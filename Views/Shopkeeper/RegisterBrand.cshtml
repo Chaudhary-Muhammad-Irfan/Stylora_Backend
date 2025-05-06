@@ -1,0 +1,411 @@
+﻿@model Brand
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brand Registration</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --first-color: hsl(176, 88%, 27%);
+            --first-color-alt: hsl(129, 44%, 94%);
+            --second-color: hsl(34, 94%, 87%);
+            --title-color: hsl(0, 0%, 13%);
+            --text-color: hsl(154, 13%, 32%);
+            --text-color-light: hsl(60, 1%, 56%);
+            --body-color: hsl(0, 0%, 100%);
+            --container-color: hsl(0, 0%, 93%);
+            --border-color: hsl(129, 36%, 85%);
+            --border-color-alt: hsl(113, 15%, 90%);
+            --valid-color: #28a745;
+        }
+
+        body {
+            background-color: var(--container-color);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .registration-container {
+            max-width: 800px;
+            background: var(--body-color);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin: 0 auto;
+        }
+
+        .form-page {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            padding: 2rem;
+        }
+
+            .form-page.active {
+                display: block;
+                opacity: 1;
+            }
+
+        .form-title {
+            color: var(--title-color);
+            position: relative;
+            padding-bottom: 1rem;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+            .form-title::after {
+                content: '';
+                position: absolute;
+                bottom: 0;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 60px;
+                height: 3px;
+                background: var(--first-color);
+            }
+
+        .logo-upload {
+            border: 2px dashed var(--border-color);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: var(--first-color-alt);
+            padding: 2rem;
+            text-align: center;
+            border-radius: 12px;
+        }
+
+        .progress-steps {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            margin: 2rem 0;
+        }
+
+        .progress-bar {
+            position: absolute;
+            top: 50%;
+            width: 100%;
+            height: 3px;
+            background: var(--border-color);
+            z-index: 0;
+        }
+
+        .step {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 2rem;
+            color: white;
+            position: relative;
+            z-index: 1;
+            transition: all 0.3s ease;
+        }
+
+            .step.active {
+                background: var(--first-color);
+                transform: scale(1.1);
+            }
+
+        .success-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .success-message {
+            background: white;
+            padding: 3rem;
+            border-radius: 15px;
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+            animation: popIn 0.3s ease;
+        }
+
+        .btn-custom {
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary-custom {
+            background: var(--first-color);
+            color: white;
+            border: none;
+        }
+
+            .btn-primary-custom:hover {
+                background: hsl(176, 88%, 25%);
+                transform: translateY(-2px);
+            }
+
+        .form-control {
+            border: 2px solid var(--border-color);
+            background: var(--first-color-alt);
+            transition: all 0.3s ease;
+        }
+
+            .form-control:focus {
+                box-shadow: 0 0 0 3px rgba(23, 176, 135, 0.1);
+                border-color: var(--border-color);
+            }
+
+        .invalid-feedback {
+            color: #dc3545;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="registration-container">
+        <div class="progress-steps">
+            <div class="progress-bar"></div>
+            <div class="step active">1</div>
+            <div class="step">2</div>
+        </div>
+        <form asp-action="RegisterBrand" method="post" enctype="multipart/form-data" id="registrationForm">
+            <!-- Page 1: Brand Information -->
+            <div class="form-page active" id="page1">
+                @Html.AntiForgeryToken()
+                <h2 class="form-title">Brand Information</h2>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label asp-for="brandName" class="form-label">BrandName</label>
+                        <input asp-for="brandName" class="form-control" />
+                        <span asp-validation-for="brandName" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="niche" class="form-label">Niche/Category</label>
+                        <input asp-for="niche" class="form-control" />
+                        <span asp-validation-for="niche" class="text-danger"></span>
+                    </div>
+                    <div class="col-12">
+                        <label asp-for="description" class="form-label">Description</label>
+                        <textarea asp-for="description" class="form-control" rows="4"></textarea>
+                        <span asp-validation-for="description" class="text-danger"></span>
+                    </div>
+                    <div class="col-12">
+                        <label asp-for="address" class="form-label">Address</label>
+                        <textarea asp-for="address" class="form-control" rows="2"></textarea>
+                        <span asp-validation-for="address" class="text-danger"></span>
+                    </div>
+                    <div class="col-12">
+                        <label asp-for="socialLink" class="form-label">Social Media Link</label>
+                        <input asp-for="socialLink" class="form-control" />
+                        <span asp-validation-for="socialLink" class="text-danger"></span>
+                    </div>
+                    <div class="col-12">
+                        <label asp-for="tagLine" class="form-label">Tag Line</label>
+                        <input asp-for="tagLine" class="form-control" />
+                        <span asp-validation-for="tagLine" class="text-danger"></span>
+                    </div>
+                    <div class="col-12">
+                        <div class="logo-upload" onclick="document.getElementById('brandLogo').click()">
+                            <div class="fs-4 mb-2">📁</div>
+                            <span id="fileText">Click to upload logo (PNG, JPG - Max 5MB)</span>
+                            <input type="file" asp-for="brandLogo"
+                                   id="brandLogo"
+                                   class="d-none"
+                                   accept="image/*"
+                                   onchange="handleFileSelect(event)">
+                        </div>
+                        <span asp-validation-for="brandLogo" class="text-danger"></span>
+                    </div>
+                    <div class="col-12 text-end">
+                        <button type="button" class="btn btn-primary-custom" onclick="showPage(2)">Next →</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page 2: Owner Information -->
+            <div class="form-page" id="page2">
+                <h2 class="form-title">Owner Information</h2>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label asp-for="brandOwnerName" class="form-label">BrandOwner Name</label>
+                        <input asp-for="brandOwnerName" class="form-control" />
+                        <span asp-validation-for="brandOwnerName" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="contact" class="form-label">Contact</label>
+                        <input asp-for="contact" class="form-control" />
+                        <span asp-validation-for="contact" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="cnic" class="form-label">CNIC</label>
+                        <input asp-for="cnic" class="form-control" />
+                        <span asp-validation-for="cnic" class="text-danger"></span>
+                    </div>
+                    <div class="col-12">
+                        <div class="section-title text-center mb-4">
+                            <h2 class="h5">Account Information</h2>
+                            <div class="title-underline"></div>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label asp-for="bankName" class="form-label">Account Type</label>
+                                <select asp-for="bankName" class="form-select">
+                                    <option value="">Select Account Type</option>
+                                    <option>Jazzcash</option>
+                                    <option>Easypaisa</option>
+                                    <option>Sadapay</option>
+                                </select>
+                                <span asp-validation-for="bankName" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="accountHolderName" class="form-label">AccountHolder Name</label>
+                                <input asp-for="accountHolderName" class="form-control" />
+                                <span asp-validation-for="accountHolderName" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="accountNumber" class="form-label">Account Number</label>
+                                <input asp-for="accountNumber" class="form-control" />
+                                <span asp-validation-for="accountNumber" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 d-flex justify-content-between">
+                        <button type="button" class="btn btn-secondary" onclick="showPage(1)">← Previous</button>
+                        <button type="submit" class="btn btn-primary-custom">Submit Application</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Success Overlay -->
+    <div class="success-overlay" style="display: none;">
+        <div class="success-message">
+            <i class="fas fa-check-circle text-success fs-1 mb-3"></i>
+            <h2 class="h4 mb-2">Submission Successful!</h2>
+            <p class="mb-4">Your request has been submitted. Please wait 24-48 hours for verification.</p>
+            <button class="btn btn-primary-custom" onclick="resetForm()">Close</button>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.3/jquery.validate.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/3.2.12/jquery.validate.unobtrusive.min.js"></script>
+
+    <script>
+        // Page Navigation
+        function showPage(pageNumber) {
+            document.querySelectorAll('.form-page').forEach(page => page.classList.remove('active'));
+            document.getElementById(`page${pageNumber}`).classList.add('active');
+            document.querySelectorAll('.step').forEach((step, index) =>
+                step.classList.toggle('active', index < pageNumber));
+        }
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            const fileText = document.getElementById('fileText');
+            fileText.textContent = file ? file.name : 'Click to upload logo (PNG, JPG - Max 5MB)';
+            fileText.style.color = file ? getComputedStyle(document.documentElement).getPropertyValue('--first-color') : '';
+        }
+                // Update form submission handler
+               document.getElementById('registrationForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            if (!$(this).valid()) return;
+
+            const formData = new FormData(this);
+            const submitButton = document.querySelector('[type="submit"]');
+            submitButton.disabled = true;
+
+            try {
+                const response = await fetch('@Url.Action("RegisterBrand", "Shopkeeper")', {
+                    method: 'POST',
+                    headers: {
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    },
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    document.querySelector('.success-overlay').style.display = 'flex';
+                    setTimeout(resetForm, 5000);
+                } else {
+                    // Show server error messages properly
+                    const errorMessage = result.message + (result.errors ? '\n' + result.errors.join('\n') : '');
+                    alert(errorMessage || 'Submission failed');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Network error - please try again');
+            } finally {
+                submitButton.disabled = false;
+            }
+        });
+        // Form Submission
+        document.getElementById('registrationForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            if (!$(this).valid()) return;
+
+            const formData = new FormData(this);
+            const submitButton = document.querySelector('[type="submit"]');
+            submitButton.disabled = true;
+
+            try {
+                const response = await fetch('@Url.Action("RegisterBrand", "Shopkeeper")', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    document.querySelector('.success-overlay').style.display = 'flex';
+                    setTimeout(resetForm, 5000);
+                } else {
+                    const error = await response.json();
+                    alert(error.message || 'Submission failed');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred during submission');
+            } finally {
+                submitButton.disabled = false;
+            }
+        });
+
+        // Phone Number Formatting
+        document.getElementById('contact').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length > 4) value = value.slice(0,4) + '-' + value.slice(4);
+            e.target.value = value.slice(0,12);
+        });
+
+        // CNIC Formatting
+        document.getElementById('cnic').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length > 5) value = value.slice(0,5) + '-' + value.slice(5);
+            if (value.length > 13) value = value.slice(0,13) + '-' + value.slice(13);
+            e.target.value = value.slice(0,15);
+        });
+        function resetForm() {
+            document.getElementById('registrationForm').reset();
+            document.querySelector('.success-overlay').style.display = 'none';
+            document.getElementById('fileText').textContent = 'Click to upload logo (PNG, JPG - Max 5MB)';
+            showPage(1);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,244 @@
+﻿@model List<WebApplication1.Models.Cart>
+@{
+    // Calculate totals here at the top
+    decimal subtotal = 0;
+    decimal shipping = 0;
+    decimal total = 0;
+
+    if (Model != null && Model.Any())
+    {
+        subtotal = Model.Sum(i => i.subTotal);
+        shipping = subtotal * 0.05m; // 5% of subtotal
+        total = subtotal + shipping;
+    }
+}
+
+<main class="main">
+    <!-- Breadcrumb -->
+    <section class="breadcrumb">
+        <ul class="breadcrumb__list flex container">
+            <li><a href="@Url.Action("Index", "Home")" class="breadcrumb__link">Home</a></li>
+            <li><span class="breadcrumb__link"></span>></li>
+            <li><span class="breadcrumb__link">Shop</span></li>
+            <li><span class="breadcrumb__link"></span>></li>
+            <li><span class="breadcrumb__link">Cart</span></li>
+        </ul>
+    </section>
+
+    <!-- Cart Section -->
+    <section class="cart section--lg container">
+        @if (Model == null || !Model.Any())
+        {
+            <div class="alert alert-info">Your cart is empty</div>
+            <div class="cart__actions">
+                <a href="@Url.Action("getAllRegisteredBrands", "Customer")" class="btn flex btn__md">
+                    <i class="fi-rs-shopping-bag"></i> Continue Shopping
+                </a>
+            </div>
+        }
+        else
+        {
+            <div class="table__container">
+                <table class="table" style="table-layout: fixed; width: 100%;">
+                    <colgroup>
+                        <col style="width: 120px"> <!-- Image -->
+                        <col style="width: 150px"> <!-- Brand -->
+                        <col style="width: 220px"> <!-- Product -->
+                        <col style="width: 90px"> <!-- Size -->
+                        <col style="width: 100px"> <!-- Price -->
+                        <col style="width: 110px"> <!-- Quantity -->
+                        <col style="width: 120px"> <!-- Subtotal -->
+                        <col style="width: 100px"> <!-- Action -->
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <th style="padding: 12px 8px;">Image</th>
+                            <th style="padding: 12px 8px;">Brand</th>
+                            <th style="padding: 12px 8px;">Product</th>
+                            <th style="padding: 12px 8px;">Size</th>
+                            <th style="padding: 12px 8px;">Price</th>
+                            <th style="padding: 12px 8px;">Quantity</th>
+                            <th style="padding: 12px 8px;">Subtotal</th>
+                            <th style="padding: 10px 8px;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <!-- Image Column -->
+                                <td style="padding: 15px 10px; vertical-align: middle;">
+                                    <img src="@Url.Content($"~/{item.productThumbnailURL}")"
+                                         alt="@item.productName"
+                                         class="table__img"
+                                         style="width: 100px; height: 100px; object-fit: contain;" />
+                                </td>
+
+                                <!-- Brand Column -->
+                                <td style="padding: 15px 10px; vertical-align: middle;">
+                                    <span style="font-weight: 500;">@item.brandName</span>
+                                </td>
+
+                                <!-- Product Column -->
+                                <td style="padding: 15px 10px; vertical-align: middle;">
+                                    <span style="font-weight: 500;">@item.productName</span>
+                                </td>
+
+                                <!-- Size Column -->
+                                <td style="padding: 15px 10px; vertical-align: middle;">
+                                    <span style="font-weight: 500;">@item.size</span>
+                                </td>
+
+                                <!-- Price Column -->
+                                <td style="padding: 15px 10px; vertical-align: middle;">
+                                    <span style="font-weight: 500;">Rs.@item.price.ToString("N0")</span>
+                                </td>
+
+                                <!-- Quantity Column -->
+                                <td style="padding: 15px 10px; vertical-align: middle;">
+                                    <input type="number"
+                                           value="@item.quantity"
+                                           min="1"
+                                           max="10"
+                                           class="quantity"
+                                           data-cart-id="@item.cardId"
+                                           style="width: 70px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" />
+                                </td>
+
+                                <!-- Subtotal Column -->
+                                <td style="padding: 15px 10px; vertical-align: middle;">
+                                    <span style="font-weight: 600;">Rs.@item.subTotal.ToString("N0")</span>
+                                </td>
+
+                                <!-- Action Column -->
+                                <td style="padding: 15px 10px; vertical-align: middle; white-space: nowrap;">
+                                    @using (Html.BeginForm("RemoveFromCart", "Customer", FormMethod.Post))
+                                    {
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="productId" value="@item.productId" />
+                                        <input type="hidden" name="size" value="@item.size" />
+                                        <button type="submit" class="btn btn-danger btn-sm" style="padding: 8px 12px;">
+                                            <i class="fas fa-trash-alt"></i> Remove
+                                        </button>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="cart__actions" style="margin: 25px 0;">
+                <button id="updateCartBtn" class="btn flex btn__md">
+                    <i class="fi-rs-shuffle"></i> Update Cart
+                </button>
+                <a href="@Url.Action("getAllRegisteredBrands", "Customer")" class="btn flex btn__md">
+                    <i class="fi-rs-shopping-bag"></i> Continue Shopping
+                </a>
+            </div>
+
+            <div class="divider">
+                <i class="fi fi-rs-fingerprint"></i>
+            </div>
+
+            <div class="cart__group grid">
+                <div>
+                    <div class="cart__shippinp">
+                        <h3 class="section__title">Calculate Shipping</h3>
+                        <form action="" class="form grid">
+                            <input type="text"
+                                   class="form__input"
+                                   placeholder="State / Country" />
+                            <div class="form__group grid">
+                                <input type="text" class="form__input" placeholder="City" />
+                                <input type="text"
+                                       class="form__input"
+                                       placeholder="PostCode" />
+                            </div>
+                            <div class="form__btn">
+                                <button class="btn flex btn--sm">
+                                    <i class="fi-rs-shuffle"></i> Update
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="cart__coupon">
+                        <h3 class="section__title">Apply Coupon</h3>
+                        <form action="" class="coupon__form form grid">
+                            <div class="form__group grid">
+                                <input type="text"
+                                       class="form__input"
+                                       placeholder="Enter Your Coupon" />
+                                <div class="form__btn">
+                                    <button class="btn flex btn--sm">
+                                        <i class="fi-rs-label"></i> Apply
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="cart__total">
+                    <h3 class="section__title">Cart Totals</h3>
+                    <table class="cart__total-table">
+                        <tr>
+                            <td><span class="cart__total-title">Cart Subtotal</span></td>
+                            <td><span class="cart__total-price">Rs.@subtotal.ToString("N0")</span></td>
+                        </tr>
+                        <tr>
+                            <td><span class="cart__total-title">Shipping (5%)</span></td>
+                            <td><span class="cart__total-price">Rs.@shipping.ToString("N0")</span></td>
+                        </tr>
+                        <tr>
+                            <td><span class="cart__total-title">Total</span></td>
+                            <td><span class="cart__total-price">Rs.@total.ToString("N0")</span></td>
+                        </tr>
+                    </table>
+                    <a href="@Url.Action("Checkout", "Customer")" class="btn flex btn--md">
+                        <i class="fi fi-rs-box-alt"></i> Proceed To Checkout
+                    </a>
+                </div>
+            </div>
+        }
+    </section>
+</main>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Update cart quantities
+            document.getElementById('updateCartBtn').addEventListener('click', function() {
+                const quantityInputs = document.querySelectorAll('.quantity');
+                const updates = [];
+
+                quantityInputs.forEach(input => {
+                    updates.push({
+                        cartId: input.dataset.cartId,
+                        quantity: input.value
+                    });
+                });
+
+                fetch('@Url.Action("UpdateCartQuantities", "Customer")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    },
+                    body: JSON.stringify(updates)
+                })
+                .then(response => {
+                    if (response.ok) {
+                        window.location.reload();
+                    } else {
+                        alert('Error updating cart');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error updating cart');
+                });
+            });
+        });
+    </script>
+}

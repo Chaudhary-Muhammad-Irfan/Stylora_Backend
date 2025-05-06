@@ -1,0 +1,29 @@
+﻿<body>
+    <!--=============== MAIN ===============-->
+    <main class="main">
+        <!--=============== HOME ===============-->
+        <section class="home section--lg">
+            <div class="home__container container grid">
+                <div class="home__content">
+                    <span class="home__subtitle">Hot Promotions</span>
+                    <h1 class="home__title">
+                        Fashion Trending <span>Great Collection</span>
+                    </h1>
+                    <p class="home__description">
+                        Save more with coupons & up tp 20% off
+                    </p>
+                    <a href="/Customer/GetAllRegisteredBrands" class="btn">Shop Now</a>
+                </div>
+                <img src="~/img/bn1.jpeg" class="home__img" alt="hats" />
+            </div>
+        </section>
+        @await Html.PartialAsync("_categories", (IEnumerable<WebApplication1.Models.Product>)ViewBag.Categories)
+        @await Html.PartialAsync("_shop")
+        @await Html.PartialAsync("_deals")
+        <section class="section new__arrivals">
+            <h2 class="section__title">New Arrived</h2> 
+            @await Html.PartialAsync("_New_Arrivals", (IEnumerable<WebApplication1.Models.Product>)ViewBag.Products)
+        </section>
+        
+    </main>
+</body>

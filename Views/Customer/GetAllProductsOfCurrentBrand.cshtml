@@ -1,0 +1,124 @@
+﻿@model List<Product>
+<body>
+    <!--=============== MAIN ===============-->
+    <main class="main">
+        <!--=============== BREADCRUMB ===============-->
+        <section class="breadcrumb">
+            <ul class="breadcrumb__list flex container">
+                <li><a href="index.html" class="breadcrumb__link">Home</a></li>
+                <li><span class="breadcrumb__link"></span>></li>
+                <li><span class="breadcrumb__link">Shop</span></li>
+            </ul>
+        </section>
+        <!--=============== PRODUCTS ===============-->
+        <section class="products container section--lg">
+            <p class="total__products">We found <span>@Model.Count</span> items for you!</p>
+            <div class="products__container grid">
+                @foreach (var product in Model)
+                {
+                    <div class="product__item">
+                        <div class="product__banner">
+                            <div data-product-id="@product.productId" class="product-debug">
+                                <a href="/Customer/DetailsOfProduct?productId=@product.productId"
+                                   class="product__images"
+                                   data-product-id="@product.productId">
+                                    <img src="~/@product.productThumbnailURL"
+                                         alt="@product.productName"
+                                         class="product__img default" />
+                                    <img src="~/@product.productThumbnailURL"
+                                         alt="@product.productName"
+                                         class="product__img hover" />
+                                </a>
+                                <div class="product__actions">
+                                     <a href="/Customer/DetailsOfProduct?productId=@product.productId" class="action__btn" aria-label="Quick View">
+                                        <i class="fi fi-rs-eye"></i>
+                                    </a>
+                                    <a href="/Customer/AddToWishlist?productId=@product.productId" class="action__btn" aria-label="Add to Wishlist">
+                                        <i class="fi fi-rs-heart"></i>
+                                    </a>
+                                </div>
+                                @if (product.discount > 0)
+                                {
+                                    <div class="product__badge light-pink">@product.discount% OFF</div>
+                                }
+                            </div>
+                            <div class="product__content">
+                                <span class="product__category">@product.productCategory</span>
+                                    <a href="/Customer/DetailsOfProduct?productId=@product.productId">
+                                    <h3 class="product__title">@product.productName</h3>
+                                </a>
+                                <div class="product__rating">
+                                    <!-- Static rating, you might want to add rating property to Product model -->
+                                    <i class="fi fi-rs-star"></i>
+                                    <i class="fi fi-rs-star"></i>
+                                    <i class="fi fi-rs-star"></i>
+                                    <i class="fi fi-rs-star"></i>
+                                    <i class="fi fi-rs-star"></i>
+                                </div>
+                                <div class="product__price flex">
+                                    @{
+                                        var newPrice = product.price - (product.price * product.discount / 100);
+                                    }
+                                    <span class="new__price">Rs. @newPrice.ToString("N0")</span>
+                                    @if (product.discount > 0)
+                                    {
+                                        <span class="old__price">Rs. @product.price.ToString("N0")</span>
+                                    }
+                                </div> 
+                                @using (Html.BeginForm("AddToCart", "Customer", FormMethod.Post, new { id = $"addToCartForm_{@product.productId}", style = "display: none;" }))
+                                {
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="productId" value="@product.productId" />
+                                    <input type="hidden" name="quantity" value="1" />
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+            <!-- Pagination (dynamic example) -->
+            <ul class="pagination">
+                @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                {
+                    <li class="pagination__item">
+                        <a href="@Url.Action("GetAllProductsOfCurrentBrand", "Customer", new { brandId = ViewBag.brandId, page = i })"
+                           class="pagination__link @(i == ViewBag.CurrentPage ? "active" : "")">
+                            @i
+                        </a>
+                    </li>
+                }
+                <li>
+                    <a href="@Url.Action("GetAllProductsOfCurrentBrand", "Customer", new { brandId = ViewBag.brandId, page = ViewBag.CurrentPage + 1 })"
+                       class="pagination__link icon @(ViewBag.CurrentPage == ViewBag.TotalPages ? "disabled" : "")">
+                        <i class="fi-rs-angle-double-small-right"></i>
+                    </a>
+                </li>
+            </ul>
+
+        </section>
+    </main>
+
+    <script>
+        function addToWishlist(productId) {
+            fetch('@Url.Action("AddToWishlist", "Customer")', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                },
+                body: JSON.stringify({ productId: productId })
+            })
+            .then(response => {
+                if (response.ok) {
+                    window.location.href = '@Url.Action("Wishlist", "Customer")';
+                } else {
+                    alert('Error adding to wishlist');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error adding to wishlist');
+            });
+        }
+    </script>
+</body>

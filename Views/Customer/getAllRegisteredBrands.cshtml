@@ -1,0 +1,61 @@
+﻿@model List<Brand>
+<style>
+    .product__images img {
+        width: 100%; 
+        height: 350px; 
+        object-fit: contain; 
+        display: block;
+    }
+    .searchBtn
+    {
+        margin-top: -50px;
+        margin-bottom: 20px;
+    }
+</style>
+<body>
+    <main>
+        <section class="products container section">
+            <section class="products container section">
+                <!-- Add this search div - matches your existing header style -->
+                <div class="header__search searchBtn">
+                    <input type="text"
+                           id="brandSearchInput"
+                           placeholder="Search Your Favourite Brand..."
+                           class="form__input" />
+                    <button class="search__btn" id="searchBrandBtn">
+                        <img src="~/img/search.png" alt="search icon" />
+                    </button>
+                </div>
+
+                <div id="brandsListContainer">
+                    @await Html.PartialAsync("_BrandsListPartial", Model)
+                </div>
+        </section>
+    </main>
+    @section Scripts {
+        <script>
+            $(document).ready(function() {
+                $('#debugHeader').text('DEBUG: jQuery is working!');
+                console.log("Script is loaded and running");
+
+                $('#searchBrandBtn').click(function(e) {
+                    e.preventDefault();
+                    console.log("Search button clicked");
+
+                    var searchTerm = $('#brandSearchInput').val();
+                    console.log("Search term:", searchTerm);
+
+                    $.get('/Customer/Search', { searchTerm: searchTerm }, function(result) {
+                        console.log("Received response:", result);
+                        $('#brandsListContainer').html(result);
+                    })
+                    .fail(function(xhr) {
+                        console.error("Error:", xhr.status, xhr.statusText);
+                        $('#brandsListContainer').html('<div class="alert alert-danger">Search failed</div>');
+                    });
+                });
+            });
+        </script>
+    }
+
+</body>

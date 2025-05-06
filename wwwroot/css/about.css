@@ -1,0 +1,342 @@
+﻿/* General Styles */
+.about-container {
+    max-width: 1140px;
+    width: 100%;
+    padding-right: 15px;
+    padding-left: 15px;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+/* Breadcrumb Styles */
+.breadcrumb {
+    padding: 1rem 0;
+    background-color: #f8f9fa;
+}
+
+.breadcrumb-list {
+    display: flex;
+    flex-wrap: wrap;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.breadcrumb-link {
+    color: #6c757d;
+    text-decoration: none;
+    margin: 0 5px;
+}
+
+    .breadcrumb-link:hover {
+        color: #0056b3;
+        text-decoration: underline;
+    }
+
+/* Utility Classes */
+.text-center {
+    text-align: center !important;
+}
+
+.about-mb-4 {
+    margin-bottom: 1.5rem !important;
+}
+
+.about-mb-5 {
+    margin-bottom: 3rem !important;
+}
+
+.about-mt-3 {
+    margin-top: 1rem !important;
+}
+
+.about-mt-5 {
+    margin-top: 3rem !important;
+}
+
+.about-pt-5 {
+    padding-top: 3rem !important;
+}
+
+.about-mx-auto {
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+.about-italic {
+    font-style: italic;
+}
+
+/* Brand Title Section */
+.about-brand-title {
+    font-size: 3.5rem;
+    font-weight: 300;
+    line-height: 1.2;
+    color: #333;
+    margin-bottom: 1rem;
+}
+
+.about-brand-divider {
+    width: 100px;
+    height: 3px;
+    background-color: #333;
+    margin: 0 auto 2rem;
+}
+
+/* Intro Card */
+.about-intro-card {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    padding: 2rem;
+}
+
+.about-intro-text {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: #555;
+    margin-bottom: 1.5rem;
+}
+
+.about-lead {
+    font-size: 1.25rem;
+    font-weight: 300;
+    line-height: 1.6;
+}
+
+/* Grid System */
+.about-row {
+    display: flex;
+    flex-wrap: wrap;
+    margin-right: -15px;
+    margin-left: -15px;
+}
+
+.about-col-lg-6,
+.about-col-md-4,
+.about-col-6 {
+    position: relative;
+    width: 100%;
+    padding-right: 15px;
+    padding-left: 15px;
+}
+
+@media (min-width: 768px) {
+    .about-col-md-4 {
+        flex: 0 0 33.333333%;
+        max-width: 33.333333%;
+    }
+
+    .about-col-6 {
+        flex: 0 0 50%;
+        max-width: 50%;
+    }
+}
+
+@media (min-width: 992px) {
+    .about-col-lg-6 {
+        flex: 0 0 50%;
+        max-width: 50%;
+    }
+
+    .about-pe-lg-4 {
+        padding-right: 1.5rem !important;
+    }
+
+    .about-ps-lg-4 {
+        padding-left: 1.5rem !important;
+    }
+}
+
+/* Spacing Utilities */
+.about-g-2 {
+    gap: 0.5rem;
+}
+
+.about-g-4 {
+    gap: 1.5rem;
+}
+
+.about-g-5 {
+    gap: 3rem;
+}
+
+/* Timeline Styles */
+.about-timeline {
+    position: relative;
+    padding-left: 2rem;
+    margin-left: 1rem;
+}
+
+    .about-timeline::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background-color: #ddd;
+    }
+
+.about-timeline-item {
+    position: relative;
+    margin-bottom: 2rem;
+}
+
+.about-timeline-year {
+    position: relative;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 0.5rem;
+}
+
+    .about-timeline-year::before {
+        content: '';
+        position: absolute;
+        left: -2.5rem;
+        top: 0.35em;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background-color: #333;
+        border: 2px solid #fff;
+        box-shadow: 0 0 0 2px #333;
+    }
+
+/* Brands Card Styles */
+.about-brands-card {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 1.5rem;
+    height: 100%;
+}
+
+.about-brands-subtitle {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.about-brands-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+    .about-brands-list li {
+        padding: 0.25rem 0;
+        color: #555;
+    }
+
+        .about-brands-list li::before {
+            content: "•";
+            color: #333;
+            font-weight: bold;
+            display: inline-block;
+            width: 1em;
+            margin-left: -1em;
+        }
+
+/* Titles */
+.about-history-title,
+.about-brands-title,
+.about-sustainability-title {
+    font-size: 2rem;
+    font-weight: 300;
+    color: #333;
+    margin-bottom: 1.5rem;
+    position: relative;
+}
+
+    .about-history-title::after,
+    .about-brands-title::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        bottom: -10px;
+        width: 50px;
+        height: 3px;
+        background-color: #333;
+    }
+
+/* Sustainability Section */
+.about-sustainability-intro {
+    max-width: 700px;
+    font-size: 1.25rem;
+    color: #555;
+    margin-bottom: 3rem;
+}
+
+.about-sustainability-card {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+    height: 100%;
+    transition: transform 0.3s ease;
+}
+
+    .about-sustainability-card:hover {
+        transform: translateY(-5px);
+    }
+
+.about-sustainability-subtitle {
+    font-size: 1.25rem;
+    font-weight: 500;
+    color: #333;
+}
+
+.about-sustainability-text {
+    color: #666;
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+.about-icon-wrapper {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    font-size: 1.5rem;
+    color: white;
+}
+
+.about-icon-eco {
+    background-color: #28a745;
+}
+
+.about-icon-energy {
+    background-color: #fd7e14;
+}
+
+.about-icon-social {
+    background-color: #17a2b8;
+}
+
+.about-sustainability-closing {
+    font-size: 1.1rem;
+    color: #555;
+    max-width: 800px;
+    margin: 0 auto;
+    line-height: 1.6;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .about-brand-title {
+        font-size: 2.5rem;
+    }
+
+    .about-history-title,
+    .about-brands-title,
+    .about-sustainability-title {
+        font-size: 1.75rem;
+    }
+
+    .about-intro-text,
+    .about-lead {
+        font-size: 1rem;
+    }
+}

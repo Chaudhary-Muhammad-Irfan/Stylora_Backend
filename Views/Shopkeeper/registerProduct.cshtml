@@ -1,0 +1,404 @@
+﻿@model Product
+@{
+    Layout = null;
+}
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger">
+        <ul>
+            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+            {
+                <li>@error.ErrorMessage</li>
+            }
+        </ul>
+    </div>
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Registration</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #2a9d8f;
+            --secondary-color: #f8f9fa;
+            --accent-color: #e9c46a;
+            --text-color: #264653;
+        }
+
+        body {
+            background: #f8f9fa;
+            min-height: 100vh;
+            padding: 2rem;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        .product-form-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            margin: 0 auto;
+            max-width: 800px;
+            padding: 2.5rem;
+        }
+
+        .form-title {
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 2.5rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            position: relative;
+            font-size: 2.2rem;
+        }
+
+            .form-title::after {
+                content: '';
+                position: absolute;
+                bottom: -15px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 60px;
+                height: 3px;
+                background: var(--primary-color);
+            }
+
+        .form-section {
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            border-radius: 15px;
+            border: 1px solid #e9ecef;
+            background: linear-gradient(to bottom right, #ffffff, #f8f9fa);
+        }
+
+        .size-option label {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--secondary-color);
+            border: 2px solid #dee2e6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .size-option input:checked + label {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+            transform: scale(1.1);
+        }
+
+        .file-upload {
+            border: 2px dashed #dee2e6;
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(233, 236, 239, 0.3);
+        }
+
+            .file-upload:hover {
+                border-color: var(--primary-color);
+                background: rgba(42, 157, 143, 0.05);
+            }
+
+        .preview-image {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 12px;
+            margin: 5px;
+            border: 2px solid #dee2e6;
+            transition: transform 0.3s ease;
+        }
+
+        .form-control {
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            padding: 12px 16px;
+            transition: all 0.3s ease;
+        }
+
+            .form-control:focus {
+                border-color: var(--primary-color);
+                box-shadow: 0 0 0 3px rgba(42, 157, 143, 0.2);
+            }
+
+        .submit-btn {
+            background: var(--primary-color);
+            color: white;
+            padding: 16px 32px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            width: 100%;
+            font-size: 1.1rem;
+            letter-spacing: 0.5px;
+        }
+
+            .submit-btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(42, 157, 143, 0.3);
+            }
+
+        .success-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .success-message {
+            background: white;
+            padding: 3rem;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            animation: popIn 0.3s ease;
+        }
+
+        .promo-field {
+            position: relative;
+        }
+
+        .promo-examples {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="product-form-container">
+        <h2 class="form-title">Product Registration</h2>
+        <form method="post"
+              asp-controller="Shopkeeper"
+              
+              asp-action="registerProduct"
+              id="productForm"
+              enctype="multipart/form-data">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <!-- Product Details Section -->
+            <div class="form-section">
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Product Name</label>
+                    <input type="text" class="form-control" name="productName" required>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Product Category</label>
+                    <input type="text" class="form-control" name="productCategory" required>
+                    <div class="promo-examples">
+                        Examples: "Formal, Kurta, Lehenga, Frak............"
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Product Description</label>
+                    <textarea class="form-control" name="productDescription" rows="4" required></textarea>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Price (PKR)</label>
+                        <input type="number" class="form-control" name="price" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Discount %</label>
+                        <input type="number" class="form-control" name="discount" value="0" min="0" max="100">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Quantity</label>
+                        <input type="number" class="form-control" name="stock" min="1" required>
+                    </div>
+                </div>
+
+                <!-- New Promotional Field -->
+                <div class="mt-4 promo-field">
+                    <label class="form-label fw-bold">Special Offer Tagline</label>
+                    <input type="text" class="form-control"
+                           name="tagLine"
+                           placeholder="Enter attention-grabbing offer"
+                           maxlength="60">
+                    <div class="promo-examples">
+                        Examples: "Buy 1 Get 1 Free!", "Purchase Now for Chance to Win!",
+                        "Limited Time Offer!", "Free Gift with Purchase!"
+                    </div>
+                </div>
+            </div>
+
+            <!-- Media Section -->
+            <div class="form-section">
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Main Thumbnail</label>
+                    <div class="file-upload" onclick="document.getElementById('thumbnail').click()">
+                        <i class="fas fa-camera fa-2x text-muted mb-3"></i>
+                        <p class="mb-0">Click to upload featured image</p>
+                        <input type="file" id="thumbnail" name="productThumbnail" class="d-none" accept="image/*" required>
+                    </div>
+                    <div id="thumbnailPreview" class="mt-3"></div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Gallery Images</label>
+                    <div class="file-upload" onclick="document.getElementById('productImages').click()">
+                        <i class="fas fa-images fa-2x text-muted mb-3"></i>
+                        <p class="mb-0">Upload product gallery (up to 10 images)</p>
+                        <small class="text-muted">Show different angles and details</small>
+                        <input type="file" id="productImages" name="productImages" class="d-none"
+                               accept="image/*" multiple required>
+                    </div>
+                    <div id="imagePreviews" class="mt-3 d-flex flex-wrap"></div>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Size Chart Image</label>
+                    <div class="file-upload" onclick="document.getElementById('sizeChart').click()">
+                        <i class="fas fa-ruler-combined fa-2x text-muted mb-3"></i>
+                        <p class="mb-0">Upload size chart</p>
+                        <small class="text-muted">Shows measurements for each size</small>
+                        <input type="file" id="sizeChart" name="sizeChart" class="d-none" accept="image/*">
+                    </div>
+                    <div id="sizeChartPreview" class="mt-3"></div>
+                </div>
+            </div>
+
+            <!-- Size Selection -->
+            <div class="form-section">
+                <label class="form-label fw-bold mb-3">Available Sizes</label>
+                <div class="d-flex flex-wrap gap-3">
+                    <div class="size-option">
+                        <input type="checkbox" name="AvailableSizes" value="S" id="sizeS">
+                        <label for="sizeS">S</label>
+                    </div>
+                    <div class="size-option">
+                        <input type="checkbox" name="AvailableSizes" value="M" id="sizeM">
+                        <label for="sizeM">M</label>
+                    </div>
+                    <div class="size-option">
+                        <input type="checkbox" name="AvailableSizes" value="L" id="sizeL">
+                        <label for="sizeL">L</label>
+                    </div>
+                    <div class="size-option">
+                        <input type="checkbox" name="AvailableSizes" value="XL" id="sizeXL">
+                        <label for="sizeXL">XL</label>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="submit-btn mt-4">
+                <i class="fas fa-cloud-upload-alt me-2"></i>Publish Product
+            </button>
+        </form>
+    </div>
+
+    <!-- Success Message Overlay -->
+    <div class="success-overlay">
+        <div class="success-message">
+            <i class="fas fa-check-circle text-success fa-4x mb-4"></i>
+            <h2 class="h3 mb-3">Product Added Successfully!</h2>
+            <p class="mb-4">Your product has been successfully listed in the store.</p>
+            <button class="btn btn-primary-custom" onclick="redirectToDashboard()"
+                    style="background: var(--primary-color); color: white; padding: 12px 24px; border-radius: 8px;">
+                Close & Continue
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Image Preview Handling
+        const createPreview = (file, container) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const preview = document.createElement('div');
+                preview.className = 'position-relative d-inline-block me-3';
+
+                const img = document.createElement('img');
+                img.className = 'preview-image';
+                img.src = e.target.result;
+
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'btn btn-danger btn-sm position-absolute top-0 end-0';
+                removeBtn.innerHTML = '×';
+                removeBtn.onclick = () => preview.remove();
+
+                preview.appendChild(img);
+                preview.appendChild(removeBtn);
+                container.appendChild(preview);
+            };
+            reader.readAsDataURL(file);
+        };
+
+        // Thumbnail
+        document.getElementById('thumbnail').addEventListener('change', function() {
+            const container = document.getElementById('thumbnailPreview');
+            container.innerHTML = '';
+            if (this.files[0]) createPreview(this.files[0], container);
+        });
+
+        // Gallery Images
+        document.getElementById('productImages').addEventListener('change', function() {
+            const container = document.getElementById('imagePreviews');
+            container.innerHTML = '';
+            Array.from(this.files).forEach(file => createPreview(file, container));
+        });
+
+        // Size Chart (FIXED: Moved outside gallery handler)
+        document.getElementById('sizeChart').addEventListener('change', function() {
+            const container = document.getElementById('sizeChartPreview');
+            container.innerHTML = '';
+            if (this.files[0]) createPreview(this.files[0], container);
+        });
+
+        // Form Submission (FIXED: Proper reset flow)
+                document.getElementById('productForm').addEventListener('submit', function() {
+            const sizesSelected = document.querySelectorAll('input[name="AvailableSizes"]:checked').length;
+            if(!sizesSelected) {
+                alert('Please select at least one size');
+                return false; // Only prevent if validation fails
+            }
+            return true; // Allow form to submit
+        });
+        // document.getElementById('productForm').addEventListener('submit', function(e) {
+        //     e.preventDefault();
+
+        //     const sizesSelected = document.querySelectorAll('input[name="AvailableSizes"]:checked').length;
+        //     if(!sizesSelected) return alert('Please select at least one size');
+
+        //     // Show success message
+        //     document.querySelector('.success-overlay').style.display = 'flex';
+
+        //     // Reset form after displaying message
+        //     setTimeout(() => {
+        //         this.reset();
+        //         document.getElementById('thumbnailPreview').innerHTML = '';
+        //         document.getElementById('imagePreviews').innerHTML = '';
+        //         document.getElementById('sizeChartPreview').innerHTML = '';
+        //     }, 0);
+        // });
+
+        // Redirect Function
+        function redirectToDashboard() {
+            document.querySelector('.success-overlay').style.display = 'none';
+            window.location.href = '/Shopkeeper/getAllProducts';
+        }
+    </script>
+</body>
+</html>

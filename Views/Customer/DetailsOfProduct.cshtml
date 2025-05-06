@@ -1,0 +1,480 @@
+﻿@model WebApplication1.Models.ViewModel.ProductDetailsViewModel
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Details</title>
+    <style>
+        /* Custom CSS for image gallery */
+        .details__small-images {
+            display: flex;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            gap: 15px;
+            padding: 10px 0;
+            margin: 20px 0;
+        }
+
+        .details__small-img {
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            height: 100px;
+            width: auto;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+            .details__small-img:hover {
+                transform: scale(1.05);
+                border-color: #2a9d8f;
+            }
+
+            .details__small-img.active {
+                border-color: #2a9d8f;
+                transform: scale(1.05);
+            }
+
+        ::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+
+            ::-webkit-scrollbar-thumb:hover {
+                background: #555;
+            }
+
+        /* Rating stars */
+        .fi-rs-star {
+            font-size: 24px;
+            color: lightgray;
+            cursor: pointer;
+        }
+
+            .fi-rs-star.selected {
+                color: gold;
+            }
+
+        .form__message {
+            color: green;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .custom-success-message {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 12px 20px;
+            border: 1px solid #c3e6cb;
+            border-radius: 10px;
+            font-weight: 500;
+            font-size: 16px;
+            margin-top: 20px;
+            text-align: center;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        /* Size chart image */
+        .size-chart-image {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Size selection styles */
+        .size__list {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .size__link {
+            padding: 8px 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+            .size__link:hover {
+                background-color: #f5f5f5;
+            }
+
+            .size__link.selected {
+                background-color: #2a9d8f;
+                color: white;
+                font-weight: bold;
+                border-color: #2a9d8f;
+            }
+
+        @@media (min-width: 768px) {
+            .size-chart-image {
+                max-width: 80%;
+            }
+        }
+
+        @@media (min-width: 1200px) {
+            .size-chart-image {
+                max-width: 60%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main class="main">
+        <!-- Breadcrumb -->
+        <section class="breadcrumb">
+            <ul class="breadcrumb__list flex container">
+                <li><a href="index.html" class="breadcrumb__link">Home</a></li>
+                <li><span class="breadcrumb__link"></span>></li>
+                <li><span class="breadcrumb__link">@Model.Product.productCategory</span></li>
+                <li><span class="breadcrumb__link"></span>></li>
+                <li><span class="breadcrumb__link">@Model.Product.productName</span></li>
+            </ul>
+        </section>
+
+        <!-- Product Details -->
+        <section class="details section--lg">
+            <div class="details__container container grid">
+                <!-- Image Gallery Section -->
+                <div class="details__group">
+                    <img src="~/@Model.Product.productThumbnailURL"
+                         alt="@Model.Product.productName"
+                         class="details__img"
+                         id="mainThumbnail" />
+
+                    <div class="details__small-images">
+                        @if (Model.Product.productImagesURL != null && Model.Product.productImagesURL.Count > 0)
+                        {
+                            bool isFirst = true;
+                            foreach (var imageUrl in Model.Product.productImagesURL)
+                            {
+                                <img src="@Url.Content($"~/{imageUrl}")"
+                                     alt="@Model.Product.productName"
+                                     class="details__small-img @(isFirst ? "active" : "")"
+                                     onclick="changeMainImage(this)" />
+                                isFirst = false;
+                            }
+                        }
+                        else
+                        {
+                            <p>No additional images available</p>
+                        }
+                    </div>
+                </div>
+
+                <!-- Product Info Section -->
+                <div class="details__group">
+                    <h3 class="details__title">@Model.Product.productName</h3>
+                    <p class="details__brand">Brand: <span>@Model.Product.brandName</span></p>
+                    <div class="details__price flex">
+                        @{
+                            var discountedPrice = Model.Product.price - (Model.Product.price * Model.Product.discount / 100);
+                        }
+                        <span class="new__price">Rs. @discountedPrice.ToString("N0")</span>
+                        @if (Model.Product.discount > 0)
+                        {
+                            <span class="old__price">Rs. @Model.Product.price.ToString("N0")</span>
+                            <span class="save__price">@Model.Product.discount% Off</span>
+                        }
+                    </div>
+                    <p class="short__description">
+                        @Model.Product.productDescription
+                    </p>
+
+                    <!-- Size Selection -->
+                    <div class="details__size flex">
+                        <span class="details__size-title">Size</span>
+                        <ul class="size__list" id="sizeList">
+                            @if (Model.Product.AvailableSizes != null && Model.Product.AvailableSizes.Count > 0)
+                            {
+                                foreach (var size in Model.Product.AvailableSizes)
+                                {
+                                    <li>
+                                        <p class="size__link" data-size="@size">@size</p>
+                                    </li>
+                                }
+                            }
+                            else
+                            {
+                                <li>No sizes available</li>
+                            }
+                        </ul>
+                        <input type="hidden" id="selectedSizes" name="selectedSizes" value="" />
+                    </div>
+                    @if (TempData["FromWishlist"] != null && (bool)TempData["FromWishlist"])
+                    {
+                        <div class="alert alert-info">
+                            Please select a size to add this product to your cart
+                        </div>
+                    }
+                    <!-- Add to Cart Section -->
+                    <div class="details__action">
+                        @using (Html.BeginForm("AddToCart", "Customer", FormMethod.Post, new { @class = "add-to-cart-form" }))
+                        {
+                            @Html.AntiForgeryToken()
+                            <input type="number" name="quantity" class="quantity" value="1" min="1" max="@Model.Product.stock" />
+                            <input type="hidden" name="productId" value="@Model.Product.productId" />
+                            <input type="hidden" name="selectedSizes" id="formSelectedSizes" value="" />
+                            <button type="submit" class="btn btn--sm" id="addToCartBtn">Add To Cart</button>
+                        }
+
+                        <a href="/Customer/AddToWishlist?productId=@Model.Product.productId" class="details__action-btn">
+                            <i class="fi fi-rs-heart"></i>
+                        </a>
+                    </div>
+                    <!-- Stock Information -->
+                    <ul class="details__meta">
+                        <li class="meta__list flex">
+                            <h3>Availability:</h3>@Model.Product.stock Items in Stock
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tabs Section -->
+        <section class="details__tab container">
+            <div class="detail__tabs">
+                <span class="detail__tab active-tab" data-target="#size-chart">
+                    Size Chart
+                </span>
+                <span class="detail__tab" data-target="#reviews">Reviews(@Model.Reviews.Count)</span>
+            </div>
+            <div class="details__tabs-content">
+                <div class="details__tab-content" content id="size-chart">
+                    @if (!string.IsNullOrEmpty(Model.Product.sizeChartURL))
+                    {
+                        <img src="@Url.Content($"~/{Model.Product.sizeChartURL}")"
+                             alt="Size Chart"
+                             class="size-chart-image" />
+                    }
+                    else
+                    {
+                        <p>No size chart available for this product</p>
+                    }
+                </div>
+                <div class="details__tab-content" content id="reviews">
+                    <!-- Reviews Section -->
+                    @if (!Model.Reviews.Any())
+                    {
+                        <div class="form__message">There are no reviews for this product. Be the first to review!</div>
+                    }
+
+                    <div class="reviews__container grid">
+                        @foreach (var review in Model.Reviews)
+                        {
+                            <div class="review__single">
+                                <div>
+                                    <h4 class="review__title">@review.Name</h4>
+                                </div>
+                                <div class="review__data">
+                                    <div class="review__rating">
+                                        @for (int i = 1; i <= 5; i++)
+                                        {
+                                            <i class="fi fi-rs-star @(i <= review.Rating ? "selected" : "")"></i>
+                                        }
+                                    </div>
+                                    <p class="review__description">
+                                        @review.Comment
+                                    </p>
+                                    <span class="review__date">@review.CreatedAt.ToString("MMMM dd, yyyy")</span>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                    <form id="reviewForm">
+                        <div class="form grid">
+                            <!-- Star Rating Section -->
+                            <div class="rate__product" id="rating-stars">
+                                @for (int i = 1; i <= 5; i++)
+                                {
+                                    <i class="fi fi-rs-star" data-value="@i"></i>
+                                }
+                                <input type="hidden" name="Rating" id="ratingInput" value="0" />
+                            </div>
+
+                            <!-- Comment box -->
+                            <textarea class="form__input textarea" placeholder="Write Comment" name="Comment" required></textarea>
+
+                            <!-- Name and Email -->
+                            <div class="form__group grid">
+                                <input type="text" placeholder="Name" class="form__input" name="Name" required />
+                                <input type="email" placeholder="Email" class="form__input" name="Email" required />
+                                <input type="hidden" name="ProductId" value="@Model.Product.productId" />
+                            </div>
+
+                            <!-- Submit Button -->
+                            <div class="form__btn" style="margin-top: 15px;">
+                                <button class="btn" type="submit">Submit Review</button>
+                            </div>
+                        </div>
+                    </form>
+
+                    <!-- Success Message -->
+                    <div id="successMessage" class="custom-success-message" style="display: none;">
+                        ✅ Your response has been submitted.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Related Products Section -->
+        @if (Model.RelatedProducts != null && Model.RelatedProducts.Any())
+        {
+            <section class="products container section--lg">
+                <h3 class="section__title"><span>Related</span> Products</h3>
+                <div class="products__container grid">
+                    @foreach (var relatedProduct in Model.RelatedProducts)
+                    {
+                        <div class="product__item">
+                            <div class="product__banner">
+                                <a href="@Url.Action("DetailsOfProduct", "Product", new { productId = relatedProduct.productId })" class="product__images">
+                                    <img src="@Url.Content(relatedProduct.productThumbnailURL)"
+                                         alt="@relatedProduct.productName"
+                                         class="product__img default" />
+                                </a>
+                            </div>
+                            <div class="product__content">
+                                <span class="product__category">@relatedProduct.productCategory</span>
+                                <a href="@Url.Action("DetailsOfProduct", "Product", new { productId = relatedProduct.productId })">
+                                    <h3 class="product__title">@relatedProduct.productName</h3>
+                                </a>
+                                <div class="product__rating">
+                                    @* You can re-enable star rating for related products if needed *@
+                                </div>
+                                <div class="product__price flex">
+                                    <span class="new__price">Rs. @relatedProduct.price.ToString("N0")</span>
+                                </div>
+                                <a href="#" class="action__btn cart__btn" aria-label="Add To Cart">
+                                    <i class="fi fi-rs-shopping-bag-add"></i>
+                                </a>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </section>
+        }
+    </main>
+
+    <script>
+                // Size selection functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const sizeLinks = document.querySelectorAll('.size__link');
+            const selectedSizesInput = document.getElementById('selectedSizes');
+            const formSelectedSizesInput = document.getElementById('formSelectedSizes');
+            const addToCartBtn = document.getElementById('addToCartBtn');
+
+            // Track selected sizes
+            let selectedSizes = [];
+
+            // Handle size selection
+            sizeLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    const size = this.getAttribute('data-size');
+
+                    if (this.classList.contains('selected')) {
+                        // Deselect
+                        this.classList.remove('selected');
+                        selectedSizes = selectedSizes.filter(s => s !== size);
+                    } else {
+                        // Select
+                        this.classList.add('selected');
+                        selectedSizes.push(size);
+                    }
+
+                    // Update hidden inputs
+                    const sizesString = selectedSizes.join(',');
+                    selectedSizesInput.value = sizesString;
+                    formSelectedSizesInput.value = sizesString;
+
+                    // Update button state
+                    addToCartBtn.disabled = selectedSizes.length === 0 &&
+                                         document.getElementById('sizeList').children.length > 0;
+                });
+            });
+
+            // Initial button state
+            addToCartBtn.disabled = selectedSizes.length === 0 &&
+                                  document.getElementById('sizeList').children.length > 0;
+        });
+        function changeMainImage(clickedImage) {
+            // Remove active class from all images
+            const allImages = document.querySelectorAll('.details__small-img');
+            allImages.forEach(img => img.classList.remove('active'));
+
+            // Add active class to clicked image
+            clickedImage.classList.add('active');
+
+            // Update main thumbnail
+            document.getElementById('mainThumbnail').src = clickedImage.src;
+        }
+
+        // Rating stars
+        const stars = document.querySelectorAll('#rating-stars i');
+        const ratingInput = document.getElementById('ratingInput');
+
+        stars.forEach((star, index) => {
+            star.addEventListener('click', () => {
+                ratingInput.value = star.dataset.value;
+                updateStars(index);
+            });
+        });
+
+        function updateStars(index) {
+            stars.forEach((star, i) => {
+                if (i <= index) {
+                    star.classList.add('selected');
+                } else {
+                    star.classList.remove('selected');
+                }
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const form = document.getElementById("reviewForm");
+
+            form.addEventListener("submit", function (e) {
+                e.preventDefault(); // Stop normal form submit
+
+                const formData = new FormData(form);
+
+                fetch("/Customer/AddReview", {
+                    method: "POST",
+                    body: formData
+                })
+                .then(response => { 
+                    if (response.ok) {
+                        document.getElementById("successMessage").style.display = "block";
+                        form.reset(); // Optional: clear form
+                        setTimeout(() => {
+                            document.getElementById("successMessage").style.display = "none";
+                        }, 5000);
+                    } else {
+                        alert("Something went wrong. Please try again.");
+                    }
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    alert("An error occurred.");
+                });
+            });
+        });
+    </script>
+</body>
+</html>

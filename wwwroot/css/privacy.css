@@ -1,0 +1,172 @@
+﻿/* Privacy Policy Styles */
+.privacy-policy {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+.policy-header {
+    text-align: center;
+    margin-bottom: 3rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid #eee;
+}
+
+    .policy-header h1 {
+        color: #333;
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+    }
+
+        .policy-header h1 i {
+            color: #4CAF50; /* Changed from blue to green */
+            margin-right: 15px;
+        }
+
+.policy-intro {
+    color: #555;
+    font-size: 1.1rem;
+    line-height: 1.6;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.policy-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 2rem;
+    margin: 3rem 0;
+}
+
+.policy-card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    padding: 2rem;
+    display: flex;
+    transition: transform 0.3s ease;
+}
+
+    .policy-card:hover {
+        transform: translateY(-5px);
+    }
+
+.card-icon {
+    font-size: 1.8rem;
+    color: #4CAF50; /* Changed from blue to green */
+    margin-right: 1.5rem;
+    margin-top: 0.3rem;
+}
+
+.card-content h3 {
+    color: #333;
+    margin-top: 0;
+    margin-bottom: 1rem;
+    font-size: 1.3rem;
+}
+
+.policy-list {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+    .policy-list li {
+        position: relative;
+        padding-left: 1.5rem;
+        margin-bottom: 0.8rem;
+        color: #555;
+    }
+
+        .policy-list li:before {
+            content: "•";
+            color: #4CAF50; /* Changed from blue to green */
+            position: absolute;
+            left: 0;
+            font-size: 1.2rem;
+        }
+
+.contact-section {
+    margin: 4rem 0;
+}
+
+.contact-card {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 2rem;
+    display: flex;
+    align-items: center;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.contact-icon {
+    font-size: 2.5rem;
+    color: #4CAF50; /* Changed from blue to green */
+    margin-right: 2rem;
+}
+
+.contact-content h3 {
+    color: #333;
+    margin-top: 0;
+    margin-bottom: 1rem;
+}
+
+.contact-content p {
+    color: #555;
+    margin-bottom: 1.5rem;
+}
+
+.contact-button {
+    display: inline-flex;
+    align-items: center;
+    background: #4CAF50; /* Changed from blue to green */
+    color: white;
+    padding: 0.8rem 1.5rem;
+    border-radius: 4px;
+    text-decoration: none;
+    transition: background 0.3s ease;
+}
+
+    .contact-button:hover {
+        background: #388E3C; /* Darker green for hover state */
+    }
+
+    .contact-button i {
+        margin-right: 10px;
+    }
+
+.update-notice {
+    text-align: center;
+    color: #777;
+    font-size: 0.9rem;
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid #eee;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .policy-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .policy-card {
+        flex-direction: column;
+    }
+
+    .card-icon {
+        margin-right: 0;
+        margin-bottom: 1rem;
+    }
+
+    .contact-card {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .contact-icon {
+        margin-right: 0;
+        margin-bottom: 1.5rem;
+    }
+}

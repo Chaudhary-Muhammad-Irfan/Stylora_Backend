@@ -1,0 +1,88 @@
+﻿@page
+@model LoginModel
+@{
+    ViewData["Title"] = "Log in";
+}
+
+<main class="main">
+    <!--=============== BREADCRUMB ===============-->
+    <section class="breadcrumb">
+        <ul class="breadcrumb__list flex container">
+            <li><a asp-page="/Index" class="breadcrumb__link">Home</a></li>
+            <li><span class="breadcrumb__link">></span></li>
+            <li><span class="breadcrumb__link">Login / Register</span></li>
+        </ul>
+    </section>
+
+    <!--=============== LOGIN ===============-->
+    <section class="login-register section--lg"> 
+        <div class="login-register__container container grid">
+            <div class="login">
+                <h3 class="section__title">Login</h3>
+
+                <!-- Regular login form -->
+                <form id="account" method="post" class="form grid">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                    <input asp-for="Input.Email" placeholder="Your Email" class="form__input" />
+                    <span asp-validation-for="Input.Email" class="text-danger"></span>
+
+                    <input asp-for="Input.Password" type="password" placeholder="Your Password" class="form__input" />
+                    <span asp-validation-for="Input.Password" class="text-danger"></span>
+
+                    <div class="remember-forgot">
+                        <div class="remember-me">
+                            <input asp-for="Input.RememberMe" type="checkbox" id="rememberMe" class="form-check-input">
+                            <label for="rememberMe">Remember Me</label>
+                        </div>
+                        <div class="forgot-password">
+                            <a asp-page="./ForgotPassword" class="forgot-password__link">Forgot Password?</a>
+                        </div>
+                    </div>
+
+                    <div class="form__btn">
+                        <button type="submit" class="btn_login">Login</button>
+                    </div>
+                </form>
+                <form asp-controller="Account" asp-action="ExternalLogin" asp-route-provider="Google" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+                    <button type="submit" class="login-with-google-btn btn_login">
+                         Sign in with Google
+                    </button>
+                </form>
+                <div class="signup-link">
+                    <p>Don't have an account? <a asp-page="/Account/Register" asp-area="Identity" class="signup__link">Sign Up</a></p>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <style>
+        .external-login {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .or-divider {
+            margin: 15px 0;
+            position: relative;
+            text-align: center;
+        }
+
+            .or-divider:before, .or-divider:after {
+                content: "";
+                flex: 1;
+                border-bottom: 1px solid #ddd;
+            }
+
+            .or-divider:before {
+                margin-right: 10px;
+            }
+
+            .or-divider:after {
+                margin-left: 10px;
+            }
+    </style>
+}

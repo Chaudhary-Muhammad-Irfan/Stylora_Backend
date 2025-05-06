@@ -1,0 +1,23 @@
+﻿@model List<Brand>
+
+<div class="products__container grid">
+    @foreach (var brand in Model)
+    {
+        <div class="product__item">
+            <div class="product__banner">
+                <a href="@Url.Action("GetAllProductsOfCurrentBrand", "Customer", new { brandId = brand.brandId })" class="product__images">
+                    <img src="@Url.Content($"~/{brand.brandLogoURL}")"
+                         alt="@brand.brandName"
+                         class="product__img default" />
+                </a>
+            </div>
+            <div class="product__content">
+                <div class="product__category">@brand.niche</div>
+                <h2 class="product__title">@brand.brandName</h2>
+                <div class="product__tagline">
+                    <p>@brand.tagLine</p>
+                </div>
+            </div>
+        </div>
+    }
+</div>

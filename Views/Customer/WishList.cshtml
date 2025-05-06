@@ -1,0 +1,82 @@
+﻿@model List<Product>
+<body>
+    <!--=============== MAIN ===============-->
+    <main class="main">
+        <!--=============== BREADCRUMB ===============-->
+        <section class="breadcrumb">
+            <ul class="breadcrumb__list flex container">
+                <li><a href="~/Home/Index" class="breadcrumb__link">Home</a></li>
+                <li><span class="breadcrumb__link">></span></li>
+                <li><span class="breadcrumb__link">Shop</span></li>
+                <li><span class="breadcrumb__link">></span></li>
+                <li><span class="breadcrumb__link">Wishlist</span></li>
+            </ul>
+        </section>
+
+        <!--=============== WISHLIST ===============-->
+        <section class="wishlist section--lg container">
+            @if (Model == null || !Model.Any())
+            {
+                <div class="empty-wishlist-message" style="text-align:center; padding:50px;">
+                    <h3>Your wishlist is empty</h3>
+                    <p>When you add products for future purchase, they will appear here.</p>
+                </div>
+            }
+            else
+            {
+                <div class="table__container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Image</th>
+                                <th>Brand Name</th>
+                                <th>Product Name</th>
+                                <th>Price</th>
+                                <th>Available Quantity</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        <img src="~/@item.productThumbnailURL" alt="Product Image" class="table__img" />
+                                    </td>
+                                    <td>
+                                        <h3 class="table__title">@item.brandName</h3>
+                                    </td>
+                                    <td>
+                                        <p class="table__description">@item.productName</p>
+                                    </td>
+                                    <td>
+                                        <span class="table__price">Rs.@item.price</span>
+                                    </td>
+                                    <td>
+                                        <span class="table__stock">@item.stock</span> 
+                                    </td>
+                                    <td>
+                                        <a href="@Url.Action("MoveToCartFromWishlist", "Customer", new { productId = item.productId })"
+                                           class="btn btn-sm">
+                                            <i class="fas fa-cart-plus"></i> Add to Cart
+                                        </a>
+                                    </td>
+
+
+
+
+
+                                    <td>
+                                        <a href="@Url.Action("RemoveFromWishlist", "Customer", new { productId = item.productId })">
+                                            <i class="fi fi-rs-trash table__trash"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </section>
+    </main>
+</body>

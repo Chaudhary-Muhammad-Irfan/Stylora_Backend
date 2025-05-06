@@ -1,0 +1,195 @@
+﻿@model List<Brand>
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Requests</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --main-color: #2c3e50; /* Original form header color */
+            --accent-color: #3498db;
+            --light-bg: #f8f9fa;
+        }
+
+        body {
+            background-color: var(--light-bg);
+        }
+
+        .requests-container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+        }
+
+        .requests-title {
+            text-align: center;
+            margin: 3rem 0;
+            font-weight: 700;
+            color: var(--main-color);
+            position: relative;
+            padding-bottom: 1rem;
+        }
+
+            .requests-title::after {
+                content: '';
+                position: absolute;
+                bottom: 0;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 100px;
+                height: 3px;
+                background: var(--accent-color);
+            }
+
+        .table-wrapper {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+            padding: 2rem;
+            margin: 0 auto;
+        }
+
+        .table-custom thead {
+            background-color: var(--main-color); /* Original form header color */
+            color: white;
+        }
+
+        .table-custom th {
+            font-weight: 600;
+            padding: 1.2rem;
+            border-bottom: 2px solid var(--accent-color);
+        }
+
+        .table-custom td {
+            padding: 1rem;
+            vertical-align: middle;
+            transition: all 0.2s ease;
+        }
+
+        .table-custom tbody tr:hover {
+            background-color: rgba(52, 152, 219, 0.05);
+        }
+
+        /* Light color buttons */
+        .filter-btn {
+            background-color: rgba(52, 152, 219, 0.1);
+            color: var(--main-color);
+            border: 1px solid rgba(52, 152, 219, 0.2);
+            transition: all 0.2s ease;
+        }
+
+            .filter-btn.active {
+                background-color: var(--accent-color);
+                color: white;
+            }
+
+        .status-badge {
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            min-width: 100px;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .status-pending {
+            background: rgba(255, 193, 7, 0.1);
+            color: #856404;
+        }
+
+        .status-approved {
+            background: rgba(40, 167, 69, 0.1);
+            color: #155724;
+        }
+
+        .status-rejected {
+            background: rgba(220, 53, 69, 0.1);
+            color: #721c24;
+        }
+
+        .action-buttons {
+            gap: 0.8rem;
+            min-width: 120px;
+        }
+
+        .btn-action {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            width: 45%;
+            background-color: rgba(52, 152, 219, 0.1);
+            color: var(--main-color);
+            border: 1px solid rgba(52, 152, 219, 0.2);
+        }
+
+            .btn-action:hover {
+                background-color: var(--accent-color);
+                color: white;
+            }
+
+        .disabled-action .btn-action {
+            opacity: 0.5;
+            pointer-events: none;
+            background-color: rgba(108, 117, 125, 0.1);
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="requests-container">
+        <h1 class="requests-title">Requests Management</h1>
+
+        <!-- Filter Buttons -->
+        <div class="d-flex justify-content-center gap-2 mb-4">
+            <a href="getAllBrands" class="btn filter-btn">
+                <i class="bi bi-filter-circle"></i> All
+            </a>
+            <a href="getAllPendingBrands" class="btn filter-btn">
+                <i class="bi bi-clock-history"></i> Pending
+            </a>
+            <a href="getAllApprovedBrands" class="btn filter-btn">
+                <i class="bi bi-check-circle"></i> Approved
+            </a>
+            <a href="getAllRejectedBrands" class="btn filter-btn active">
+                <i class="bi bi-x-circle"></i> Rejected
+            </a>
+        </div>
+        <!-- Requests Table -->
+        <div class="table-wrapper">
+            <table class="table table-custom">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Brand Name</th>
+                        <th>Niche</th>
+                        <th>Owner Name</th>
+                        <th>Contact</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var brand in Model)
+                    {
+                        <tr>
+                            <td>@brand.brandId</td>
+                            <td>@brand.brandName</td>
+                            <td>@brand.niche</td>
+                            <td>@brand.brandOwnerName</td>
+                            <td>@brand.contact</td>
+                            <td>@brand.brandRegistrationDate.ToString("yyyy-MM-dd")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,154 @@
+﻿@section Styles {
+
+                <link href="~/css/privacy.css" rel="stylesheet" />
+
+}
+
+<body>
+    <!--=============== MAIN ===============-->
+    <main class="main">
+        <!--=============== BREADCRUMB ===============-->
+        <section class="breadcrumb">
+            <ul class="breadcrumb__list flex container">
+                <li><a href="index.html" class="breadcrumb__link">Home</a></li>
+                <li><span class="breadcrumb__separator">›</span></li>
+                <li><span class="breadcrumb__current">Privacy Policy</span></li>
+            </ul>
+        </section>
+
+        <div class="container privacy-policy">
+            <!-- Policy Header -->
+            <div class="policy-header">
+                <h1 class="text-center">
+                    <i class="fas fa-shield-alt"></i> Privacy Policy
+                </h1>
+                <p class="policy-intro">
+                    At Stylora, we are committed to protecting your privacy. This Privacy Policy outlines how we collect, 
+                    use, and safeguard your personal information in compliance with international data protection regulations.
+                </p>
+            </div>
+
+            <!-- Policy Sections -->
+            <div class="policy-grid">
+                <div class="policy-card">
+                    <div class="card-icon">
+                        <i class="fas fa-database"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3>Information We Collect</h3>
+                        <ul class="policy-list">
+                            <li>Contact details (name, email, phone)</li>
+                            <li>Billing and shipping information</li>
+                            <li>Order history and preferences</li>
+                            <li>Device and browsing data</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="policy-card">
+                    <div class="card-icon">
+                        <i class="fas fa-cogs"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3>How We Use Information</h3>
+                        <ul class="policy-list">
+                            <li>Process transactions and fulfill orders</li>
+                            <li>Personalize your shopping experience</li>
+                            <li>Improve our products and services</li>
+                            <li>Send relevant promotions and updates</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="policy-card">
+                    <div class="card-icon">
+                        <i class="fas fa-share-alt"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3>Information Sharing</h3>
+                        <p>We only share data with:</p>
+                        <ul class="policy-list">
+                            <li>Payment processors</li>
+                            <li>Shipping providers</li>
+                            <li>Trusted service partners</li>
+                            <li>When required by law</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="policy-card">
+                    <div class="card-icon">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3>Data Security</h3>
+                        <ul class="policy-list">
+                            <li>SSL encrypted transactions</li>
+                            <li>Secure payment gateways</li>
+                            <li>Regular security audits</li>
+                            <li>Limited employee access</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="policy-card">
+                    <div class="card-icon">
+                        <i class="fas fa-user-shield"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3>Your Rights</h3>
+                        <ul class="policy-list">
+                            <li>Access your personal data</li>
+                            <li>Request corrections</li>
+                            <li>Delete your information</li>
+                            <li>Opt-out of marketing</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="policy-card">
+                    <div class="card-icon">
+                        <i class="fas fa-sync-alt"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3>Policy Updates</h3>
+                        <p>We may update this policy periodically. The latest version will always be available on our website with the effective date clearly displayed.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Section -->
+            <div class="contact-section">
+                <div class="contact-card">
+                    <div class="contact-icon">
+                        <i class="fas fa-headset"></i>
+                    </div>
+                    <div class="contact-content">
+                        <h3>Have Questions?</h3>
+                        <p>Our privacy team is available to address any concerns you may have about your personal data.</p>
+                        <a href="mailto:support@stylora.com" class="contact-button">
+                            <i class="fas fa-envelope"></i> support@stylora.com
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Last Updated -->
+            <div class="update-notice">
+                <p><strong>Last Updated:</strong> <span id="current-date"></span></p>
+            </div>
+        </div>
+    </main>
+
+    <!--=============== SWIPER JS ===============-->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <script>
+        // Add current date
+        document.getElementById('current-date').textContent = new Date().toLocaleDateString('en-US', {
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric'
+        });
+    </script>
+</body>
