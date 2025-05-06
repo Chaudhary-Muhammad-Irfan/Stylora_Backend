@@ -19,16 +19,17 @@
                     <p class="account__tab" data-target="#orders">
                         <i class="fi fi-rs-shopping-bag"></i> Orders
                     </p>
-                    <p class="account__tab" data-target="#update-profile">
-                        <i class="fi fi-rs-user"></i> Update Profile
-                    </p>
                     <p class="account__tab" data-target="#address">
                         <i class="fi fi-rs-marker"></i> My Address
                     </p>
                     <p class="account__tab" data-target="#change-password">
                         <i class="fi fi-rs-settings-sliders"></i> Change Password
                     </p>
-                    <p class="account__tab"><i class="fi fi-rs-exit"></i> Logout</p>
+                    <form asp-area="Identity" asp-page="/Account/Logout" method="post">
+                        <button type="submit">
+                            <p class="account__tab"><i class="fi fi-rs-exit"></i> Logout</p>
+                        </button>
+                    </form>
                 </div>
                 <div class="tabs__content">
                     <div class="tab__content active-tab" content id="dashboard">
@@ -62,35 +63,8 @@
                                         <td>$125.00</td>
                                         <td><a href="#" class="view__order">View</a></td>
                                     </tr>
-                                    <tr>
-                                        <td>#2468</td>
-                                        <td>June 29, 2022</td>
-                                        <td>Completed</td>
-                                        <td>$364.00</td>
-                                        <td><a href="#" class="view__order">View</a></td>
-                                    </tr>
-                                    <tr>
-                                        <td>#2366</td>
-                                        <td>August 02, 2022</td>
-                                        <td>Completed</td>
-                                        <td>$280.00</td>
-                                        <td><a href="#" class="view__order">View</a></td>
-                                    </tr>
                                 </tbody>
                             </table>
-                        </div>
-                    </div>
-                    <div class="tab__content" content id="update-profile">
-                        <h3 class="tab__header">Update Profile</h3>
-                        <div class="tab__body">
-                            <form class="form grid">
-                                <input type="text"
-                                       placeholder="Username"
-                                       class="form__input" />
-                                <div class="form__btn">
-                                    <button class="btn btn--md">Save</button>
-                                </div>
-                            </form>
                         </div>
                     </div>
                     <div class="tab__content" content id="address">
@@ -128,6 +102,5 @@
                 </div>
             </div>
         </section>
-
     </main>
 </body>
