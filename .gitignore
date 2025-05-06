@@ -400,3 +400,12 @@ FodyWeavers.xsd
 # JetBrains Rider
 *.sln.iml
 /.vs 
+
+
+#Program.cs file ignored  due to secret key in it
+
+# Ignore appsettings.json
+appsettings.json
+
+# Ignore Program.cs
+Program.cs
