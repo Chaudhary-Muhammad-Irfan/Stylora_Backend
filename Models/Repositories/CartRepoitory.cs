@@ -20,44 +20,89 @@ namespace WebApplication1.Models.Repositories
                     try
                     {
                         const string query = @"
-                IF NOT EXISTS (
-                    SELECT 1 FROM Cart 
-                    WHERE userId = @userId 
-                    AND productId = @productId 
-                    AND (size = @size OR (size IS NULL AND @size IS NULL))
-                )
-                BEGIN
-                    INSERT INTO Cart (
-                        userId, 
-                        productId,
-                        brandName,
-                        productName,
-                        productThumbnailURL,
-                        price,
-                        quantity,
-                        subTotal,
-                        size
-                    )
-                    SELECT 
-                        @userId,
-                        @productId,
-                        @brandName,
-                        @productName,
-                        @productThumbnailURL,
-                        @price,
-                        @quantity,
-                        @subTotal,
-                        @size
-                END
-                ELSE
-                BEGIN
-                    UPDATE Cart 
-                    SET quantity = quantity + @quantity,
-                        subTotal = subTotal + @subTotal
-                    WHERE userId = @userId 
-                    AND productId = @productId 
-                    AND (size = @size OR (size IS NULL AND @size IS NULL))
-                END";
+    IF NOT EXISTS (
+        SELECT 1 FROM Cart 
+        WHERE userId = @userId 
+        AND productId = @productId 
+        AND (size = @size OR (size IS NULL AND @size IS NULL))
+    )
+    BEGIN
+        INSERT INTO Cart (
+            userId, 
+            productId,
+            brandName,
+            productName,
+            productThumbnailURL,
+            price,
+            quantity,
+            subTotal,
+            size,
+            availableStock
+        )
+        SELECT 
+            @userId,
+            @productId,
+            @brandName,
+            @productName,
+            @productThumbnailURL,
+            @price,
+            @quantity,
+            @subTotal,
+            @size,
+            p.stock
+        FROM Product p
+        WHERE p.productId = @productId
+    END
+    ELSE
+    BEGIN
+        UPDATE Cart 
+        SET quantity = quantity + @quantity,
+            subTotal = subTotal + @subTotal
+        WHERE userId = @userId 
+        AND productId = @productId 
+        AND (size = @size OR (size IS NULL AND @size IS NULL))
+    END";
+
+
+                        //        const string query = @"
+                        //IF NOT EXISTS (
+                        //    SELECT 1 FROM Cart 
+                        //    WHERE userId = @userId 
+                        //    AND productId = @productId 
+                        //    AND (size = @size OR (size IS NULL AND @size IS NULL))
+                        //)
+                        //BEGIN
+                        //    INSERT INTO Cart (
+                        //        userId, 
+                        //        productId,
+                        //        brandName,
+                        //        productName,
+                        //        productThumbnailURL,
+                        //        price,
+                        //        quantity,
+                        //        subTotal,
+                        //        size
+                        //    )
+                        //    SELECT 
+                        //        @userId,
+                        //        @productId,
+                        //        @brandName,
+                        //        @productName,
+                        //        @productThumbnailURL,
+                        //        @price,
+                        //        @quantity,
+                        //        @subTotal,
+                        //        @size
+                        //END
+                        //ELSE
+                        //BEGIN
+                        //    UPDATE Cart 
+                        //    SET quantity = quantity + @quantity,
+                        //        subTotal = subTotal + @subTotal
+                        //    WHERE userId = @userId 
+                        //    AND productId = @productId 
+                        //    AND (size = @size OR (size IS NULL AND @size IS NULL))
+                        //END";
 
                         foreach (var size in sizes)
                         {
