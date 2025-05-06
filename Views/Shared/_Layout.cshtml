@@ -20,8 +20,62 @@
     <link href="~/css/styles.css" rel="stylesheet" />
 
     @RenderSection("Styles", required: false)
+    <style>
+        .header__user-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            position: relative;
+        }
 
+        .header__user-dropdown {
+            position: relative;
+            display: inline-block;
+        }
 
+        .dropdown__menu {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 100%;
+            background: white;
+            min-width: 200px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            padding: 0.5rem 0;
+            z-index: 1000;
+        }
+
+        .header__user-dropdown:hover .dropdown__menu {
+            display: block;
+        }
+
+        .dropdown__item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: #333;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+            .dropdown__item:hover {
+                background: #f5f5f5;
+                color: #000;
+            }
+
+            .dropdown__item i {
+                font-size: 1rem;
+            }
+            .dropdown__item[type="submit"] {
+                background: none;
+                border: none;
+                width: 100%;
+                text-align: left;
+                cursor: pointer;
+            }
+    </style>
 </head>
 <body>
     <header class="header">
@@ -41,9 +95,7 @@
         </div>
         <nav class="nav container">
             <a href="@Url.Action("Index","Home")" class="nav__logo">
-                <img class="nav__logo-img"
-                     src="~/img/lb.png"
-                     alt="website logo" />
+                <img class="nav__logo-img" src="~/img/lb.png" alt="website logo" />
             </a>
             <div class="nav__menu" id="nav-menu">
                 <div class="nav__menu-top">
@@ -60,21 +112,14 @@
                     </li>
                     <li class="nav__item">
                         <a href="@Url.Action("GetAllRegisteredBrands","Customer")" class="nav__link">Brands</a>
-                    </li> 
+                    </li>
                     <li class="nav__item">
                         <a href="@Url.Action("About","Home")" class="nav__link">About</a>
                     </li>
                     <li class="nav__item">
                         <a href="@Url.Action("Contact","Home")" class="nav__link">Contact</a>
                     </li>
-                    <li class="nav__item">
-                        <a href="@Url.Action("MyAccount","Home")" class="nav__link">My Account</a>
-                    </li>
-                    <li class="nav__item">
-                        <a href="@Url.Page("/Account/Login", new { area = "Identity" })" class="nav__link">Login</a>
-                    </li>
                 </ul>
-               
             </div>
             <div class="header__user-actions">
                 <a href="@Url.Action("WishList","Customer")" class="header__action-btn" title="Wishlist">
@@ -83,6 +128,34 @@
                 <a href="@Url.Action("ViewCart","Customer")" class="header__action-btn" title="Cart">
                     <img src="~/img/icon-cart.svg" alt="" />
                 </a>
+                <div class="header__user-dropdown">
+                    <button class="header__action-btn" title="User Account">
+                        <i class="fi fi-rs-user" style="font-size: 22px !important;"></i>
+
+                    </button>
+                    <div class="dropdown__menu">
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            <a href="@Url.Action("MyAccount","Home")" class="dropdown__item">
+                                My Account
+                            </a>
+                            <form asp-area="Identity" asp-page="/Account/Logout" method="post">
+                                <button type="submit" class="dropdown__item">
+                                    Logout
+                                </button>
+                            </form>
+                        }
+                        else
+                        {
+                            <a href="@Url.Page("/Account/Login", new { area = "Identity" })" class="dropdown__item">
+                                Login
+                            </a>
+                            <a href="@Url.Page("/Account/Register", new { area = "Identity" })" class="dropdown__item">
+                                Register
+                            </a>
+                        }
+                    </div>
+                </div>
             </div>
         </nav>
     </header>
@@ -201,5 +274,14 @@
     <script src="~/js/main.js"></script>
 
     @RenderSection("Scripts", required: false)
+    <script>
+                // Toggle dropdown on mobile
+        document.querySelector('.header__user-dropdown button').addEventListener('click', function(e) {
+            if (window.innerWidth < 768) {
+                e.preventDefault();
+                this.nextElementSibling.classList.toggle('show');
+            }
+        });
+    </script>
 </body>
 </html>
