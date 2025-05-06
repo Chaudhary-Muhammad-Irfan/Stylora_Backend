@@ -18,10 +18,10 @@
             </div>
         </section>
         @await Html.PartialAsync("_categories", (IEnumerable<WebApplication1.Models.Product>)ViewBag.Categories)
-        @await Html.PartialAsync("_shop")
+        @await Html.PartialAsync("_shop", (IEnumerable<WebApplication1.Models.Brand>)ViewBag.Brands)
         @await Html.PartialAsync("_deals")
         <section class="section new__arrivals">
-            <h2 class="section__title">New Arrived</h2> 
+            <h2 class="section__title">New Arrived Products</h2> 
             @await Html.PartialAsync("_New_Arrivals", (IEnumerable<WebApplication1.Models.Product>)ViewBag.Products)
         </section>
     </main> 

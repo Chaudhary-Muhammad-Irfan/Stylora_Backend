@@ -1,54 +1,36 @@
-﻿<section class="products container section">
-    <div class="tab__btns">
-        <span class="tab__btn active-tab" data-target="#featured">Featured</span>
-        <span class="tab__btn" data-target="#popular">Popular</span>
-        <span class="tab__btn" data-target="#new-added">New Added</span>
-    </div>
-    <div class="tab__items">
-        <div class="tab__item active-tab" content id="featured">
-            <div class="products__container grid">
+﻿@model List<Brand>
+
+<section class="products container section">
+    <h2 class="section__title">Newly Added Brands</h2>
+    <div class="products__container grid">
+        @if (Model != null && Model.Any())
+        {
+            @foreach (var brand in Model)
+            {
                 <div class="product__item">
                     <div class="product__banner">
-                        <a href="@Url.Action("Shop","Home")" class="product__images">
-                            <img src="~/img/sapphire.jpg"
-                                 alt=""
+                        <a href="@Url.Action("GetAllProductsOfCurrentBrand", "Customer", new { brandId = brand.brandId })" class="product__images">
+                            <img src="@Url.Content($"~/{brand.brandLogoURL}")"
+                                 alt="@brand.brandName"
                                  class="product__img default" />
-                            <img src="~/img/sapphire.jpg"
-                                 alt=""
-                                 class="product__img hover" />
                         </a>
                     </div>
                     <div class="product__content">
-                        <span class="product__category">Clothing</span>
-                        <a href="details.html">
-                            <h3 class="product__title">Sapphire</h3>
-                        </a>
-                        <div class="product__rating">
-                            <i class="fi fi-rs-star"></i>
-                            <i class="fi fi-rs-star"></i>
-                            <i class="fi fi-rs-star"></i>
-                            <i class="fi fi-rs-star"></i>
-                            <i class="fi fi-rs-star"></i>
-                        </div>
-
+                        <div class="product__category">@brand.niche</div>
+                        <h2 class="product__title">@brand.brandName</h2>
                         <div class="product__tagline">
-                            <p>Premium Fashion & Apparel</p>
+                            <p>@brand.tagLine</p>
                         </div>
-                        <div class="product__tagline">
-                            <p>Luxury Clothing for Every Occasion</p>
-                        </div>
-                        </a>
                     </div>
                 </div>
+            }
+        }
+        else
+        {
+            <div class="no-results">
+                <i class="fi fi-rs-info"></i>
+                <p>No new brands available</p>
             </div>
-        </div>
-        <div class="tab__item" content id="popular">
-            <div class="products__container grid">
-            </div>
-        </div>
-        <div class="tab__item" content id="new-added">
-            <div class="products__container grid">
-            </div>
-        </div>
+        }
     </div>
 </section>

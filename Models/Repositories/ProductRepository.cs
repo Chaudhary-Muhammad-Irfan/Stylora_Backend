@@ -520,6 +520,56 @@ namespace WebApplication1.Models.Repositories
 
             return products;
         }
+        public List<Brand> GetNewlyAddedBrands()
+        {
+            var newlyAddedBrands = new List<Brand>();
 
+            using (SqlConnection conn = new SqlConnection(_connectionString))
+            {
+                DateTime sevenWeeksAgo = DateTime.Now.AddDays(-49); 
+                string query = @" SELECT 
+            brandId, 
+            brandName, 
+            brandLogoURL, 
+            brandRegistrationDate,
+            description,
+            tagLine,
+            niche
+        FROM Brand
+        WHERE brandRegistrationDate >= @SevenWeeksAgo
+        AND brandRegistrationStatus = 'Approved'
+        ORDER BY brandRegistrationDate DESC";
+
+                SqlCommand cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@SevenWeeksAgo", sevenWeeksAgo);
+
+                try
+                {
+                    conn.Open();
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        newlyAddedBrands.Add(new Brand
+                        {
+                            brandId = Convert.ToInt32(reader["brandId"]),
+                            brandName = reader["brandName"].ToString(),
+                            brandLogoURL = reader["brandLogoURL"].ToString(),
+                            brandRegistrationDate = Convert.ToDateTime(reader["brandRegistrationDate"]),
+                            description = reader["description"].ToString(),
+                            tagLine = reader["tagLine"].ToString(),
+                            niche = reader["niche"].ToString()
+                        });
+                    }
+                    reader.Close();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error getting newly added brands: {ex.Message}");
+                    throw;
+                }
+            }
+            return newlyAddedBrands;
+        }
     }
 }

@@ -4,6 +4,7 @@ using NuGet.Protocol.Core.Types;
 using System.Diagnostics;
 using System.Security.Claims;
 using WebApplication1.Models;
+using WebApplication1.Models.Interfaces;
 using WebApplication1.Models.Repositories;
 
 namespace WebApplication1.Controllers
@@ -25,9 +26,10 @@ namespace WebApplication1.Controllers
             }
             var categories = _repository.GetDistinctCategoriesWithThumbnails();
             var newProducts = _repository.GetNewArrivals();
+            var brands = _repository.GetNewlyAddedBrands();
             ViewBag.Categories = categories;
             ViewBag.Products = newProducts;
-            Console.WriteLine($"New products count: {newProducts.Count()}");
+            ViewBag.Brands = brands;
             return View();
         }
         [Authorize]
