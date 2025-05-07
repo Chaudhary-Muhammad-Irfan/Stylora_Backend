@@ -102,6 +102,7 @@ namespace WebApplication1.Areas.Identity.Pages.Account
             [Display(Name = "Confirm password")]
             [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
             public string ConfirmPassword { get; set; }
+            public bool isShopkeeper { get; set; }
 
         }
 
@@ -122,6 +123,7 @@ namespace WebApplication1.Areas.Identity.Pages.Account
 
 
                 user.name = Input.Name;
+                user.isShopkeeper = Input.isShopkeeper;
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
                 var result = await _userManager.CreateAsync(user, Input.Password);

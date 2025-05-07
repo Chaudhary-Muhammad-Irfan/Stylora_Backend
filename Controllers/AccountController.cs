@@ -11,7 +11,7 @@ using WebApplication1.Models.Services;
 namespace WebApplication1.Controllers
 {
     public class AccountController : Controller
-    {
+    { 
         private readonly SignInManager<UserType> _signInManager;
         private readonly UserManager<UserType> _userManager;
         private readonly ILogger<AccountController> _logger;
@@ -48,29 +48,41 @@ namespace WebApplication1.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(RegisterViewModel model)
         {
-            if (!ModelState.IsValid)
-                return View(model);
-
-            // Strict validation before anything else
-            var validation = await _emailValidator.ValidateEmailAsync(model.Email);
-            if (!validation.IsValid)
+            if (ModelState.IsValid)
             {
-                ModelState.AddModelError("Email", validation.Message);
-                return View(model);
+                var user = new UserType
+                {
+                    UserName = model.Email,
+                    Email = model.Email,
+                    isShopkeeper = model.isShopkeeper
+                };
+
+                var result = await _userManager.CreateAsync(user, model.Password);
+
+                if (result.Succeeded)
+                {
+                    // Add shopkeeper claim if selected
+                    if (model.isShopkeeper)
+                    {
+                        await _userManager.AddClaimAsync(user, new Claim("IsShopkeeper", "true"));
+                    }
+
+                    // Sign in the user
+                    await _signInManager.SignInAsync(user, isPersistent: false);
+
+                    // Force refresh the authentication cookie to include new claims
+                    await _signInManager.RefreshSignInAsync(user);
+
+                    return RedirectToAction("Index", "Home");
+                }
+
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
             }
 
-            // Rest of your registration logic...
-            var user = new UserType { UserName = model.Email, Email = model.Email };
-            var result = await _userManager.CreateAsync(user, model.Password);
-
-            if (!result.Succeeded)
-            {
-                AddErrors(result);
-                return View(model);
-            }
-
-            // ... send confirmation email etc.
-            return RedirectToAction("Index", "Home");
+            return View(model);
         }
         [HttpGet]
         public async Task<IActionResult> ValidateEmail(string email)

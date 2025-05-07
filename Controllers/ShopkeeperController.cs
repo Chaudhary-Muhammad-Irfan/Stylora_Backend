@@ -1,6 +1,7 @@
 ﻿using AspNetCoreGeneratedDocument;
 using Azure.Core;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis;
 using Microsoft.Data.SqlClient;
@@ -8,25 +9,38 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Client; 
 using System.Configuration;
 using System.Security.Claims;
+using System.Threading.Tasks;
 using WebApplication1.Models;
 using WebApplication1.Models.Repositories;
 
-namespace WebApplication1.Controllers
+namespace WebApplication1.Controllers 
 {
+    [Authorize(Policy = "ShopkeeperOnly")]
     public class ShopkeeperController : Controller
     {
         private readonly IWebHostEnvironment _env;
         private readonly BrandRepository _brandRepository;
         private readonly ProductRepository _productRepository;
-
-        public ShopkeeperController(IWebHostEnvironment env, BrandRepository brandRepository , ProductRepository productRepository)
+        private readonly UserManager<UserType> _userManager;
+        public ShopkeeperController(
+             IWebHostEnvironment env,
+             BrandRepository brandRepository,
+             ProductRepository productRepository,
+             UserManager<UserType> userManager)
         {
             _env = env;
             _brandRepository = brandRepository;
             _productRepository = productRepository;
+            _userManager = userManager;
         }
-        public IActionResult Index() 
+        public async Task<IActionResult> Index()
         {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null || !user.isShopkeeper)
+            {
+                // This shouldn't happen because of our policy, but just in case
+                return RedirectToAction("AccessDenied", "Account");
+            }
             return View();
         }
         [HttpGet]

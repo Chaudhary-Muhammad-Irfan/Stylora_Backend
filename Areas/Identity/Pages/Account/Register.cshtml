@@ -3,6 +3,28 @@
 @{
     ViewData["Title"] = "Register";
 }
+<style>
+    .form__radio-group {
+        display: flex;
+        gap: 1rem;
+        margin-top: 0.5rem;
+    }
+
+    .form__radio-item {
+        display: flex;
+        align-items: center;
+    }
+
+    .form__radio-label {
+        margin-left: 0.5rem;
+        cursor: pointer;
+    }
+
+    input[type="radio"] {
+        accent-color: #7380ec;
+        cursor: pointer;
+    }
+</style>
 <body>
     <!--=============== MAIN ===============-->
     <main class="main">
@@ -12,7 +34,7 @@
                 <li><a href="/" class="breadcrumb__link">Home</a></li>
                 <li><span class="breadcrumb__link">></span></li>
                 <li><span class="breadcrumb__link">Login / Register</span></li>
-            </ul> 
+            </ul>
         </section>
 
         <!--=============== SignUp ===============-->
@@ -21,17 +43,20 @@
                 <h3 class="section__title">Create an Account</h3>
                 <form class="form grid" id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
                     <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+
                     <input asp-for="Input.Name"
                            class="form__input"
                            placeholder="Name"
                            aria-required="true" />
                     <span asp-validation-for="Input.Name" class="text-danger"></span>
-                   <input asp-for="Input.Email"
+
+                    <input asp-for="Input.Email"
                            class="form__input"
                            placeholder="Your Email"
                            autocomplete="username"
-                           aria-required="true" / readonly>
+                           aria-required="true" />
                     <span asp-validation-for="Input.Email" class="text-danger"></span>
+
                     <input asp-for="Input.Password"
                            class="form__input"
                            placeholder="Your Password"
@@ -45,6 +70,23 @@
                            autocomplete="new-password"
                            aria-required="true" />
                     <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
+
+                    <!-- User Type Selection Radio Buttons -->
+                    <div class="form__group">
+                        <label class="form__label">Register as:</label>
+                        <div class="form__radio-group">
+                            <div class="form__radio-item">
+                                <input type="radio" asp-for="Input.isShopkeeper" value="false" id="customerRole" checked />
+                                <label for="customerRole" class="form__radio-label">Customer</label>
+                            </div>
+                            <div class="form__radio-item">
+                                <input type="radio" asp-for="Input.isShopkeeper" value="true" id="shopkeeperRole" />
+                                <label for="shopkeeperRole" class="form__radio-label">Shopkeeper</label>
+                            </div>
+                        </div>
+                        <span asp-validation-for="Input.isShopkeeper" class="text-danger"></span>
+                    </div>
+
                     <div class="form__btn">
                         <button id="registerSubmit" type="submit" class="btn_signup">Submit & Register</button>
                     </div>
@@ -57,7 +99,7 @@
         </section>
     </main>
     <script>
-                   $(document).ready(function() {
+        $(document).ready(function() {
             $('#Email').on('blur', async function() {
                 var email = $(this).val();
                 var response = await fetch('/Account/ValidateEmail?email=' + encodeURIComponent(email));
@@ -69,6 +111,14 @@
                 } else {
                     $('#emailError').hide();
                     $('#registerButton').prop('disabled', false);
+                }
+            });
+
+            // Client-side validation for user type selection
+            $('form').submit(function(e) {
+                if ($('input[name="Input.IsShopkeeper"]:checked').length === 0) {
+                    e.preventDefault();
+                    alert('Please select whether you are registering as a customer or shopkeeper');
                 }
             });
         });

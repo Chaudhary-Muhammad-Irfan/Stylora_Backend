@@ -84,15 +84,19 @@
                     </span>
                     <h3>Settings</h3>
                 </a>
-                <a href="#">
-                    <span class="material-icons-sharp">
-                        logout
-                    </span>
-                    <h3>Logoutt</h3>
-                </a>
+                @using (Html.BeginForm("Logout", "Account", FormMethod.Post, new { id = "logoutForm", @class = "d-inline" }))
+                {
+                    @Html.AntiForgeryToken()
+                    <a href="javascript:document.getElementById('logoutForm').submit();" style="text-decoration: none;">
+                        <span class="material-icons-sharp">
+                            logout
+                        </span>
+                        <h3>Logout</h3>
+                    </a>
+                }
             </div>
 
-        </aside>
+        </aside> 
 
 
         <main>
