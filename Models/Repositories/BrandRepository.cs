@@ -86,7 +86,7 @@ namespace WebApplication1.Models.Repositories
             using (SqlConnection conn = new SqlConnection(_connectionString))
             {
                 conn.Open();
-                string query = "SELECT brandId, brandName,niche, brandOwnerName, contact, brandRegistrationDate, brandRegistrationStatus , tagLine, brandLogoURL, description FROM Brand WHERE brandRegistrationStatus = @status";
+                string query = "SELECT brandId, brandName,niche, brandOwnerName, contact, brandRegistrationDate, brandRegistrationStatus , tagLine, brandLogoURL, description , socialLink,cnic , bankName,accountNumber,accountHolderName  FROM Brand WHERE brandRegistrationStatus = @status";
                 using (SqlCommand cmd = new SqlCommand(query, conn))
                 {
                     cmd.Parameters.AddWithValue("@status", status);
@@ -105,7 +105,12 @@ namespace WebApplication1.Models.Repositories
                                 brandRegistrationStatus = reader.GetString(6),
                                 tagLine = reader.GetString(7),
                                 brandLogoURL = reader.GetString(8),
-                                description = reader.GetString(9)
+                                description = reader.GetString(9),
+                                socialLink=reader.GetString(10),
+                                cnic= reader.GetString(11),
+                                bankName= reader.GetString(12),
+                                accountNumber=reader.GetString(13),
+                                accountHolderName=reader.GetString(14)
                             });
                         }
                     }

@@ -18,7 +18,7 @@ namespace WebApplication1.Models
 
         // Personal details
         public string brandOwnerId { get; set; }
-        public string brandOwnerName { get; set; }
+        public string brandOwnerName { get; set; } 
         public string contact { get; set; }
         public string cnic { get; set; }
         public string bankName { get; set; }

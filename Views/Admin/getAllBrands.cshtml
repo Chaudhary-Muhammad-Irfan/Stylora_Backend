@@ -141,6 +141,13 @@
             background-color: rgba(108, 117, 125, 0.1);
             color: #6c757d;
         }
+
+        .empty-message {
+            text-align: center;
+            font-size: 1.2rem;
+            color: #6c757d;
+            padding: 2rem 0;
+        }
     </style>
 </head>
 <body>
@@ -165,71 +172,40 @@
 
         <!-- Requests Table -->
         <div class="table-wrapper">
-            <table class="table table-custom">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Brand Name</th>
-                        <th>Niche</th>
-                        <th>Owner Name</th>
-                        <th>Contact</th>
-                        <th>Date</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var brand in Model)
-                    {
+            @if (Model != null && Model.Count > 0)
+            {
+                <table class="table table-custom">
+                    <thead>
                         <tr>
-                            <td>@brand.brandId</td>
-                            <td>@brand.brandName</td>
-                            <td>@brand.niche</td>
-                            <td>@brand.brandOwnerName</td>
-                            <td>@brand.contact</td>
-                            <td>@brand.brandRegistrationDate.ToString("yyyy-MM-dd")</td>
-                            <td>
-                                @if (brand.brandRegistrationStatus == "Pending")
-                                {
-                                    <span class="status-badge status-pending">Pending</span>
-                                }
-                                else if (brand.brandRegistrationStatus == "Approved")
-                                {
-                                    <span class="status-badge status-approved">Approved</span>
-                                }
-                                else
-                                {
-                                    <span class="status-badge status-rejected">Rejected</span>
-                                }
-                            </td>
-                            <td>
-                                <div class="action-buttons d-flex">
-                                    @if (brand.brandRegistrationStatus == "Pending")
-                                    {
-                                        <a href="ApproveBrandRegestrationRequest/@brand.brandId" class="btn-action">
-                                            <i class="bi bi-check-lg"></i>
-                                        </a>
-                                        <a href="RejectBrandRegestrationRequest/@brand.brandId" class="btn-action">
-                                            <i class="bi bi-x-lg"></i>
-                                        </a>
-                                    }
-                                    else
-                                    {
-                                        <div class="action-buttons d-flex disabled-action">
-                                            <span class="btn-action">
-                                                <i class="bi bi-check-lg"></i>
-                                            </span>
-                                            <span class="btn-action">
-                                                <i class="bi bi-x-lg"></i>
-                                            </span>
-                                        </div>
-                                    }
-                                </div>
-                            </td>
+                            <th>ID</th>
+                            <th>Brand Name</th>
+                            <th>Niche</th>
+                            <th>Owner Name</th>
+                            <th>Contact</th>
+                            <th>Date</th>
                         </tr>
-                    }
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        @foreach (var brand in Model)
+                        {
+                            <tr>
+                                <td>@brand.brandId</td>
+                                <td>@brand.brandName</td>
+                                <td>@brand.niche</td>
+                                <td>@brand.brandOwnerName</td>
+                                <td>@brand.contact</td>
+                                <td>@brand.brandRegistrationDate.ToString("yyyy-MM-dd")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <div class="empty-message">
+                    <i class="bi bi-info-circle-fill"></i> No brand requests yet.
+                </div>
+            }
         </div>
     </div>
 </body>

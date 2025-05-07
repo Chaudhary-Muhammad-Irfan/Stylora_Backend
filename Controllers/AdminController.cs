@@ -57,5 +57,19 @@ namespace WebApplication1.Controllers
             _contactRepository.MarkMessageAsRead();
             return View(contacts);
         }
+        public IActionResult RegisteredBrands()
+        {
+            var brands = _brandRepo.GetAllBrandsByStatus("Approved");
+            return View(brands);
+        }
+        public IActionResult BrandOwners()
+        {
+            var brands = _brandRepo.GetAllBrandsByStatus("Approved");
+            return View(brands);
+        }
+        public IActionResult RegisteredUsers()
+        {
+            return View();
+        }
     }
 }
