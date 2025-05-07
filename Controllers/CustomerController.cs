@@ -370,10 +370,22 @@ namespace WebApplication1.Controllers
         {
             if (ModelState.IsValid)
             {
-                _contactRepository.AddContact(contact);
-                return RedirectToAction("Contact", "Home");
+                try
+                {
+                    _contactRepository.AddContact(contact);
+                    return Json(new { success = true, message = "Your message has been submitted successfully!" });
+                }
+                catch (Exception ex)
+                {
+                    return Json(new { success = false, message = "Error submitting your message: " + ex.Message });
+                }
             }
-            return Json(new { success = false, message = "There was an error submitting your message." });
+            var errors = ModelState.Values
+                .SelectMany(v => v.Errors)
+                .Select(e => e.ErrorMessage)
+                .ToList();
+
+            return Json(new { success = false, message = "Validation errors", errors = errors });
         }
     }
 }

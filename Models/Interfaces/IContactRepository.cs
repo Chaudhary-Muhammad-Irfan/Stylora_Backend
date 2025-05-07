@@ -3,5 +3,8 @@
     public interface IContactRepository
     {
         void AddContact(Contact contact);
+        int GetUnreadMessageCount();
+        List<Contact> GetAllMessages();
+        void MarkMessageAsRead();
     }
 }
