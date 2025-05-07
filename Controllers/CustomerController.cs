@@ -15,12 +15,14 @@ namespace WebApplication1.Controllers
         private readonly ProductRepository _productRepository;
         private readonly WishlistRepository _wishlistRepository;
         private readonly CartRepoitory _cartRepository;
-        public CustomerController(BrandRepository brandRepository, ProductRepository productRepository, WishlistRepository wishlistRepository, CartRepoitory cartRepoitory)
+        private readonly IContactRepository _contactRepository;
+        public CustomerController(BrandRepository brandRepository, ProductRepository productRepository, WishlistRepository wishlistRepository, CartRepoitory cartRepoitory, IContactRepository contactRepository)
         {
             _brandRepository = brandRepository;
             _productRepository = productRepository;
             _wishlistRepository = wishlistRepository;
             _cartRepository = cartRepoitory;
+            _contactRepository = contactRepository;
         }
         public IActionResult Index()
         {
@@ -363,6 +365,15 @@ namespace WebApplication1.Controllers
                 return RedirectToAction("ViewCart");
             }
         }
-        
+        [HttpPost]
+        public IActionResult SubmitContact(Contact contact)
+        {
+            if (ModelState.IsValid)
+            {
+                _contactRepository.AddContact(contact);
+                return RedirectToAction("Contact", "Home");
+            }
+            return Json(new { success = false, message = "There was an error submitting your message." });
+        }
     }
 }

@@ -1,19 +1,18 @@
-﻿@section Styles {
-        <link href="~/css/contact.css" rel="stylesheet" />
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+﻿@model Contact
+
+@section Styles {
+    <link href="~/css/contact.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 }
 
-
-
-
-   <!--=============== BREADCRUMB ===============-->
-        <section class="breadcrumb">
-            <ul class="breadcrumb__list flex container">
-                <li><a href="index.html" class="breadcrumb__link">Home</a></li>
-                <li><span class="breadcrumb__separator">›</span></li>
-                <li><span class="breadcrumb__current">Privacy Policy</span></li>
-            </ul>
-        </section>
+<!--=============== BREADCRUMB ===============-->
+<section class="breadcrumb">
+    <ul class="breadcrumb__list flex container">
+        <li><a href="index.html" class="breadcrumb__link">Home</a></li>
+        <li><span class="breadcrumb__separator">›</span></li>
+        <li><span class="breadcrumb__current">Contact Us</span></li>
+    </ul>
+</section>
 
 <div class="contact-section">
     <div class="contact-container">
@@ -24,16 +23,17 @@
                 <p class="form-subtitle">Have questions or want to discuss a project? Fill out the form below and we'll get back to you within 24 hours.</p>
             </div>
 
-            <form class="contact-form">
+             <form id="contactForm" class="contact-form" asp-controller="Customer" asp-action="SubmitContact" method="post">
+
                 <div class="form-row">
                     <div class="form-group">
                         <label for="firstName">First Name</label>
-                        <input type="text" id="firstName" name="firstName" placeholder="Enter your first name">
+                        <input type="text" id="firstName" name="FirstName" placeholder="Enter your first name" required>
                         <i class="fas fa-user input-icon"></i>
                     </div>
                     <div class="form-group">
                         <label for="lastName">Last Name</label>
-                        <input type="text" id="lastName" name="lastName" placeholder="Enter your last name">
+                        <input type="text" id="lastName" name="LastName" placeholder="Enter your last name" required>
                         <i class="fas fa-user input-icon"></i>
                     </div>
                 </div>
@@ -41,19 +41,19 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="email">Email Address</label>
-                        <input type="email" id="email" name="email" placeholder="Enter your email">
+                        <input type="email" id="email" name="Email" placeholder="Enter your email" required>
                         <i class="fas fa-envelope input-icon"></i>
                     </div>
                     <div class="form-group">
                         <label for="phone">Phone Number</label>
-                        <input type="tel" id="phone" name="phone" placeholder="Enter your phone">
+                        <input type="tel" id="phone" name="Phone" placeholder="Enter your phone" required>
                         <i class="fas fa-phone input-icon"></i>
                     </div>
                 </div>
 
                 <div class="form-group full-width">
                     <label for="message">Your Message</label>
-                    <textarea id="message" name="message" placeholder="Tell us about your project or inquiry..."></textarea>
+                    <textarea id="message" name="Message" placeholder="Tell us about your project or inquiry..." required></textarea>
                     <i class="fas fa-comment-dots textarea-icon"></i>
                 </div>
 
@@ -124,12 +124,61 @@
             </div>
 
             <div class="contact-map">
-                <div class="map-placeholder">
-                    <i class="fas fa-map-marked-alt"></i>
-                    <p>Interactive Map Here</p>
-                </div>
+                <iframe
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3153.0191909281104!2d-122.4194156846819!3d37.77492977975901!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8085809c5c0f3f3f%3A0x4e2b0c0f0e0c0f0!2sSan%20Francisco%2C%20CA%2C%20USA!5e0!3m2!1sen!2s!4v1610000000000!5m2!1sen!2s"
+                    width="100%" height="300" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
             </div>
         </div>
     </div>
 </div>
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.getElementById('contactForm').addEventListener('submit', function (e) {
+            e.preventDefault();
 
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "Do you want to submit this form?",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, submit it!',
+                cancelButtonText: 'Cancel',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const form = document.getElementById('contactForm');
+                    const formData = new FormData(form);
+
+                    fetch(form.action, {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.text(); 
+                    })
+                    .then(() => {
+                        Swal.fire({
+                            title: 'Submitted!',
+                            text: 'Your form has been submitted. Please wait up to 24 hours for a response.',
+                            icon: 'success',
+                            confirmButtonText: 'OK'
+                        });
+                        form.reset(); 
+                    })
+                    .catch(error => {
+                        Swal.fire({
+                            title: 'Error!',
+                            text: 'Could not connect to the server.',
+                            icon: 'error'
+                        });
+                        console.error('Submission error:', error);
+                    });
+                }
+            });
+        });
+    </script>
+}

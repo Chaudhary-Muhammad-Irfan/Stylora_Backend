@@ -15,5 +15,6 @@ namespace WebApplication1.Data
         public DbSet<Product> Product { get; set; }
         public DbSet<Review> Review { get; set; }
         public DbSet<Wishlist> Wishlist { get; set; }
+        public DbSet<Contact> Contacts { get; set; }
     }
 }

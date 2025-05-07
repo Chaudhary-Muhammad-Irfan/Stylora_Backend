@@ -37,18 +37,6 @@ namespace WebApplication1.Controllers
         {
             return View();
         }
-        public IActionResult Login()
-        {
-            return View();
-        }
-        public IActionResult Register()
-        {
-            return View();
-        }
-        public IActionResult ForgotPassword()
-        {
-            return View();
-        }
         [Authorize]
         public IActionResult Cart()
         {
@@ -75,24 +63,5 @@ namespace WebApplication1.Controllers
         {
             return View();
         }
-        [Authorize]
-        public IActionResult TrackOrder()
-        {
-            return View();
-        }
-        public IActionResult Help()
-        {
-            return View();
-        }
-        public IActionResult Order()
-        {
-            return View();
-        }
-        //public IActionResult CategoriesPartial()
-        //{
-        //    Console.WriteLine("In partial view's action method.");
-        //    List<Product> products = _repository.GetDistinctCategoriesWithThumbnails();
-        //    return PartialView("_categories", products);
-        //}
     }
 }

@@ -79,20 +79,6 @@
 </head>
 <body>
     <header class="header">
-        <div class="header__top">
-            <div class="header__container container">
-                <div class="header__contact">
-                    <span>(+92) - 2345 - 6789</span>
-                    <span>Our location</span>
-                </div>
-                <p class="header__alert-news">
-                    Super Values Deals - Save more coupons
-                </p>
-                <li class="nav__item">
-                    <a href="@Url.Page("/Account/Login", new { area = "Identity" })" class="nav__link">Login / Sign Up</a>
-                </li>
-            </div>
-        </div>
         <nav class="nav container">
             <a href="@Url.Action("Index","Home")" class="nav__logo">
                 <img class="nav__logo-img" src="~/img/lb.png" alt="website logo" />
@@ -165,28 +151,6 @@
             @RenderBody()
         </main>
     </div>
-
-    <!--=============== NEWSLETTER ===============-->
-    <section class="newsletter section home__newsletter">
-        <div class="newsletter__container container grid">
-            <h3 class="newsletter__title flex">
-                <img src="~/img/icon-email.svg"
-                     alt=""
-                     class="newsletter__icon" />
-                Sign in to Newsletter
-            </h3>
-            <p class="newsletter__description">
-                ...and receive Rs.2500 coupon for first shopping.
-            </p>
-            <form action="" class="newsletter__form">
-                <input type="text"
-                       placeholder="Enter Your Email"
-                       class="newsletter__input" />
-                <button type="submit" class="newsletter__btn">Subscribe</button>
-            </form>
-        </div>
-    </section>
-
     <footer class="footer container">
         <div class="footer__container grid">
             <div class="footer__content">
@@ -250,7 +214,6 @@
                     <li><a href="@Url.Page("/Account/Login", new { area = "Identity" })" class="footer__link">Sign In</a></li>
                     <li><a href="@Url.Action("Cart" ,"Home")" class="footer__link">View Cart</a></li>
                     <li><a href="@Url.Action("WishList" , "Customer")" class="footer__link">My Wishlist</a></li>
-                    <li><a href="@Url.Action("TrackOrder","Home")" class="footer__link">Track My Order</a></li>
                 </ul>
             </div>
             <div class="footer__content">
@@ -259,10 +222,6 @@
                      alt=""
                      class="payment__img" />
             </div>
-        </div>
-        <div class="footer__bottom">
-            <p class="copyright">&copy; 2024 Evara. All right reserved</p>
-            <span class="designer">Designer by Crypticalcoder</span>
         </div>
     </footer>
 
