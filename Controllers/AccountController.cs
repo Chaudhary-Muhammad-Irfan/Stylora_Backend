@@ -33,8 +33,6 @@ namespace WebApplication1.Controllers
             _emailValidator = strictEmailValidator;
             _emailSender = emailSender;
         }
-        
-
         [HttpGet]
         public IActionResult Register(string email = null, string name = null)
         {
