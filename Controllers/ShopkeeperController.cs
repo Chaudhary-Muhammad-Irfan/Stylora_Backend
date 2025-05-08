@@ -8,6 +8,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Client; 
 using System.Configuration;
+using System.Data;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using WebApplication1.Models;
@@ -41,6 +42,12 @@ namespace WebApplication1.Controllers
                 // This shouldn't happen because of our policy, but just in case
                 return RedirectToAction("AccessDenied", "Account");
             }
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var brandStatus = _brandRepository.GetBrandStatus(userId);
+            int count = _productRepository.CountUnreadReviews(userId);
+            ViewBag.Count = count;
+            ViewBag.HasApprovedBrand = brandStatus.IsApproved;
+            ViewBag.BrandStatus = brandStatus.Status;
             return View();
         }
         [HttpGet]
@@ -219,5 +226,13 @@ namespace WebApplication1.Controllers
             }
             return urls;
         }
+        public IActionResult AllProductReviews()
+        {
+            string userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            DataTable reviews = _productRepository.GetReviewsOfShopkeeperProducts(userId);
+            _productRepository.MarkReviewsAsRead(userId);
+            return View(reviews);
+        }
+
     }
 }

@@ -24,10 +24,6 @@ namespace WebApplication1.Controllers
             _cartRepository = cartRepoitory;
             _contactRepository = contactRepository;
         }
-        public IActionResult Index()
-        {
-            return View();
-        }
         public IActionResult getAllRegisteredBrands(string status = "Approved")
         {
             var brands = _brandRepository.GetAllBrandsByStatus(status);
@@ -80,6 +76,15 @@ namespace WebApplication1.Controllers
             return View(paginatedProducts);
         }
         public IActionResult Checkout()
+        {
+            return View();
+        }
+        public IActionResult BankTransfer()
+        {
+            return View();
+        }
+
+        public IActionResult JazzCash()
         {
             return View();
         }

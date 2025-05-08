@@ -2,6 +2,7 @@
 using Microsoft.Data.SqlClient;
 using Newtonsoft.Json;
 using System.Configuration;
+using System.Data;
 using System.Diagnostics;
 using WebApplication1.Models; 
 using WebApplication1.Models.Interfaces;
@@ -405,6 +406,117 @@ namespace WebApplication1.Models.Repositories
                 }
             }
             return reviews;
+        }
+        public DataTable GetReviewsOfShopkeeperProducts(string shopkeeperId)
+        {
+            DataTable dataTable = new DataTable();
+            using (SqlConnection conn = new SqlConnection(_connectionString))
+            {
+                string query = @"SELECT 
+                p.productCode,
+                p.productName,
+                r.Name,
+                r.Email,
+                r.Comment,
+                r.Rating,
+                r.isRead
+            FROM Brand b
+            INNER JOIN Product p ON b.brandId = p.brandId
+            INNER JOIN Review r ON p.productId = r.ProductId
+            WHERE b.brandOwnerId = @shopkeeperId";
+                using (SqlCommand cmd = new SqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@shopkeeperId", shopkeeperId);
+                    conn.Open();
+                    using (SqlDataAdapter adapter = new SqlDataAdapter(cmd))
+                    {
+                        adapter.Fill(dataTable);
+                    }
+                }
+            }
+            return dataTable;
+        }
+        public int CountUnreadReviews(string shopkeeperId)
+        {
+            int unreadCount = 0;
+            string query = @"
+        SELECT COUNT(r.ReviewId) 
+        FROM Review r
+        JOIN Product p ON r.ProductId = p.ProductId
+        JOIN Brand b ON p.BrandId = b.BrandId
+        WHERE b.BrandOwnerId = @ShopkeeperId 
+        AND r.IsRead = 0";
+
+            using (SqlConnection connection = new SqlConnection(_connectionString))
+            {
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@ShopkeeperId", shopkeeperId);
+
+                    try
+                    {
+                        connection.Open();
+                        unreadCount = (int)command.ExecuteScalar();
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error counting unread reviews: {ex.Message}");
+                        throw;
+                    }
+                }
+            }
+
+            return unreadCount;
+        }
+        public void MarkReviewsAsRead(string shopkeeperId, List<int> reviewIds = null)
+        {
+            string query;
+
+            using (SqlConnection connection = new SqlConnection(_connectionString))
+            {
+                connection.Open();
+
+                if (reviewIds != null && reviewIds.Any())
+                {
+                    // Mark specific reviews by ID (if they belong to this shopkeeper)
+                    query = @"
+                UPDATE r
+                SET r.isRead = 1
+                FROM Review r
+                JOIN Product p ON r.productId = p.productId
+                JOIN Brand b ON p.brandId = b.brandId
+                WHERE b.brandOwnerId = @ShopkeeperId
+                AND r.reviewId IN ({0})";
+
+                    string idList = string.Join(",", reviewIds);
+                    query = string.Format(query, idList);
+                }
+                else
+                {
+                    query = @"
+                UPDATE r
+                SET r.isRead = 1
+                FROM Review r
+                JOIN Product p ON r.productId = p.productId
+                JOIN Brand b ON p.brandId = b.brandId
+                WHERE b.brandOwnerId = @ShopkeeperId
+                AND r.isRead = 0";
+                }
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@ShopkeeperId", shopkeeperId);
+                    try
+                    {
+                        int rowsAffected = command.ExecuteNonQuery();
+                        Console.WriteLine($"Marked {rowsAffected} reviews as read");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error marking reviews as read: {ex.Message}");
+                        throw;
+                    }
+                }
+            }
         }
         public List<Product> GetProductsByBrandAndCategory(int brandId, string productCategory,int productId)
         {

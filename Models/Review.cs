@@ -12,6 +12,7 @@ namespace WebApplication1.Models
         public string Comment { get; set; }
         public int Rating { get; set; }
         public DateTime CreatedAt { get; set; }
+        public bool isRead { get; set; }
     }
 
 }
