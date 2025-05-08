@@ -169,5 +169,38 @@ namespace WebApplication1.Models.Repositories
             Console.WriteLine($"Found {brands.Count} matching brands");
             return brands;
         }
+        public (bool HasBrand, bool IsApproved, string Status) GetBrandStatus(string userId)
+        {
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                connection.Open();
+
+                var command = new SqlCommand(
+                    @"SELECT 
+                COUNT(*) AS HasBrand,
+                CASE WHEN brandRegistrationStatus = 'Approved' THEN 1 ELSE 0 END AS IsApproved,
+                ISNULL(brandRegistrationStatus, 'No brand registered') AS Status
+              FROM Brand 
+              WHERE brandOwnerId = @userId
+              GROUP BY brandRegistrationStatus",
+                    connection);
+
+                command.Parameters.AddWithValue("@userId", userId);
+
+                using (var reader = command.ExecuteReader())
+                {
+                    if (reader.Read())
+                    {
+                        return (
+                            HasBrand: reader.GetInt32(0) > 0,
+                            IsApproved: reader.GetInt32(1) == 1,  // ✅ Fix: Use GetInt32 then compare to 1
+                            Status: reader.GetString(2)
+                        );
+                    }
+                }
+                return (false, false, "No brand registered");
+            }
+        }
+
     }
 }
