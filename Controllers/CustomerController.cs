@@ -144,7 +144,7 @@ namespace WebApplication1.Controllers
         {
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             var wishlistItems = _wishlistRepository.GetWishlistProductsOfCurrentUser(userId);
-            return View(wishlistItems);
+            return View(wishlistItems.Products);
         }
         [HttpGet]
         public IActionResult DetailsOfProduct(int productId)
@@ -243,7 +243,7 @@ namespace WebApplication1.Controllers
                     return RedirectToAction("Login", "Account");
                 }
                 var cartItems = _cartRepository.GetCartProducts(userId);
-                return View(cartItems); // Pass to view
+                return View(cartItems.carts); 
             }
             catch (Exception ex)
             {

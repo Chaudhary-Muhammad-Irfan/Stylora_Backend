@@ -91,7 +91,7 @@ namespace WebApplication1.Models.Repositories
                 }
             }
         }
-        public List<Cart> GetCartProducts(string userId)
+        public (int count , List<Cart> carts) GetCartProducts(string userId)
         {
             List<Cart> cartItems = new List<Cart>();
 
@@ -140,11 +140,10 @@ namespace WebApplication1.Models.Repositories
                 catch (SqlException ex)
                 {
                     Console.WriteLine($"SQL Error getting cart items: {ex.Message}");
-                    throw; // Or return empty list depending on your requirements
+                    throw; 
                 }
             }
-
-            return cartItems;
+            return (cartItems.Count,  cartItems);
         }
         public bool UpdateQuantity(int cartId, int newQuantity)
         {

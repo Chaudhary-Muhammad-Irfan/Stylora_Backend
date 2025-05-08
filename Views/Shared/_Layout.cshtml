@@ -77,6 +77,26 @@
                 text-align: left;
                 cursor: pointer;
             }
+
+        .header__action-btn {
+            position: relative;
+            display: inline-block;
+        }
+
+        .wishlist-count ,  .cart-count {
+            position: absolute;
+            top: -8px;
+            left: -8px;
+            background-color: #d4edda;
+            color: green;
+            font-weight: bold;
+            border-radius: 50%;
+            padding: 4px 7px;
+            font-size: 12px;
+            line-height: 1;
+            min-width: 20px;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -120,11 +140,13 @@
                 </ul>
             </div>
             <div class="header__user-actions">
-                <a href="@Url.Action("WishList","Customer")" class="header__action-btn" title="Wishlist">
-                    <img src="~/img/icon-heart.svg" alt="" />
+                <a href="@Url.Action("WishList", "Customer")" class="header__action-btn" title="Wishlist">
+                    <img src="~/img/icon-heart.svg" alt="Wishlist" />
+                    @await Component.InvokeAsync("WishList")
                 </a>
                 <a href="@Url.Action("ViewCart","Customer")" class="header__action-btn" title="Cart">
                     <img src="~/img/icon-cart.svg" alt="" />
+                    @await Component.InvokeAsync("CartCount")
                 </a>
                 <div class="header__user-dropdown">
                     <button class="header__action-btn" title="User Account">

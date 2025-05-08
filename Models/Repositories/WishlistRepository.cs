@@ -54,14 +54,16 @@ namespace WebApplication1.Models.Repositories
                     return false;
                 }
             }
-        } 
-        public List<Product> GetWishlistProductsOfCurrentUser(string userId)
+        }
+        public (int Count, List<Product> Products) GetWishlistProductsOfCurrentUser(string userId)
         {
             List<Product> wishlistProducts = new List<Product>();
             using (SqlConnection conn = new SqlConnection(_connectionString))
             {
-                string query = @"SELECT productId,productName,productThumbnailURL,
-                price,brandId,brandName,stock from Wishlist WHERE userId = @userId";
+                string query = @"SELECT productId, productName, productThumbnailURL,
+                         price, brandId, brandName, stock 
+                         FROM Wishlist 
+                         WHERE userId = @userId";
 
                 using (SqlCommand cmd = new SqlCommand(query, conn))
                 {
@@ -88,8 +90,10 @@ namespace WebApplication1.Models.Repositories
                     }
                 }
             }
-            return wishlistProducts;
+
+            return (wishlistProducts.Count, wishlistProducts);
         }
+
         public bool RemoveFromWishlist(string userId, int productId)
         {
             const string query = @"
