@@ -1,129 +1,667 @@
 ﻿<body>
-    <!--=============== MAIN ===============-->
-    <main class="main">
-        <!--=============== BREADCRUMB ===============-->
-        <section class="breadcrumb">
-            <ul class="breadcrumb__list flex container">
-                <li><a href="index.html" class="breadcrumb__link">Home</a></li>
-                <li><span class="breadcrumb__link">></span></li>
-                <li><span class="breadcrumb__link">Shop</span></li>
-                <li><span class="breadcrumb__link">></span></li>
-                <li><span class="breadcrumb__link">Checkout</span></li>
-            </ul>
-        </section>
+    <style>
+        .payment-details-form {
+            display: none;
+            margin-top: 20px;
+            margin: 0 auto 30px; /* Added bottom margin */
+            padding: 25px;
+            background: #fff;
+            margin-bottom: 90px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            max-width: 500px;
+        }
 
-        <!--=============== CHECKOUT ===============-->
-        <section class="checkout section--lg">
-            <div class="checkout__container container grid">
-                <div class="checkout__group">
-                    <h3 class="section__title">Billing Details</h3>
-                    <form class="form grid">
-                        <input type="text" placeholder="Name" class="form__input" />
-                        <input type="text" placeholder="Address" class="form__input" />
-                        <input type="text" placeholder="City" class="form__input" />
-                        <input type="text" placeholder="Country" class="form__input" />
-                        <input type="text" placeholder="Postcode" class="form__input" />
-                        <input type="text" placeholder="Phone" class="form__input" />
-                        <input type="email" placeholder="Email" class="form__input" />
-                        <h3 class="checkout__title">Additional Information</h3>
-                        <textarea name=""
-                                  placeholder="order note"
-                                  class="form__input textarea"></textarea>
-                    </form>
-                </div>
-                <div class="checkout__group">
-                    <h3 class="section__title">Cart Totals</h3>
-                    <table class="order__table">
-                        <thead>
-                            <tr>
-                                <th colspan="2">Products</th>
-                                <th>Total</th>
-                            </tr>
-                        </thead>
+            .payment-details-form.active {
+                display: block;
+            }
 
-                        <tbody>
-                            <tr>
-                                <td>
-                                    <img src="./assets/img/product-1-2.jpg"
-                                         alt=""
-                                         class="order__img" />
-                                </td>
-                                <td>
-                                    <h3 class="table__title">Yidarton Women Summer Blue</h3>
-                                    <p class="table__quantity">x 2</p>
-                                </td>
-                                <td><span class="table__price">$180.00</span></td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <img src="./assets/img/product-2-1.jpg"
-                                         alt=""
-                                         class="order__img" />
-                                </td>
-                                <td>
-                                    <h3 class="table__title">LDB Moon Summer</h3>
-                                    <p class="table__quantity">x 1</p>
-                                </td>
-                                <td><span class="table__price">$65.00</span></td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <img src="./assets/img/product-7-1.jpg"
-                                         alt=""
-                                         class="order__img" />
-                                </td>
-                                <td>
-                                    <h3 class="table__title">Women Short Sleeve Loose</h3>
-                                    <p class="table__quantity">x 2</p>
-                                </td>
-                                <td><span class="table__price">$35.00</span></td>
-                            </tr>
-                            <tr>
-                                <td><span class="order__subtitle">Subtotal</span></td>
-                                <td colspan="2"><span class="table__price">$280.00</span></td>
-                            </tr>
-                            <tr>
-                                <td><span class="order__subtitle">Shipping</span></td>
-                                <td colspan="2">
-                                    <span class="table__price">Free Shipping</span>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><span class="order__subtitle">Total</span></td>
-                                <td colspan="2">
-                                    <span class="order__grand-total">$280.00</span>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <div class="payment__methods">
-                        <h3 class="checkout__title payment__title">Payment</h3>
-                        <div class="payment__option flex">
-                            <input type="radio"
-                                   name="radio"
-                                   id="l1"
-                                   checked
-                                   class="payment__input" />
-                            <label for="l1" class="payment__label">Direct Bank Transfer</label>
-                        </div>
-                        <div class="payment__option flex">
-                            <input type="radio"
-                                   name="radio"
-                                   id="l2"
-                                   class="payment__input" />
-                            <label for="l2" class="payment__label">Check Payment</label>
-                        </div>
-                        <div class="payment__option flex">
-                            <input type="radio"
-                                   name="radio"
-                                   id="l3"
-                                   class="payment__input" />
-                            <label for="l3" class="payment__label">Paypal</label>
-                        </div>
+        .payment-method-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: 500;
+            margin: 25px 0 10px 0;
+            color: #555;
+        }
+
+        .form-row {
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            background: #fafafa;
+            box-sizing: border-box;
+        }
+
+            .form-input:focus {
+                border-color: #888;
+                background: #fff;
+                outline: none;
+            }
+
+        .form-select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            background: #fafafa url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e") no-repeat right 10px center;
+            background-size: 14px;
+            appearance: none;
+        }
+
+        .card-info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .card-icon {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            height: 24px;
+            display: none;
+        }
+
+        .card-icons img {
+            height: 24px;
+        }
+
+        .card-icon.visible {
+            display: block;
+        }
+        .card-input-wrapper {
+            position: relative;
+            width: 100%; /* ya jitni width chahiye */
+        }
+
+        .card-input {
+            width: 100%;
+            padding: 10px 60px 10px 10px; /* Right padding for icons */
+            font-size: 16px;
+        }
+
+        .icon-container {
+            position: absolute;
+            top: 50%;
+            right: 10px;
+            transform: translateY(-50%);
+            display: flex;
+            gap: 5px;
+            font-size: 16px;
+            pointer-events: none; /* prevent icons from blocking typing */
+        }
+
+        .section-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .form-row {
+            margin-bottom: 15px;
+        }
+
+        .cvc-input-wrapper {
+            position: relative;
+            width: 100%;
+        }
+
+        .cvc-input {
+            width: 100%;
+            padding: 10px 35px 10px 10px; /* right side padding for icon */
+            font-size: 16px;
+        }
+
+        .cvc-icon {
+            position: absolute;
+            top: 50%;
+            right: 10px;
+            transform: translateY(-50%);
+            font-size: 16px;
+            color: gray;
+            pointer-events: none;
+        }
+
+        /* //.................. jazz cash..........// */
+        .payment-details-form {
+            max-width: 500px;
+            margin: 0 auto 30px; /* Added bottom margin */
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            background: #fff;
+        }
+
+        .form-title {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .form.grid {
+            display: grid;
+            gap: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #555;
+        }
+
+        .form__input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+            .form__input:focus {
+                border-color: #007bff;
+                outline: none;
+                box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+            }
+
+        /* Phone Number Input with +92 Prefix */
+        .input-with-prefix {
+            display: flex;
+            align-items: center;
+        }
+
+        .prefix {
+            padding: 10px;
+            background: #eee;
+            border: 1px solid #ccc;
+            border-right: none;
+            border-radius: 4px 0 0 4px;
+        }
+
+        .input-with-prefix .form__input {
+            border-radius: 0 4px 4px 0;
+        }
+
+        .hint {
+            color: #666;
+            font-size: 12px;
+            margin-top: 4px;
+        }
+
+    </style>
+    <body>
+        <!--=============== MAIN ===============-->
+        <main class="main">
+            <!--=============== BREADCRUMB ===============-->
+            <section class="breadcrumb">
+                <ul class="breadcrumb__list flex container">
+                    <li><a href="index.html" class="breadcrumb__link">Home</a></li>
+                    <li><span class="breadcrumb__link">></span></li>
+                    <li><span class="breadcrumb__link">Shop</span></li>
+                    <li><span class="breadcrumb__link">></span></li>
+                    <li><span class="breadcrumb__link">Checkout</span></li>
+                </ul>
+            </section>
+
+            <!--=============== CHECKOUT ===============-->
+            <section class="checkout section--lg">
+                <div class="checkout__container container grid">
+                    <div class="checkout__group">
+                        <h3 class="section__title">Billing Details</h3>
+                        <form class="form grid">
+                            <input type="text" placeholder="Name" class="form__input" />
+                            <input type="text" placeholder="Address" class="form__input" />
+                            <input type="text" placeholder="City" class="form__input" />
+                            <input type="text" placeholder="Country" class="form__input" />
+                            <input type="text" placeholder="Postcode" class="form__input" />
+                            <input type="text" placeholder="Phone" class="form__input" />
+                            <input type="email" placeholder="Email" class="form__input" />
+                            <h3 class="checkout__title">Additional Information</h3>
+                            <textarea name=""
+                                      placeholder="order note"
+                                      class="form__input textarea"></textarea>
+                        </form>
                     </div>
-                    <button class="btn btn--md">Place Order</button>
+                    <div class="checkout__group">
+                        <h3 class="section__title">Cart Totals</h3>
+                        <table class="order__table">
+                            <thead>
+                                <tr>
+                                    <th colspan="2">Products</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <img src="./assets/img/product-1-2.jpg"
+                                             alt=""
+                                             class="order__img" />
+                                    </td>
+                                    <td>
+                                        <h3 class="table__title">Yidarton Women Summer Blue</h3>
+                                        <p class="table__quantity">x 2</p>
+                                    </td>
+                                    <td><span class="table__price">$180.00</span></td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <img src="./assets/img/product-2-1.jpg"
+                                             alt=""
+                                             class="order__img" />
+                                    </td>
+                                    <td>
+                                        <h3 class="table__title">LDB Moon Summer</h3>
+                                        <p class="table__quantity">x 1</p>
+                                    </td>
+                                    <td><span class="table__price">$65.00</span></td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <img src="./assets/img/product-7-1.jpg"
+                                             alt=""
+                                             class="order__img" />
+                                    </td>
+                                    <td>
+                                        <h3 class="table__title">Women Short Sleeve Loose</h3>
+                                        <p class="table__quantity">x 2</p>
+                                    </td>
+                                    <td><span class="table__price">$35.00</span></td>
+                                </tr>
+                                <tr>
+                                    <td><span class="order__subtitle">Subtotal</span></td>
+                                    <td colspan="2"><span class="table__price">$280.00</span></td>
+                                </tr>
+                                <tr>
+                                    <td><span class="order__subtitle">Shipping</span></td>
+                                    <td colspan="2">
+                                        <span class="table__price">Free Shipping</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><span class="order__subtitle">Total</span></td>
+                                    <td colspan="2">
+                                        <span class="order__grand-total">$280.00</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="payment__methods">
+                            <h3 class="checkout__title payment__title">Payment</h3>
+                            <div class="payment__option flex">
+                                <input type="radio" name="radio" id="l1" checked class="payment__input" value="bank-transfer" />
+                                <label for="l1" class="payment__label">Direct Bank Transfer</label>
+                            </div>
+                            <div class="payment__option flex">
+                                <input type="radio" name="radio" id="l2" class="payment__input" value="check-payment" />
+                                <label for="l2" class="payment__label">JazzCash/EasyPaisa</label>
+                            </div>
+                            <div class="payment__option flex">
+                                <input type="radio" name="radio" id="l3" class="payment__input" value="paypal" />
+                                <label for="l3" class="payment__label">Cash on Delivery</label>
+                            </div>
+                        </div>
+                        <button id="place-order-btn" class="btn btn--md">Place Order</button>
+                    </div>
                 </div>
+            </section>
+        </main>
+    </body>
+
+    <div id="bank-transfer-form" class="payment-details-form">
+        <div class="payment-method-title">Payment method</div>
+
+        <!-- Card Information Section -->
+        <div class="section-title">Card information</div>
+        <div class="form-row card-input-wrapper">
+            <div class="icon-container">
+                <i class="fa fa-cc-visa" style="color:navy;"></i>
+                <i class="fa fa-cc-amex" style="color:blue;"></i>
+                <i class="fa fa-cc-mastercard" style="color:red;"></i>
+                <i class="fa fa-cc-discover" style="color:orange;"></i>
             </div>
-        </section>
+            <input type="text"
+                   id="card-number"
+                   class="form-input card-input"
+                   placeholder="1234 1234 1234 1234"
+                   maxlength="19"
+                   inputmode="numeric"
+                   pattern="[0-9]*"
+                   oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                   required>
+        </div>
+        <div class="card-info-grid">
+            <div class="form-row">
+                <input type="text"
+                       id="card-expiry"
+                       class="form-input ccFormatMonitor"
+                       placeholder="MM/YY"
+                       maxlength="5"
+                       inputmode="numeric"
+                       oninput="formatExpiry(this)"
+                       pattern="(0[1-9]|1[0-2])\/\d{2}"
+                       required>
+
+                <script>
+                    function formatExpiry(input) {
+                        // Remove all non-digit characters
+                        let value = input.value.replace(/\D/g, '');
+
+                        // Insert slash after 2 digits
+                        if (value.length > 2) {
+                            value = value.substring(0, 2) + '/' + value.substring(2, 4);
+                        }
+
+                        // Update the input value (max 5 chars: MM/YY)
+                        input.value = value.substring(0, 5);
+
+                        // Also validate the month is between 01-12
+                        const month = value.substring(0, 2);
+                        if (month && (parseInt(month) < 1 || parseInt(month) > 12)) {
+                            input.setCustomValidity('Month must be between 01 and 12');
+                        } else {
+                            input.setCustomValidity('');
+                        }
+                    }
+                </script>
+            </div>
+            <div class="form-row cvc-input-wrapper">
+                <div class="cvc-icon">
+                    <i class="fa fa-credit-card" style="color:gray;"></i>
+                </div>
+                <input type="text"
+                       id="card-cvc"
+                       class="form-input cvc-input"
+                       placeholder="CVC"
+                       maxlength="4"
+                       inputmode="numeric"
+                       pattern="[0-9]*"
+                       oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                       required>
+            </div>
+
+        </div>
+
+        <!-- Cardholder Name -->
+        <div class="section-title">Cardholder name</div>
+        <div class="form-row">
+            <input type="text"
+                   id="card-name"
+                   class="form-input"
+                   placeholder="Full name on card"
+                   required>
+        </div>
+
+        <!-- Billing Address -->
+        <div class="section-title">Billing address</div>
+        <div class="form-row">
+            <select class="form-select" id="country">
+                <option value="Pakistan" selected>Pakistan</option>
+                <option value="US">United States</option>
+                <option value="UK">United Kingdom</option>
+                <option value="CA">Canada</option>
+                <option value="AU">Australia</option>
+            </select>
+        </div>
+
+        <div class="form-row">
+            <input type="text" class="form-input" placeholder="Address line 1" id="address1" required>
+        </div>
+
+        <div class="form-row">
+            <input type="text" class="form-input" placeholder="Address line 2" id="address2">
+        </div>
+
+        <div class="card-info-grid">
+            <div class="form-row">
+                <input type="text" class="form-input" placeholder="Suburb" id="suburb">
+            </div>
+            <div class="form-row">
+                <input type="text" class="form-input" placeholder="City" id="city" required>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <input type="text" class="form-input" placeholder="Postal code" id="postal-code" required>
+        </div>
+    </div>
+
+    @* //.......... jazz cash ............// *@
+    <div id="check-payment-form" class="payment-details-form">
+        <h4 class="form-title">JazzCash / EasyPaisa Payment</h4>
+
+        <div class="form grid">
+            <!-- Payment Number (JazzCash/EasyPaisa Transaction ID) -->
+            <div class="form-group">
+                <label for="payment-number" class="form-label">Amount</label>
+                <input type="text"
+                       id="payment-number"
+                       class="form__input"
+                       placeholder="Rs . "
+                       required
+                       pattern="[0-9]+"
+                       title="Enter a valid transaction number (digits only)" />
+            </div>
+
+            <!-- Account Title (Name as Registered) -->
+            <div class="form-group">
+                <label for="account-title" class="form-label">Account Title</label>
+                <input type="text"
+                       id="account-title"
+                       class="form__input"
+                       placeholder="Name as Registered in JazzCash/EasyPaisa"
+                       required
+                       pattern="[A-Za-z\s]+"
+                       title="Only letters and spaces allowed" />
+            </div>
+
+            <!-- Phone Number (with Country Code +92) -->
+            <div class="form-group">
+                <label for="phone-number" class="form-label">Mobile Number (with Country Code)</label>
+                <div class="input-with-prefix">
+                    <span class="prefix">+92</span>
+                    <input type="tel"
+                           id="phone-number"
+                           class="form__input"
+                           placeholder="3001234567"
+                           required
+                           pattern="3[0-9]{9}"
+                           title="Enter a valid 10-digit Pakistani mobile number (e.g., 3001234567)"
+                           maxlength="10" />
+                </div>
+                <small class="hint">Format: +92 3XX-XXXXXXX</small>
+            </div>
+        </div>
+    </div>
+
+    <div id="paypal-form" class="payment-details-form">
+        <h4> Thank You For Shopping ! </h4>
+    </div>
+    </section>
     </main>
 </body>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const placeOrderBtn = document.getElementById('place-order-btn');
+      const paymentOptions = document.querySelectorAll('.payment__input');
+      const paymentForms = {
+        'bank-transfer': document.getElementById('bank-transfer-form'),
+        'check-payment': document.getElementById('check-payment-form'),
+        'paypal': document.getElementById('paypal-form')
+      };
+
+      // Store form validity state
+      const formValidity = {
+        'bank-transfer': false,
+        'check-payment': false,
+        'paypal': false
+      };
+
+      let selectedPaymentMethod = 'bank-transfer'; // Default
+      let isFormVisible = false; // Track if form is currently visible
+
+      // Initialize form validation listeners
+      function initFormValidation(formId) {
+        const form = paymentForms[formId];
+        if (!form) return;
+
+        const inputs = form.querySelectorAll('input[required], select[required]');
+        inputs.forEach(input => {
+          input.addEventListener('input', () => validateForm(formId));
+          input.addEventListener('change', () => validateForm(formId));
+        });
+
+        // Initial validation
+        validateForm(formId);
+      }
+
+      // Validate entire form
+      function validateForm(formId) {
+        const form = paymentForms[formId];
+        if (!form) return;
+
+        let isValid = true;
+        const inputs = form.querySelectorAll('input[required], select[required]');
+
+        inputs.forEach(input => {
+          if (!input.value.trim()) {
+            isValid = false;
+          }
+
+          // Special validation for card fields
+          if (input.id === 'card-number' && input.value.replace(/\s/g, '').length < 16) {
+            isValid = false;
+          }
+
+          if (input.id === 'card-expiry' && input.value.length < 7) {
+            isValid = false;
+          }
+
+          if (input.id === 'card-cvc' && input.value.length < 3) {
+            isValid = false;
+          }
+        });
+
+        formValidity[formId] = isValid;
+        updatePlaceOrderButton();
+      }
+    function formatExpiry(input) {
+        // Remove all non-digits
+        let value = input.value.replace(/\D/g, '');
+
+        // Insert slash after two digits
+        if (value.length > 2) {
+          value = value.slice(0, 2) + '/' + value.slice(2, 4);
+        }
+
+        input.value = value;
+      }
+
+      // Update place order button state
+      function updatePlaceOrderButton() {
+        if (isFormVisible && formValidity[selectedPaymentMethod]) {
+          placeOrderBtn.disabled = false;
+          placeOrderBtn.classList.remove('btn--disabled');
+        } else {
+          placeOrderBtn.disabled = false; // Always enable the button to show forms
+          placeOrderBtn.classList.remove('btn--disabled');
+        }
+      }
+
+      // Payment method selection handler
+      paymentOptions.forEach(option => {
+        option.addEventListener('change', function() {
+          selectedPaymentMethod = this.value;
+          isFormVisible = false; // Reset form visibility when changing payment method
+
+          // Hide all forms when changing payment method
+          Object.values(paymentForms).forEach(form => {
+            if (form) form.classList.remove('active');
+          });
+
+          updatePlaceOrderButton();
+        });
+      });
+
+      // Place Order button click handler
+      placeOrderBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+
+        if (isFormVisible && formValidity[selectedPaymentMethod]) {
+          // Form is visible and valid - submit it
+          submitPaymentForm(selectedPaymentMethod);
+        } else {
+          // Show the selected payment form
+          isFormVisible = true;
+
+          // Hide all forms first
+          Object.values(paymentForms).forEach(form => {
+            if (form) form.classList.remove('active');
+          });
+
+          // Show selected form
+          if (paymentForms[selectedPaymentMethod]) {
+            paymentForms[selectedPaymentMethod].classList.add('active');
+          }
+
+          // Scroll to the form
+          if (paymentForms[selectedPaymentMethod]) {
+            paymentForms[selectedPaymentMethod].scrollIntoView({ behavior: 'smooth' });
+          }
+
+          updatePlaceOrderButton();
+        }
+      });
+
+      // Form submission handler
+      function submitPaymentForm(paymentMethod) {
+        // Here you would normally send data to your server
+        console.log(`Submitting ${paymentMethod} form`);
+
+        // Get all form data
+        const formData = {};
+        const inputs = paymentForms[paymentMethod].querySelectorAll('input, select');
+
+        inputs.forEach(input => {
+          if (input.name || input.id) {
+            const key = input.name || input.id;
+            formData[key] = input.value;
+          }
+        });
+
+        console.log('Form data:', formData);
+
+        // Show success message
+        alert('Payment processed successfully!');
+
+        // In a real app, you would redirect or show a success page
+        // window.location.href = '/order-confirmation';
+      }
+
+      // Initialize validation for all forms
+      Object.keys(paymentForms).forEach(initFormValidation);
+
+      // Initial button state
+      updatePlaceOrderButton();
+    });
+</script>
