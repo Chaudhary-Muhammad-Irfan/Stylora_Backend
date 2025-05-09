@@ -13,6 +13,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using WebApplication1.Models;
 using WebApplication1.Models.Repositories;
+using WebApplication1.Models.ViewModel;
 
 namespace WebApplication1.Controllers 
 {
@@ -23,19 +24,22 @@ namespace WebApplication1.Controllers
         private readonly BrandRepository _brandRepository;
         private readonly ProductRepository _productRepository;
         private readonly UserManager<UserType> _userManager;
+        private readonly OrderRepository _orderRepository;
         public ShopkeeperController(
              IWebHostEnvironment env,
              BrandRepository brandRepository,
              ProductRepository productRepository,
-             UserManager<UserType> userManager)
+             UserManager<UserType> userManager,
+             OrderRepository orderRepository)
         {
             _env = env;
             _brandRepository = brandRepository;
             _productRepository = productRepository;
             _userManager = userManager;
+            _orderRepository = orderRepository;
         }
         public async Task<IActionResult> Index()
-        {
+        { 
             var user = await _userManager.GetUserAsync(User);
             if (user == null || !user.isShopkeeper)
             {
@@ -48,7 +52,13 @@ namespace WebApplication1.Controllers
             ViewBag.Count = count;
             ViewBag.HasApprovedBrand = brandStatus.IsApproved;
             ViewBag.BrandStatus = brandStatus.Status;
-            return View();
+            var model = new ShopkeeperDashboardViewModel
+            {
+                ShopkeeperName = _orderRepository.GetShopkeeperName(userId),
+                Stats = _orderRepository.GetDashboardStats(userId),
+                RecentOrders=_orderRepository.GetRecentOrders(userId)
+            };
+            return View(model);
         }
         [HttpGet]
         public IActionResult RegisterBrand()
@@ -233,6 +243,5 @@ namespace WebApplication1.Controllers
             _productRepository.MarkReviewsAsRead(userId);
             return View(reviews);
         }
-
     }
 }

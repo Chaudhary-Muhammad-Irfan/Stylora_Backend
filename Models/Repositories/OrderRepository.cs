@@ -151,6 +151,119 @@ namespace WebApplication1.Models.Repositories
 
             return order;
         }
+        public List<RecentOrder> GetRecentOrders(string shopkeeperId)
+        {
+            var orders = new List<RecentOrder>();
 
+            using (SqlConnection connection = new SqlConnection(_connectionString))
+            {
+                connection.Open();
+
+                string query = @"
+            SELECT TOP 2 o.OrderId, o.OrderDate, o.Total AS TotalAmount, 
+                         o.Status, u.Name AS CustomerName
+            FROM Orders o
+            JOIN OrderProducts op ON o.OrderId = op.OrderId
+            JOIN Product p ON op.ProductId = p.ProductId
+            JOIN Brand b ON p.BrandId = b.BrandId
+            JOIN AspNetUsers u ON o.Email = u.Email
+            WHERE b.BrandOwnerId = @ShopkeeperId
+              AND o.OrderDate >= DATEADD(day, -1, GETDATE())
+            ORDER BY o.OrderDate DESC";
+
+                using (SqlCommand cmd = new SqlCommand(query, connection))
+                {
+                    cmd.Parameters.AddWithValue("@ShopkeeperId", shopkeeperId);
+
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            orders.Add(new RecentOrder
+                            {
+                                OrderId = reader.GetInt32(0),
+                                OrderDate = reader.GetDateTime(1),
+                                TotalAmount = reader.GetDecimal(2),
+                                Status = reader.GetString(3),
+                                CustomerName = reader.GetString(4)
+                            });
+                        }
+                    }
+                }
+            }
+
+            return orders;
+        }
+        public DashboardStats GetDashboardStats(string shopkeeperId)
+        {
+            var stats = new DashboardStats();
+
+            using (SqlConnection connection = new SqlConnection(_connectionString))
+            {
+                connection.Open();
+
+                // Total Sales
+                string salesQuery = @"
+            SELECT SUM(o.Total)
+            FROM Orders o
+            JOIN OrderProducts op ON o.OrderId = op.OrderId
+            JOIN Product p ON op.ProductId = p.ProductId
+            JOIN Brand b ON p.BrandId = b.BrandId
+            WHERE b.BrandOwnerId = @ShopkeeperId";
+
+                using (SqlCommand cmd = new SqlCommand(salesQuery, connection))
+                {
+                    cmd.Parameters.AddWithValue("@ShopkeeperId", shopkeeperId);
+                    stats.TotalSales = cmd.ExecuteScalar() != DBNull.Value ? Convert.ToDecimal(cmd.ExecuteScalar()) : 0;
+                }
+
+                // Total Orders
+                string orderCountQuery = @"
+            SELECT COUNT(DISTINCT o.OrderId)
+            FROM Orders o
+            JOIN OrderProducts op ON o.OrderId = op.OrderId
+            JOIN Product p ON op.ProductId = p.ProductId
+            JOIN Brand b ON p.BrandId = b.BrandId
+            WHERE b.BrandOwnerId = @ShopkeeperId";
+
+                using (SqlCommand cmd = new SqlCommand(orderCountQuery, connection))
+                {
+                    cmd.Parameters.AddWithValue("@ShopkeeperId", shopkeeperId);
+                    stats.OrderCount = Convert.ToInt32(cmd.ExecuteScalar());
+                }
+
+                // Total Customers
+                string customerCountQuery = @"
+            SELECT COUNT(DISTINCT o.Email)
+            FROM Orders o
+            JOIN OrderProducts op ON o.OrderId = op.OrderId
+            JOIN Product p ON op.ProductId = p.ProductId
+            JOIN Brand b ON p.BrandId = b.BrandId
+            WHERE b.BrandOwnerId = @ShopkeeperId";
+
+                using (SqlCommand cmd = new SqlCommand(customerCountQuery, connection))
+                {
+                    cmd.Parameters.AddWithValue("@ShopkeeperId", shopkeeperId);
+                    stats.CustomerCount = Convert.ToInt32(cmd.ExecuteScalar());
+                }
+            }
+
+            return stats;
+        }
+
+        public string GetShopkeeperName(string userId)
+        {
+            using (SqlConnection connection = new SqlConnection(_connectionString))
+            {
+                connection.Open();
+                string query = "SELECT Name FROM AspNetUsers WHERE Id = @UserId";
+
+                using (SqlCommand cmd = new SqlCommand(query, connection))
+                {
+                    cmd.Parameters.AddWithValue("@UserId", userId);
+                    return cmd.ExecuteScalar()?.ToString();
+                }
+            }
+        }
     }
 }
