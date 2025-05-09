@@ -3,9 +3,9 @@
     Layout = null;
     var hasApprovedBrand = ViewBag.HasApprovedBrand as bool? ?? false;
     var ratingCount = ViewBag.ratingCount as int? ?? 0;
-    var ratingAverage = ViewBag.ratingAverage as int? ?? 0;
-    var filledStars = ratingAverage;
-    var emptyStars = 5 - filledStars;
+    var ratingAverage = ViewBag.ratingAverage as decimal? ?? 0;
+    var filledStars = (int)Math.Ceiling(ratingAverage);
+    var hasHalfStar = (ratingAverage - filledStars) >= 0.5m;
 }
 
 <!DOCTYPE html>
@@ -114,6 +114,7 @@
             padding: var(--card-padding);
             background: white;
             border-bottom: 1px solid var(--medium-gray);
+            align-items: center;
         }
 
         .shopkeeper-photo {
@@ -124,12 +125,17 @@
             margin-right: 25px;
             border: 5px solid var(--primary-light);
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
         }
 
             .shopkeeper-photo img {
                 width: 100%;
                 height: 100%;
-                object-fit: cover;
+                object-fit: contain;
+                padding: 10px;
             }
 
         .shopkeeper-details {
@@ -149,25 +155,18 @@
                 font-size: 14px;
             }
 
-        .brand-details {
+        .brand-description {
             background: rgba(108, 92, 231, 0.05);
             padding: 15px;
             border-radius: var(--border-radius-1);
             margin-top: 10px;
+            font-size: 14px;
+            line-height: 1.6;
         }
 
-            .brand-details h4 {
+            .brand-description strong {
                 color: var(--primary-dark);
-                margin-bottom: 5px;
-                font-size: 16px;
             }
-
-        .brand-logo {
-            width: 80px;
-            height: 80px;
-            object-fit: contain;
-            margin-top: 10px;
-        }
 
         .performance-metrics {
             display: grid;
@@ -496,24 +495,25 @@
 
         <div class="shopkeeper-section">
             <div class="shopkeeper-photo">
-                <img src="https://ui-avatars.com/api/?name=@(Model.ShopkeeperName ?? User.Identity?.Name)&background=6c5ce7&color=fff&size=200" alt="Shopkeeper Photo">
+                @if (Model.brand != null && !string.IsNullOrEmpty(Model.brand.brandLogoURL))
+                {
+                    <img src="~/@Model.brand.brandLogoURL" alt="@Model.brand.brandName Logo">
+                }
+                else
+                {
+                    <img src="https://ui-avatars.com/api/?name=@(Model.ShopkeeperName ?? User.Identity?.Name)&background=6c5ce7&color=fff&size=200" alt="Shopkeeper Photo">
+                }
             </div>
             <div class="shopkeeper-details">
-                <h3>@(Model.ShopkeeperName ?? User.Identity?.Name)</h3>
-                <p>Verified Shopkeeper on Stylora</p>
-                <p>Member since @DateTime.Now.AddYears(-1).ToString("MMMM yyyy")</p>
+                <h3>@Model.brand.brandName</h3>
+                <p>Verified Shopkeeper of <strong>@(Model.brand?.brandName ?? "Stylora")</strong></p>
 
                 @if (Model.brand != null)
                 {
-                    <div class="brand-details">
-                        <h4>@Model.brand.brandName</h4>
-                        <p>@Model.brand.niche</p>
-                        <p>@Model.brand.tagLine</p>
-                        <p>Registered on @Model.brand.brandRegistrationDate.ToString("MMMM dd, yyyy")</p>
-                        @if (!string.IsNullOrEmpty(Model.brand.brandLogoURL))
-                        {
-                            <img src="~/@Model.brand.brandLogoURL" alt="Brand Logo" class="brand-logo">
-                        }
+                    <div class="brand-description">
+                        <p><strong>@Model.brand.brandName</strong> is a @Model.brand.niche brand that has been our trusted partner since @Model.brand.brandRegistrationDate.ToString("MMMM yyyy").</p>
+                        <p>"@Model.brand.tagLine"</p>
+                        <p>@Model.brand.description</p>
                     </div>
                 }
             </div>
@@ -547,17 +547,24 @@
                 </div>
                 <h3>Customer Rating</h3>
                 <div class="rating-stars">
-                    @for (int i = 0; i < filledStars; i++)
+                    @for (int i = 1; i <= 5; i++)
                     {
-                        <span class="star">★</span>
-                    }
-                    @for (int i = 0; i < emptyStars; i++)
-                    {
-                        <span class="star empty">★</span>
+                        if (i <= filledStars)
+                        {
+                            <span class="filled">★</span>
+                        }
+                        else if (i == filledStars + 1 && hasHalfStar)
+                        {
+                            <span class="half">★</span>
+                        }
+                        else
+                        {
+                            <span class="empty">★</span>
+                        }
                     }
                 </div>
                 <div class="rating-count">
-                    @ratingCount Reviews
+                    Based on @ratingCount customer reviews
                 </div>
             </div>
         </div>
@@ -610,47 +617,11 @@
     </div>
 
     <div class="action-buttons">
-        <button class="btn btn-primary" id="download-pdf">
-            <i class="material-icons-sharp">download</i> Download as PDF
-        </button>
         <button class="btn btn-outline" onclick="window.print()">
             <i class="material-icons-sharp">print</i> Print Report
         </button>
     </div>
-
     <script>
-        // PDF Export with improved settings
-        document.getElementById('download-pdf').addEventListener('click', function() {
-            const element = document.getElementById('report-content');
-            const opt = {
-                margin: [10, 5, 10, 5],
-                filename: 'Stylora_Shopkeeper_Report_@DateTime.Now.ToString("yyyyMMdd")',
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: {
-                    scale: 2,
-                    logging: true,
-                    useCORS: true,
-                    allowTaint: true,
-                    scrollX: 0,
-                    scrollY: 0,
-                    windowWidth: element.scrollWidth,
-                    windowHeight: element.scrollHeight
-                },
-                jsPDF: {
-                    unit: 'mm',
-                    format: 'a4',
-                    orientation: 'portrait',
-                    compress: true
-                },
-                pagebreak: {
-                    mode: ['avoid-all', 'css', 'legacy']
-                }
-            };
-
-            // Generate PDF
-            html2pdf().set(opt).from(element).save();
-        });
-
         // Ensure proper printing
         function beforePrint() {
             // Any pre-print adjustments can go here
@@ -663,7 +634,6 @@
                 }
             });
         }
-
         window.onbeforeprint = beforePrint;
     </script>
 </body>

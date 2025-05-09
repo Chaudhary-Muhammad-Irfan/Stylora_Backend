@@ -5,7 +5,7 @@
     var brandStatus = ViewBag.BrandStatus as string ?? "No brand registered";
     var ratingCount = ViewBag.ratingCount as int? ?? 0;
     var ratingAverage = ViewBag.ratingAverage as decimal? ?? 0;
-    var filledStars = (int)Math.Floor(ratingAverage);
+    var filledStars = (int)Math.Ceiling(ratingAverage);
     var hasHalfStar = (ratingAverage - filledStars) >= 0.5m;
 }
 
