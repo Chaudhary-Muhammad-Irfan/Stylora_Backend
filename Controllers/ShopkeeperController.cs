@@ -58,6 +58,9 @@ namespace WebApplication1.Controllers
                 Stats = _orderRepository.GetDashboardStats(userId),
                 RecentOrders=_orderRepository.GetRecentOrders(userId)
             };
+            var ratingStats = _productRepository.GetShopkeeperReviewStats(userId);
+            ViewBag.ratingCount = ratingStats.ReviewCount;
+            ViewBag.ratingAverage = ratingStats.AverageRating;
             return View(model);
         }
         [HttpGet]
@@ -259,6 +262,44 @@ namespace WebApplication1.Controllers
             string userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var customers = _orderRepository.GetDistinctCustomersByBrandOwnerId(userId);
             return View(customers);
+        }
+        public IActionResult Report()
+        {
+            var user = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var brandStatus = _brandRepository.GetBrandStatus(userId);
+            int count = _productRepository.CountUnreadReviews(userId);
+            ViewBag.Count = count;
+            ViewBag.HasApprovedBrand = brandStatus.IsApproved;
+            ViewBag.BrandStatus = brandStatus.Status;
+            var model = new ShopkeeperDashboardViewModel
+            {
+                ShopkeeperName = _orderRepository.GetShopkeeperName(userId),
+                Stats = _orderRepository.GetDashboardStats(userId),
+                RecentOrders = _orderRepository.GetRecentOrders(userId),
+                brand = _brandRepository.GetBrandByOwnerId(userId)
+            };
+            var ratingStats = _productRepository.GetShopkeeperReviewStats(userId);
+            ViewBag.ratingCount = ratingStats.ReviewCount;
+            ViewBag.ratingAverage = ratingStats.AverageRating;
+            return View(model);
+        }
+        public IActionResult Analytics()
+        {
+            var user = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var brandStatus = _brandRepository.GetBrandStatus(userId);
+            int count = _productRepository.CountUnreadReviews(userId);
+            ViewBag.Count = count;
+            ViewBag.HasApprovedBrand = brandStatus.IsApproved;
+            ViewBag.BrandStatus = brandStatus.Status;
+            var model = new ShopkeeperDashboardViewModel
+            {
+                ShopkeeperName = _orderRepository.GetShopkeeperName(userId),
+                Stats = _orderRepository.GetDashboardStats(userId),
+                RecentOrders = _orderRepository.GetRecentOrders(userId)
+            };
+            return View(model);
         }
     }
 }

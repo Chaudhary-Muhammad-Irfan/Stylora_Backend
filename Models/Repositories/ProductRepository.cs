@@ -683,5 +683,43 @@ namespace WebApplication1.Models.Repositories
             }
             return newlyAddedBrands;
         }
+        public (int ReviewCount, decimal AverageRating) GetShopkeeperReviewStats(string brandOwnerId)
+        {
+            int reviewCount = 0;
+            decimal averageRating = 0;
+
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                connection.Open();
+
+                const string query = @"
+                SELECT 
+                    COUNT(r.ReviewId) AS ReviewCount,
+                    AVG(CAST(r.Rating AS DECIMAL(10,2))) AS AverageRating
+                FROM Review r
+                INNER JOIN Product p ON r.ProductId = p.productId
+                INNER JOIN Brand b ON p.brandId = b.brandId
+                WHERE b.brandOwnerId = @BrandOwnerId";
+
+                using (var command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@BrandOwnerId", brandOwnerId);
+
+                    using (var reader = command.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            reviewCount = reader.GetInt32(reader.GetOrdinal("ReviewCount"));
+                            if (!reader.IsDBNull(reader.GetOrdinal("AverageRating")))
+                            {
+                                averageRating = reader.GetDecimal(reader.GetOrdinal("AverageRating"));
+                            }
+                        }
+                    }
+                }
+            }
+
+            return (reviewCount, averageRating);
+        }
     }
 }

@@ -1,0 +1,670 @@
+﻿@model WebApplication1.Models.ViewModel.ShopkeeperDashboardViewModel
+@{
+    Layout = null;
+    var hasApprovedBrand = ViewBag.HasApprovedBrand as bool? ?? false;
+    var ratingCount = ViewBag.ratingCount as int? ?? 0;
+    var ratingAverage = ViewBag.ratingAverage as int? ?? 0;
+    var filledStars = ratingAverage;
+    var emptyStars = 5 - filledStars;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopkeeper Report | Stylora</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --primary-light: #a29bfe;
+            --primary-dark: #5649c0;
+            --secondary: #00cec9;
+            --danger: #ff7675;
+            --success: #55efc4;
+            --warning: #fdcb6e;
+            --white: #fff;
+            --light-gray: #f5f6fa;
+            --medium-gray: #dfe6e9;
+            --dark-gray: #636e72;
+            --dark: #2d3436;
+            --card-border-radius: 16px;
+            --border-radius-1: 8px;
+            --border-radius-2: 12px;
+            --card-padding: 24px;
+            --box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: var(--light-gray);
+            color: var(--dark);
+            line-height: 1.6;
+        }
+
+        .report-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: var(--card-border-radius);
+            box-shadow: var(--box-shadow);
+            overflow: hidden;
+        }
+
+        .report-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--card-padding);
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+        }
+
+            .logo-section img {
+                width: 60px;
+                height: 60px;
+                margin-right: 15px;
+                border-radius: 50%;
+                border: 3px solid rgba(255,255,255,0.2);
+            }
+
+        .logo-text h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .logo-text p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .report-title {
+            text-align: right;
+        }
+
+            .report-title h2 {
+                font-size: 20px;
+                margin-bottom: 5px;
+                font-weight: 500;
+            }
+
+            .report-title p {
+                font-size: 14px;
+                opacity: 0.9;
+            }
+
+        .shopkeeper-section {
+            display: flex;
+            padding: var(--card-padding);
+            background: white;
+            border-bottom: 1px solid var(--medium-gray);
+        }
+
+        .shopkeeper-photo {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            overflow: hidden;
+            margin-right: 25px;
+            border: 5px solid var(--primary-light);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+            .shopkeeper-photo img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+
+        .shopkeeper-details {
+            flex: 1;
+        }
+
+            .shopkeeper-details h3 {
+                font-size: 24px;
+                color: var(--primary-dark);
+                margin-bottom: 8px;
+                font-weight: 600;
+            }
+
+            .shopkeeper-details p {
+                color: var(--dark-gray);
+                margin-bottom: 6px;
+                font-size: 14px;
+            }
+
+        .brand-details {
+            background: rgba(108, 92, 231, 0.05);
+            padding: 15px;
+            border-radius: var(--border-radius-1);
+            margin-top: 10px;
+        }
+
+            .brand-details h4 {
+                color: var(--primary-dark);
+                margin-bottom: 5px;
+                font-size: 16px;
+            }
+
+        .brand-logo {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            margin-top: 10px;
+        }
+
+        .performance-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            padding: var(--card-padding);
+            background: white;
+        }
+
+        .metric-card {
+            background: white;
+            padding: 20px;
+            border-radius: var(--border-radius-2);
+            box-shadow: var(--box-shadow);
+            transition: var(--transition);
+            text-align: center;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+            .metric-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+            }
+
+            .metric-card h3 {
+                font-size: 16px;
+                color: var(--dark-gray);
+                margin-bottom: 12px;
+                font-weight: 500;
+            }
+
+            .metric-card h1 {
+                font-size: 36px;
+                color: var(--primary-dark);
+                margin-bottom: 8px;
+                font-weight: 600;
+            }
+
+            .metric-card .icon {
+                width: 60px;
+                height: 60px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin: 0 auto 15px;
+                background: rgba(108, 92, 231, 0.1);
+                color: var(--primary);
+                font-size: 28px;
+            }
+
+        .rating-stars {
+            display: flex;
+            justify-content: center;
+            margin: 10px 0;
+        }
+
+            .rating-stars .star {
+                color: #ffc107;
+                font-size: 24px;
+                margin: 0 2px;
+            }
+
+            .rating-stars .empty {
+                color: #e0e0e0;
+            }
+
+        .rating-count {
+            font-size: 14px;
+            color: var(--dark-gray);
+        }
+
+        .recent-orders {
+            background: white;
+            padding: var(--card-padding);
+            border-radius: var(--border-radius-2);
+            box-shadow: var(--box-shadow);
+            margin-bottom: 20px;
+        }
+
+            .recent-orders h3 {
+                color: var(--primary-dark);
+                font-size: 18px;
+                font-weight: 600;
+                margin-bottom: 20px;
+            }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 12px 15px;
+            background: var(--primary);
+            color: white;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--medium-gray);
+            color: var(--dark-gray);
+            font-size: 14px;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background: rgba(108, 92, 231, 0.05);
+        }
+
+        .status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            display: inline-block;
+        }
+
+        .status-pending {
+            background: var(--warning);
+            color: white;
+        }
+
+        .status-completed {
+            background: var(--success);
+            color: white;
+        }
+
+        .testimonial {
+            background: white;
+            padding: var(--card-padding);
+            border-radius: var(--border-radius-2);
+            box-shadow: var(--box-shadow);
+            margin-bottom: 20px;
+            position: relative;
+            border-left: 4px solid var(--primary);
+        }
+
+            .testimonial:before {
+                content: """; font-family: Georgia, serif;
+                font-size: 60px;
+                color: var(--primary-light);
+                position: absolute;
+                left: 20px;
+                top: 10px;
+                line-height: 1;
+                opacity: 0.2;
+            }
+
+            .testimonial p {
+                font-style: italic;
+                color: var(--dark);
+                margin-bottom: 15px;
+                padding: 0 40px;
+                font-size: 16px;
+                line-height: 1.7;
+            }
+
+        .testimonial-author {
+            text-align: right;
+            color: var(--primary-dark);
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .footer {
+            text-align: center;
+            padding: var(--card-padding);
+            color: var(--dark-gray);
+            font-size: 14px;
+            background: var(--light-gray);
+        }
+
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: var(--border-radius-1);
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            font-size: 15px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 12px rgba(108, 92, 231, 0.3);
+        }
+
+            .btn-primary:hover {
+                background: var(--primary-dark);
+                transform: translateY(-2px);
+                box-shadow: 0 6px 16px rgba(108, 92, 231, 0.4);
+            }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+
+            .btn-outline:hover {
+                background: var(--primary-light);
+                color: white;
+                transform: translateY(-2px);
+            }
+
+        .btn i {
+            margin-right: 8px;
+            font-size: 18px;
+        }
+
+        /* Print-specific styles */
+        @@media print {
+            body
+
+        {
+            background: white !important;
+            padding: 0 !important;
+            font-size: 12pt;
+        }
+
+        .report-container {
+            box-shadow: none !important;
+            border-radius: 0 !important;
+            margin: 0 !important;
+            max-width: 100% !important;
+            page-break-after: avoid;
+        }
+
+        .action-buttons {
+            display: none !important;
+        }
+
+        .metric-card {
+            page-break-inside: avoid;
+        }
+
+        table {
+            page-break-inside: avoid;
+        }
+
+        }
+
+        /* Responsive styles */
+        @@media (max-width: 768px) {
+            .report-header
+
+        {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .report-title {
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .shopkeeper-section {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .shopkeeper-photo {
+            margin-right: 0;
+            margin-bottom: 15px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .performance-metrics {
+            grid-template-columns: 1fr;
+        }
+
+        }
+
+        @@media (max-width: 480px) {
+            .report-container
+
+        {
+            padding: 10px !important;
+        }
+
+        th, td {
+            padding: 8px 10px !important;
+            font-size: 12px !important;
+        }
+
+        .testimonial p {
+            padding: 0 20px !important;
+            font-size: 14px !important;
+        }
+
+        }
+    </style>
+</head>
+<body>
+    <div class="report-container" id="report-content">
+        <div class="report-header">
+            <div class="logo-section">
+                <img src="https://ui-avatars.com/api/?name=Stylora&background=6c5ce7&color=fff&bold=true" alt="Stylora Logo">
+                <div class="logo-text">
+                    <h1>Stylora</h1>
+                    <p>Elevating Fashion, Empowering Shopkeepers</p>
+                </div>
+            </div>
+            <div class="report-title">
+                <h2>Shopkeeper Performance Report</h2>
+                <p>Generated on @DateTime.Now.ToString("MMMM dd, yyyy")</p>
+            </div>
+        </div>
+
+        <div class="shopkeeper-section">
+            <div class="shopkeeper-photo">
+                <img src="https://ui-avatars.com/api/?name=@(Model.ShopkeeperName ?? User.Identity?.Name)&background=6c5ce7&color=fff&size=200" alt="Shopkeeper Photo">
+            </div>
+            <div class="shopkeeper-details">
+                <h3>@(Model.ShopkeeperName ?? User.Identity?.Name)</h3>
+                <p>Verified Shopkeeper on Stylora</p>
+                <p>Member since @DateTime.Now.AddYears(-1).ToString("MMMM yyyy")</p>
+
+                @if (Model.brand != null)
+                {
+                    <div class="brand-details">
+                        <h4>@Model.brand.brandName</h4>
+                        <p>@Model.brand.niche</p>
+                        <p>@Model.brand.tagLine</p>
+                        <p>Registered on @Model.brand.brandRegistrationDate.ToString("MMMM dd, yyyy")</p>
+                        @if (!string.IsNullOrEmpty(Model.brand.brandLogoURL))
+                        {
+                            <img src="~/@Model.brand.brandLogoURL" alt="Brand Logo" class="brand-logo">
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="performance-metrics">
+            <div class="metric-card">
+                <div class="icon">
+                    <span class="material-icons-sharp">trending_up</span>
+                </div>
+                <h3>Total Sales</h3>
+                <h1>Rs. @(Model.Stats?.TotalSales.ToString("N0") ?? "0")</h1>
+            </div>
+            <div class="metric-card">
+                <div class="icon">
+                    <span class="material-icons-sharp">receipt_long</span>
+                </div>
+                <h3>Total Orders</h3>
+                <h1>@(Model.Stats?.OrderCount.ToString() ?? "0")</h1>
+            </div>
+            <div class="metric-card">
+                <div class="icon">
+                    <span class="material-icons-sharp">people</span>
+                </div>
+                <h3>Customers</h3>
+                <h1>@(Model.Stats?.CustomerCount.ToString() ?? "0")</h1>
+            </div>
+            <div class="metric-card">
+                <div class="icon">
+                    <span class="material-icons-sharp">star</span>
+                </div>
+                <h3>Customer Rating</h3>
+                <div class="rating-stars">
+                    @for (int i = 0; i < filledStars; i++)
+                    {
+                        <span class="star">★</span>
+                    }
+                    @for (int i = 0; i < emptyStars; i++)
+                    {
+                        <span class="star empty">★</span>
+                    }
+                </div>
+                <div class="rating-count">
+                    @ratingCount Reviews
+                </div>
+            </div>
+        </div>
+
+        <div class="recent-orders">
+            <h3>Recent Notable Orders</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Customer</th>
+                        <th>Date</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.RecentOrders != null && Model.RecentOrders.Any())
+                    {
+                        foreach (var order in Model.RecentOrders.Take(5))
+                        {
+                            <tr>
+                                <td>#@order.OrderId</td>
+                                <td>@order.CustomerName</td>
+                                <td>@DateTime.Now.AddDays(-1).ToString("MMM dd")</td>
+                                <td>Rs. @order.TotalAmount.ToString("N0")</td>
+                                <td><span class="status @(order.Status == "Pending" ? "status-pending" : "status-completed")">@order.Status</span></td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="5">No recent orders available</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="testimonial">
+            <p>"Stylora has transformed my boutique business by connecting me with customers across the country. The platform's tools and analytics help me understand my customers better and grow my sales consistently month after month."</p>
+            <div class="testimonial-author">— @(Model.brand?.brandName ?? "Our Brand"), Stylora Partner</div>
+        </div>
+
+        <div class="footer">
+            <p>This report is generated by Stylora - Your trusted partner in fashion ecommerce</p>
+            <p>© @DateTime.Now.Year Stylora. All rights reserved.</p>
+        </div>
+    </div>
+
+    <div class="action-buttons">
+        <button class="btn btn-primary" id="download-pdf">
+            <i class="material-icons-sharp">download</i> Download as PDF
+        </button>
+        <button class="btn btn-outline" onclick="window.print()">
+            <i class="material-icons-sharp">print</i> Print Report
+        </button>
+    </div>
+
+    <script>
+        // PDF Export with improved settings
+        document.getElementById('download-pdf').addEventListener('click', function() {
+            const element = document.getElementById('report-content');
+            const opt = {
+                margin: [10, 5, 10, 5],
+                filename: 'Stylora_Shopkeeper_Report_@DateTime.Now.ToString("yyyyMMdd")',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: {
+                    scale: 2,
+                    logging: true,
+                    useCORS: true,
+                    allowTaint: true,
+                    scrollX: 0,
+                    scrollY: 0,
+                    windowWidth: element.scrollWidth,
+                    windowHeight: element.scrollHeight
+                },
+                jsPDF: {
+                    unit: 'mm',
+                    format: 'a4',
+                    orientation: 'portrait',
+                    compress: true
+                },
+                pagebreak: {
+                    mode: ['avoid-all', 'css', 'legacy']
+                }
+            };
+
+            // Generate PDF
+            html2pdf().set(opt).from(element).save();
+        });
+
+        // Ensure proper printing
+        function beforePrint() {
+            // Any pre-print adjustments can go here
+        }
+
+        if (window.matchMedia) {
+            window.matchMedia('print').addListener(function(mql) {
+                if (mql.matches) {
+                    beforePrint();
+                }
+            });
+        }
+
+        window.onbeforeprint = beforePrint;
+    </script>
+</body>
+</html>

@@ -5,5 +5,6 @@
         public string ShopkeeperName { get; set; }
         public DashboardStats Stats { get; set; }
         public List<RecentOrder> RecentOrders { get; set; }
+        public Brand brand { get; set; }
     }
 }

@@ -1,0 +1,729 @@
+﻿@model WebApplication1.Models.ViewModel.ShopkeeperDashboardViewModel
+@{
+    Layout = null;
+    var hasApprovedBrand = ViewBag.HasApprovedBrand as bool? ?? false;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopkeeper Analytics | Stylora</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment"></script>
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --primary-light: #a29bfe;
+            --primary-dark: #5649c0;
+            --secondary: #00cec9;
+            --danger: #ff7675;
+            --success: #55efc4;
+            --warning: #fdcb6e;
+            --white: #fff;
+            --light-gray: #f5f6fa;
+            --medium-gray: #dfe6e9;
+            --dark-gray: #636e72;
+            --dark: #2d3436;
+            --card-border-radius: 16px;
+            --border-radius-1: 8px;
+            --border-radius-2: 12px;
+            --card-padding: 24px;
+            --box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: var(--light-gray);
+            color: var(--dark);
+            line-height: 1.6;
+        }
+
+        .container {
+            display: grid;
+            width: 96%;
+            margin: 0 auto;
+            gap: 1.8rem;
+            grid-template-columns: 14rem auto;
+        }
+
+        aside {
+            height: 100vh;
+            background: white;
+            box-shadow: var(--box-shadow);
+            border-radius: var(--card-border-radius);
+            padding: 1rem;
+        }
+
+            aside .top {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                margin-bottom: 1rem;
+            }
+
+            aside .logo {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+            }
+
+                aside .logo h2 {
+                    font-size: 1.2rem;
+                    color: var(--primary);
+                }
+
+            aside .close {
+                display: none;
+            }
+
+            aside .sidebar {
+                display: flex;
+                flex-direction: column;
+                height: 86vh;
+                position: relative;
+                top: 1rem;
+            }
+
+                aside .sidebar a {
+                    display: flex;
+                    align-items: center;
+                    color: var(--dark-gray);
+                    gap: 1rem;
+                    height: 3.2rem;
+                    position: relative;
+                    margin-left: 0.5rem;
+                    transition: var(--transition);
+                }
+
+                    aside .sidebar a.active {
+                        background: var(--light);
+                        color: var(--primary);
+                        margin-left: 0;
+                        border-left: 4px solid var(--primary);
+                    }
+
+                    aside .sidebar a:hover {
+                        color: var(--primary);
+                    }
+
+                        aside .sidebar a:hover span {
+                            margin-left: 0.5rem;
+                        }
+
+                    aside .sidebar a span {
+                        font-size: 1.6rem;
+                        transition: var(--transition);
+                    }
+
+        main {
+            margin-top: 1.4rem;
+        }
+
+            main .analytics-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 1.5rem;
+            }
+
+                main .analytics-header h1 {
+                    color: var(--primary-dark);
+                    font-size: 1.8rem;
+                }
+
+        .time-filters {
+            display: flex;
+            gap: 1rem;
+            background: white;
+            padding: 0.7rem;
+            border-radius: var(--border-radius-2);
+            box-shadow: var(--box-shadow);
+        }
+
+            .time-filters button {
+                padding: 0.5rem 1rem;
+                border-radius: var(--border-radius-1);
+                cursor: pointer;
+                transition: var(--transition);
+                border: none;
+                background: transparent;
+                color: var(--dark-gray);
+                font-weight: 500;
+            }
+
+                .time-filters button.active {
+                    background: var(--primary);
+                    color: white;
+                }
+
+                .time-filters button:hover:not(.active) {
+                    background: var(--light-gray);
+                }
+
+        .chart-container {
+            background: white;
+            padding: var(--card-padding);
+            border-radius: var(--card-border-radius);
+            box-shadow: var(--box-shadow);
+            margin-bottom: 1.5rem;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+            .chart-header h3 {
+                color: var(--primary-dark);
+                font-size: 1.2rem;
+            }
+
+        .chart-wrapper {
+            height: 300px;
+            position: relative;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .metric-card {
+            background: white;
+            padding: var(--card-padding);
+            border-radius: var(--card-border-radius);
+            box-shadow: var(--box-shadow);
+            transition: var(--transition);
+            text-align: center;
+        }
+
+            .metric-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+            }
+
+            .metric-card h3 {
+                font-size: 1rem;
+                color: var(--dark-gray);
+                margin-bottom: 0.5rem;
+            }
+
+            .metric-card h1 {
+                font-size: 2rem;
+                color: var(--primary-dark);
+                margin-bottom: 0.5rem;
+            }
+
+            .metric-card .icon {
+                width: 50px;
+                height: 50px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin: 0 auto 1rem;
+                background: rgba(108, 92, 231, 0.1);
+                color: var(--primary);
+                font-size: 1.5rem;
+            }
+
+        .trend-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+        }
+
+        .trend-up {
+            color: var(--success);
+        }
+
+        .trend-down {
+            color: var(--danger);
+        }
+
+        .trend-indicator i {
+            margin-right: 0.3rem;
+        }
+
+        /* Responsive styles */
+        @@media screen and (max-width: 1200px) {
+            .container
+
+        {
+            width: 94%;
+            grid-template-columns: 7rem auto;
+        }
+
+        aside .sidebar h3 {
+            display: none;
+        }
+
+        aside .sidebar a {
+            width: 5.6rem;
+        }
+
+        .metrics-grid {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        }
+
+        @@media screen and (max-width: 768px) {
+            .container
+
+        {
+            width: 100%;
+            grid-template-columns: 1fr;
+        }
+
+        aside {
+            position: fixed;
+            left: -100%;
+            background: white;
+            width: 18rem;
+            z-index: 3;
+            box-shadow: 1rem 3rem 4rem rgba(0,0,0,0.2);
+            height: 100vh;
+            padding-right: var(--card-padding);
+            display: none;
+        }
+
+            aside .logo h2 {
+                display: inline;
+            }
+
+            aside .sidebar h3 {
+                display: inline;
+            }
+
+            aside .sidebar a {
+                width: 100%;
+                height: 3.4rem;
+            }
+
+            aside .close {
+                display: inline-block;
+                cursor: pointer;
+            }
+
+        main {
+            margin-top: 6rem;
+            padding: 0 1rem;
+        }
+
+        .time-filters {
+            flex-wrap: wrap;
+        }
+
+        .metrics-grid {
+            grid-template-columns: 1fr;
+        }
+
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <aside>
+            <div class="top">
+                <div class="logo">
+                    <h2>Stylora</h2>
+                </div>
+                <div class="close" id="close-btn">
+                    <span class="material-icons-sharp">close</span>
+                </div>
+            </div>
+
+            <div class="sidebar">
+                <a href="Shopkeeper/Index">
+                    <span class="material-icons-sharp">dashboard</span>
+                    <h3>Dashboard</h3>
+                </a>
+                <a href="Shopkeeper/RegisterProduct">
+                    <span class="material-icons-sharp">add</span>
+                    <h3>Add Product</h3>
+                </a>
+                <a href="Shopkeeper/GetAllProducts">
+                    <span class="material-icons-sharp">inventory</span>
+                    <h3>Products</h3>
+                </a>
+                <a href="Shopkeeper/Customers">
+                    <span class="material-icons-sharp">person_outline</span>
+                    <h3>Customers</h3>
+                </a>
+                <a href="Shopkeeper/Orders">
+                    <span class="material-icons-sharp">receipt_long</span>
+                    <h3>Orders</h3>
+                </a>
+                <a href="Shopkeeper/Analytics" class="active">
+                    <span class="material-icons-sharp">insights</span>
+                    <h3>Analytics</h3>
+                </a>
+                <a href="Shopkeeper/AllProductReviews">
+                    <span class="material-icons-sharp">mail_outline</span>
+                    <h3>Messages</h3>
+                </a>
+                <a href="Shopkeeper/Report">
+                    <span class="material-icons-sharp">description</span>
+                    <h3>Reports</h3>
+                </a>
+                <a href="#">
+                    <span class="material-icons-sharp">settings</span>
+                    <h3>Settings</h3>
+                </a>
+                <a href="javascript:document.getElementById('logoutForm').submit();">
+                    <span class="material-icons-sharp">logout</span>
+                    <h3>Logout</h3>
+                </a>
+            </div>
+        </aside>
+
+        <main>
+            <div class="analytics-header">
+                <h1>Sales Analytics</h1>
+                <div class="time-filters">
+                    <button class="active" data-period="7days">Last 7 Days</button>
+                    <button data-period="6months">Last 6 Months</button>
+                    <button data-period="12months">Last 12 Months</button>
+                </div>
+            </div>
+
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="icon">
+                        <span class="material-icons-sharp">trending_up</span>
+                    </div>
+                    <h3>Total Sales</h3>
+                    <h1>Rs. @(Model.Stats?.TotalSales.ToString("N0") ?? "0")</h1>
+                    <div class="trend-indicator trend-up">
+                        <i class="material-icons-sharp">arrow_upward</i>
+                        <span>12% from last period</span>
+                    </div>
+                </div>
+                <div class="metric-card">
+                    <div class="icon">
+                        <span class="material-icons-sharp">receipt_long</span>
+                    </div>
+                    <h3>Total Orders</h3>
+                    <h1>@(Model.Stats?.OrderCount.ToString() ?? "0")</h1>
+                    <div class="trend-indicator trend-up">
+                        <i class="material-icons-sharp">arrow_upward</i>
+                        <span>8% from last period</span>
+                    </div>
+                </div>
+                <div class="metric-card">
+                    <div class="icon">
+                        <span class="material-icons-sharp">people</span>
+                    </div>
+                    <h3>Customers</h3>
+                    <h1>@(Model.Stats?.CustomerCount.ToString() ?? "0")</h1>
+                    <div class="trend-indicator trend-up">
+                        <i class="material-icons-sharp">arrow_upward</i>
+                        <span>15 new customers</span>
+                    </div>
+                </div>
+                <div class="metric-card">
+                    <div class="icon">
+                        <span class="material-icons-sharp">star</span>
+                    </div>
+                    <h3>Avg. Rating</h3>
+                    <h1>4.2</h1>
+                    <div class="trend-indicator trend-up">
+                        <i class="material-icons-sharp">arrow_upward</i>
+                        <span>0.3 from last month</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h3>Sales & Orders Overview</h3>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="combinedChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h3>Sales Trend</h3>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="salesChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h3>Orders Trend</h3>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="ordersChart"></canvas>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Sample data for different time periods
+        const data7Days = {
+            dates: ['2023-05-01', '2023-05-02', '2023-05-03', '2023-05-04', '2023-05-05', '2023-05-06', '2023-05-07'],
+            sales: [12000, 19000, 15000, 20000, 18000, 22000, 25000],
+            orders: [12, 19, 15, 20, 18, 22, 25]
+        };
+
+        const data6Months = {
+            dates: ['2023-01-01', '2023-02-01', '2023-03-01', '2023-04-01', '2023-05-01', '2023-06-01'],
+            sales: [120000, 190000, 150000, 200000, 180000, 220000],
+            orders: [120, 190, 150, 200, 180, 220]
+        };
+
+        const data12Months = {
+            dates: ['2022-07-01', '2022-08-01', '2022-09-01', '2022-10-01', '2022-11-01', '2022-12-01',
+                    '2023-01-01', '2023-02-01', '2023-03-01', '2023-04-01', '2023-05-01', '2023-06-01'],
+            sales: [100000, 110000, 105000, 120000, 130000, 140000,
+                    120000, 190000, 150000, 200000, 180000, 220000],
+            orders: [100, 110, 105, 120, 130, 140,
+                    120, 190, 150, 200, 180, 220]
+        };
+
+        // Chart instances
+        let combinedChart, salesChart, ordersChart;
+
+        // Initialize charts
+        function initCharts(data) {
+            // Combined Chart (Sales & Orders)
+            const combinedCtx = document.getElementById('combinedChart').getContext('2d');
+            if (combinedChart) combinedChart.destroy();
+            combinedChart = new Chart(combinedCtx, {
+                type: 'bar',
+                data: {
+                    labels: data.dates,
+                    datasets: [
+                        {
+                            label: 'Sales (Rs.)',
+                            data: data.sales,
+                            backgroundColor: 'rgba(108, 92, 231, 0.7)',
+                            borderColor: 'rgba(108, 92, 231, 1)',
+                            borderWidth: 1,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: 'Orders',
+                            data: data.orders,
+                            type: 'line',
+                            borderColor: 'rgba(0, 206, 201, 1)',
+                            backgroundColor: 'rgba(0, 206, 201, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.4,
+                            fill: true,
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    scales: {
+                        x: {
+                            type: 'time',
+                            time: {
+                                unit: data.dates.length > 10 ? 'month' : 'day',
+                                tooltipFormat: 'MMM D, YYYY'
+                            },
+                            grid: {
+                                display: false
+                            }
+                        },
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: 'Sales (Rs.)'
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return 'Rs. ' + value.toLocaleString();
+                                }
+                            }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: {
+                                display: true,
+                                text: 'Orders'
+                            },
+                            grid: {
+                                drawOnChartArea: false
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label.includes('Sales')) {
+                                        label += ': Rs. ' + context.raw.toLocaleString();
+                                    } else {
+                                        label += ': ' + context.raw;
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Sales Chart
+            const salesCtx = document.getElementById('salesChart').getContext('2d');
+            if (salesChart) salesChart.destroy();
+            salesChart = new Chart(salesCtx, {
+                type: 'line',
+                data: {
+                    labels: data.dates,
+                    datasets: [{
+                        label: 'Sales (Rs.)',
+                        data: data.sales,
+                        backgroundColor: 'rgba(108, 92, 231, 0.2)',
+                        borderColor: 'rgba(108, 92, 231, 1)',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            type: 'time',
+                            time: {
+                                unit: data.dates.length > 10 ? 'month' : 'day',
+                                tooltipFormat: 'MMM D, YYYY'
+                            },
+                            grid: {
+                                display: false
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return 'Rs. ' + value.toLocaleString();
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return 'Sales: Rs. ' + context.raw.toLocaleString();
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Orders Chart
+            const ordersCtx = document.getElementById('ordersChart').getContext('2d');
+            if (ordersChart) ordersChart.destroy();
+            ordersChart = new Chart(ordersCtx, {
+                type: 'bar',
+                data: {
+                    labels: data.dates,
+                    datasets: [{
+                        label: 'Orders',
+                        data: data.orders,
+                        backgroundColor: 'rgba(0, 206, 201, 0.7)',
+                        borderColor: 'rgba(0, 206, 201, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            type: 'time',
+                            time: {
+                                unit: data.dates.length > 10 ? 'month' : 'day',
+                                tooltipFormat: 'MMM D, YYYY'
+                            },
+                            grid: {
+                                display: false
+                            }
+                        },
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        // Initialize with 7 days data by default
+        initCharts(data7Days);
+
+        // Time filter buttons
+        const timeFilters = document.querySelectorAll('.time-filters button');
+        timeFilters.forEach(button => {
+            button.addEventListener('click', function() {
+                // Remove active class from all buttons
+                timeFilters.forEach(btn => btn.classList.remove('active'));
+                // Add active class to clicked button
+                this.classList.add('active');
+
+                // Load data based on selected period
+                const period = this.dataset.period;
+                switch(period) {
+                    case '7days':
+                        initCharts(data7Days);
+                        break;
+                    case '6months':
+                        initCharts(data6Months);
+                        break;
+                    case '12months':
+                        initCharts(data12Months);
+                        break;
+                }
+            });
+        });
+
+        // Sidebar toggle for mobile
+        document.getElementById('close-btn').addEventListener('click', function() {
+            document.querySelector('aside').style.display = 'none';
+        });
+
+        // You would need to implement the menu button functionality as in your dashboard
+    </script>
+</body>
+</html>

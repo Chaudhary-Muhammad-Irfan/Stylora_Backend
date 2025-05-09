@@ -201,6 +201,51 @@ namespace WebApplication1.Models.Repositories
                 return (false, false, "No brand registered");
             }
         }
+        // In your BrandRepository or equivalent data access class
+        public Brand GetBrandByOwnerId(string brandOwnerId)
+        {
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                connection.Open();
 
+                const string query = @"
+            SELECT 
+                brandId,
+                brandName,
+                niche,
+                description,
+                brandLogoURL,
+                tagLine,
+                brandOwnerName,
+                brandRegistrationDate
+            FROM Brand
+            WHERE brandOwnerId = @BrandOwnerId";
+
+                using (var command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@BrandOwnerId", brandOwnerId);
+
+                    using (var reader = command.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            return new Brand
+                            {
+                                brandId = reader.GetInt32(reader.GetOrdinal("brandId")),
+                                brandName = reader.GetString(reader.GetOrdinal("brandName")),
+                                niche = reader.GetString(reader.GetOrdinal("niche")),
+                                description = reader.GetString(reader.GetOrdinal("description")),
+                                brandLogoURL = reader.GetString(reader.GetOrdinal("brandLogoURL")),
+                                tagLine = reader.GetString(reader.GetOrdinal("tagLine")),
+                                brandOwnerName = reader.GetString(reader.GetOrdinal("brandOwnerName")),
+                                brandRegistrationDate = reader.GetDateTime(reader.GetOrdinal("brandRegistrationDate"))
+                            };
+                        }
+                    }
+                }
+            }
+
+            return null; 
+        }
     }
 }
