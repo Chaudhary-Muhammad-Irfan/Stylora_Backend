@@ -256,7 +256,9 @@ namespace WebApplication1.Controllers
         }
         public IActionResult Customers()
         {
-            return View();
+            string userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var customers = _orderRepository.GetDistinctCustomersByBrandOwnerId(userId);
+            return View(customers);
         }
     }
 }

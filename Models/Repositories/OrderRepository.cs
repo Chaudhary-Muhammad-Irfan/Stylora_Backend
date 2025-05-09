@@ -49,6 +49,7 @@ namespace WebApplication1.Models.Repositories
                     // 2. Insert Order Products
                     foreach (var item in order.OrderItems)
                     {
+                        DecreaseProductQuantity(item.productId, item.quantity);
                         string productQuery = @"INSERT INTO OrderProducts
                                           (OrderId, ProductId, BrandId, ProductName, Size, 
                                            Price, Quantity, Subtotal, ProductThumbnailURL)
@@ -160,7 +161,7 @@ namespace WebApplication1.Models.Repositories
                 connection.Open();
 
                 string query = @"
-            SELECT TOP 2 o.OrderId, o.OrderDate, o.Total AS TotalAmount, 
+            SELECT DISTINCT o.OrderId, o.OrderDate, o.Total AS TotalAmount, 
                          o.Status, u.Name AS CustomerName
             FROM Orders o
             JOIN OrderProducts op ON o.OrderId = op.OrderId
@@ -169,7 +170,7 @@ namespace WebApplication1.Models.Repositories
             JOIN AspNetUsers u ON o.Email = u.Email
             WHERE b.BrandOwnerId = @ShopkeeperId
               AND o.OrderDate >= DATEADD(day, -1, GETDATE())
-            ORDER BY o.OrderDate DESC";
+            ORDER BY o.OrderDate";
 
                 using (SqlCommand cmd = new SqlCommand(query, connection))
                 {
@@ -310,8 +311,7 @@ namespace WebApplication1.Models.Repositories
                 Size,
                 Price,
                 Quantity,
-                ProductThumbnailURL,
-                OrderId
+                ProductThumbnailURL
             FROM OrderProducts
             WHERE OrderId = @OrderId";
 
@@ -329,8 +329,7 @@ namespace WebApplication1.Models.Repositories
                                 Size = reader.GetString(1),
                                 Price = reader.GetDecimal(2),
                                 Quantity = reader.GetInt32(3),
-                                ProductThumbnailURL = reader.IsDBNull(4) ? null : reader.GetString(4),
-                                OrderId=reader.GetInt32(5)
+                                ProductThumbnailURL = reader.IsDBNull(4) ? null : reader.GetString(4)
                             });
                         }
                     }
@@ -350,6 +349,62 @@ namespace WebApplication1.Models.Repositories
                     cmd.Parameters.AddWithValue("@UserId", userId);
                     return cmd.ExecuteScalar()?.ToString();
                 }
+            }
+        }
+        public List<Order> GetDistinctCustomersByBrandOwnerId(string brandOwnerId)
+        {
+            List<Order> orders = new List<Order>();
+
+            string query = @"
+            SELECT DISTINCT 
+                o.CustomerName, 
+                o.Email, 
+                o.Phone, 
+                o.City, 
+                o.Address, 
+                o.PostCode
+            FROM Orders o
+            INNER JOIN OrderProducts op ON o.orderId = op.OrderId
+            INNER JOIN Brand b ON op.brandId = b.brandId
+            WHERE b.brandOwnerId = @brandOwnerId;";
+            using (SqlConnection con = new SqlConnection(_connectionString))
+            using (SqlCommand cmd = new SqlCommand(query, con))
+            {
+                cmd.Parameters.AddWithValue("@brandOwnerId", brandOwnerId);
+                con.Open();
+
+                using (SqlDataReader reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        Order order = new Order
+                        {
+                            CustomerName = reader["CustomerName"].ToString(),
+                            Email = reader["Email"]?.ToString(),
+                            Phone = reader["Phone"].ToString(),
+                            City = reader["City"].ToString(),
+                            Address = reader["Address"].ToString(),
+                            PostCode = reader["PostCode"]?.ToString()
+                        };
+
+                        orders.Add(order);
+                    }
+                }
+            }
+            return orders;
+        }
+        public void DecreaseProductQuantity(int productId, int quantity)
+        {
+            using (SqlConnection conn = new SqlConnection(_connectionString))
+            {
+                string query = "UPDATE Product SET stock = stock - @quantity WHERE productId = @ProductId";
+
+                SqlCommand cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@ProductId", productId);
+                cmd.Parameters.AddWithValue("@quantity", quantity);
+                conn.Open();
+                cmd.ExecuteNonQuery();
+                conn.Close();
             }
         }
     }
