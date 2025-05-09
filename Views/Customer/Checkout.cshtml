@@ -1,23 +1,15 @@
-﻿@model List<WebApplication1.Models.Cart>
+﻿@model WebApplication1.Models.ViewModel.CheckoutViewModel
 @{
-    // Calculate totals here at the top
-    decimal subtotal = 0;
-    decimal shipping = 0;
-    decimal total = 0;
-
-    if (Model != null && Model.Any())
-    {
-        subtotal = Model.Sum(i => i.subTotal);
-        shipping = subtotal * 0.05m;
-        total = subtotal + shipping;
-    }
+    ViewData["Title"] = "Checkout";
 }
-
 <style>
     .checkout__container {
         max-width: 1200px;
         margin: 0 auto;
         padding: 20px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
     }
 
     .checkout__group {
@@ -69,6 +61,8 @@
 
     .payment__option {
         margin-bottom: 15px;
+        display: flex;
+        align-items: center;
     }
 
     .btn {
@@ -126,6 +120,7 @@
 </style>
 
 <main class="main">
+    <!-- Breadcrumb -->
     <section class="breadcrumb">
         <ul class="breadcrumb__list flex container">
             <li><a href="@Url.Action("Index", "Home")" class="breadcrumb__link">Home</a></li>
@@ -137,35 +132,65 @@
     </section>
 
     <section class="checkout section--lg">
-        <div class="checkout__container container grid">
+        <div class="checkout__container container">
+            <!-- Billing Details Form -->
             <div class="checkout__group">
                 <h3 class="section__title">Billing Details</h3>
-                <form class="form grid">
-                    <input type="text" placeholder="Name" class="form__input" />
-                    <input type="text" placeholder="Address" class="form__input" />
-                    <input type="text" placeholder="City" class="form__input" />
-                    <input type="text" placeholder="Country" class="form__input" />
-                    <input type="text" placeholder="Postcode" class="form__input" />
-                    <input type="text" placeholder="Phone" class="form__input" />
-                    <input type="email" placeholder="Email" class="form__input" />
-                    <h3 class="checkout__title">Additional Information</h3>
-                    <textarea placeholder="Order note" class="form__input textarea"></textarea>
-                </form>
+                @using (Html.BeginForm("Checkout", "Customer", FormMethod.Post))
+                {
+                    @Html.AntiForgeryToken()
+                    <div class="form grid">
+                        <input asp-for="CustomerName" placeholder="Full Name" class="form__input" required />
+                        <input asp-for="Address" placeholder="Street Address" class="form__input" required />
+                        <input asp-for="City" placeholder="City" class="form__input" required />
+                        <input asp-for="Country" placeholder="Country" class="form__input" required />
+                        <input asp-for="PostCode" placeholder="Postal Code" class="form__input" />
+                        <input asp-for="Phone" placeholder="Phone" class="form__input" required />
+                        <input asp-for="Email" placeholder="Email" class="form__input" />
+                        <h3 class="checkout__title">Additional Information</h3>
+                        <textarea asp-for="OrderNote" placeholder="Order note" class="form__input textarea"></textarea>
+                    </div>
+
+                    <!-- Hidden fields for order totals -->
+                    <input type="hidden" asp-for="Subtotal" />
+                    <input type="hidden" asp-for="Shipping" />
+                    <input type="hidden" asp-for="Total" />
+
+                    <!-- Payment Method Selection -->
+                    <div class="payment__methods">
+                        <h3 class="checkout__title payment__title">Payment Method</h3>
+                        <div class="payment__option">
+                            <input type="radio" asp-for="PaymentMethod" id="bank" value="BankTransfer" class="payment__input" />
+                            <label for="bank" class="payment__label">Direct Bank Transfer</label>
+                        </div>
+                        <div class="payment__option">
+                            <input type="radio" asp-for="PaymentMethod" id="jazz" value="JazzCash" class="payment__input" />
+                            <label for="jazz" class="payment__label">JazzCash/EasyPaisa</label>
+                        </div>
+                        <div class="payment__option">
+                            <input type="radio" asp-for="PaymentMethod" id="cod" value="COD" class="payment__input" checked />
+                            <label for="cod" class="payment__label">Cash on Delivery</label>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn--md">Place Order</button>
+                }
             </div>
 
+            <!-- Order Summary -->
             <div class="checkout__group">
-                <h3 class="section__title">Cart Totals</h3>
+                <h3 class="section__title">Your Order</h3>
                 <table class="order__table">
                     <thead>
                         <tr>
-                            <th colspan="2">Products</th>
+                            <th colspan="2">Product</th>
                             <th>Total</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @if (Model != null && Model.Any())
+                        @if (Model.CartItems != null && Model.CartItems.Any())
                         {
-                            @foreach (var item in Model)
+                            foreach (var item in Model.CartItems)
                             {
                                 <tr>
                                     <td>
@@ -176,23 +201,23 @@
                                     <td>
                                         <h3 class="table__title">@item.productName</h3>
                                         <p class="table__quantity">Size: @item.size</p>
-                                        <p class="table__quantity">x @item.quantity</p>
+                                        <p class="table__quantity">Qty: @item.quantity</p>
                                     </td>
                                     <td><span class="table__price">Rs.@item.subTotal.ToString("N0")</span></td>
                                 </tr>
                             }
 
                             <tr>
-                                <td><span class="order__subtitle">Subtotal</span></td>
-                                <td colspan="2"><span class="table__price">Rs.@subtotal.ToString("N0")</span></td>
+                                <td colspan="2"><span class="order__subtitle">Subtotal</span></td>
+                                <td><span class="table__price">Rs.@Model.Subtotal.ToString("N0")</span></td>
                             </tr>
                             <tr>
-                                <td><span class="order__subtitle">Shipping (5%)</span></td>
-                                <td colspan="2"><span class="table__price">Rs.@shipping.ToString("N0")</span></td>
+                                <td colspan="2"><span class="order__subtitle">Shipping (5%)</span></td>
+                                <td><span class="table__price">Rs.@Model.Shipping.ToString("N0")</span></td>
                             </tr>
                             <tr>
-                                <td><span class="order__subtitle">Total</span></td>
-                                <td colspan="2"><span class="order__grand-total">Rs.@total.ToString("N0")</span></td>
+                                <td colspan="2"><span class="order__subtitle">Total</span></td>
+                                <td><span class="order__grand-total">Rs.@Model.Total.ToString("N0")</span></td>
                             </tr>
                         }
                         else
@@ -203,48 +228,15 @@
                         }
                     </tbody>
                 </table>
-
-                <div class="payment__methods">
-                    <h3 class="checkout__title payment__title">Payment Method</h3>
-                    <div class="payment__option flex">
-                        <input type="radio" name="radio" id="bank" class="payment__input" />
-                        <label for="bank" class="payment__label">Direct Bank Transfer</label>
-                    </div>
-                    <div class="payment__option flex">
-                        <input type="radio" name="radio" id="jazz" class="payment__input" />
-                        <label for="jazz" class="payment__label">JazzCash/EasyPaisa</label>
-                    </div>
-                    <div class="payment__option flex">
-                        <input type="radio" name="radio" id="cod" class="payment__input" checked />
-                        <label for="cod" class="payment__label">Cash on Delivery</label>
-                    </div>
-                </div>
-
-                <button id="place-order-btn" class="btn btn--md">Place Order</button>
             </div>
         </div>
     </section>
 </main>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const placeOrderBtn = document.getElementById('place-order-btn');
-
-        placeOrderBtn.addEventListener('click', function (e) {
-            e.preventDefault();
-
-            const bank = document.getElementById('bank').checked;
-            const jazz = document.getElementById('jazz').checked;
-            const cod = document.getElementById('cod').checked;
-
-            if (bank) {
-                window.location.href = 'BankTransfer';
-            } else if (jazz) {
-                window.location.href = 'JazzCash';
-            } else if (cod) {
-                alert('Order placed successfully!');
-                window.location.href = '@Url.Action("Index", "Home")';
-            }
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Client-side validation or other scripts can go here
         });
-    });
-</script>
+    </script>
+}

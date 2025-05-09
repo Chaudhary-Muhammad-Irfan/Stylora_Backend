@@ -1,0 +1,156 @@
+﻿using Microsoft.Data.SqlClient;
+using WebApplication1.Models.Interfaces;
+
+namespace WebApplication1.Models.Repositories
+{
+    public class OrderRepository : IOrderRepository
+    {
+        private readonly string _connectionString = "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=Stylora;Integrated Security=True";
+        public int PlaceOrder(Order order)
+        {
+            int orderId = 0;
+
+            using (SqlConnection connection = new SqlConnection(_connectionString))
+            {
+                connection.Open();
+                SqlTransaction transaction = connection.BeginTransaction();
+
+                try
+                {
+                    // 1. Insert Order
+                    string orderQuery = @"INSERT INTO Orders 
+                                    (CustomerName, Address, City, Country, PostCode, Phone, Email, 
+                                     OrderNote, PaymentMethod, Subtotal, Shipping, Total, OrderDate, Status)
+                                    VALUES 
+                                    (@CustomerName, @Address, @City, @Country, @PostCode, @Phone, @Email,
+                                     @OrderNote, @PaymentMethod, @Subtotal, @Shipping, @Total, @OrderDate, @Status);
+                                    SELECT CAST(SCOPE_IDENTITY() as int)";
+
+                    using (SqlCommand cmd = new SqlCommand(orderQuery, connection, transaction))
+                    {
+                        cmd.Parameters.AddWithValue("@CustomerName", order.CustomerName);
+                        cmd.Parameters.AddWithValue("@Address", order.Address);
+                        cmd.Parameters.AddWithValue("@City", order.City);
+                        cmd.Parameters.AddWithValue("@Country", order.Country);
+                        cmd.Parameters.AddWithValue("@PostCode", order.PostCode ?? (object)DBNull.Value);
+                        cmd.Parameters.AddWithValue("@Phone", order.Phone);
+                        cmd.Parameters.AddWithValue("@Email", order.Email ?? (object)DBNull.Value);
+                        cmd.Parameters.AddWithValue("@OrderNote", order.OrderNote ?? (object)DBNull.Value);
+                        cmd.Parameters.AddWithValue("@PaymentMethod", order.PaymentMethod);
+                        cmd.Parameters.AddWithValue("@Subtotal", order.Subtotal);
+                        cmd.Parameters.AddWithValue("@Shipping", order.Shipping);
+                        cmd.Parameters.AddWithValue("@Total", order.Total);
+                        cmd.Parameters.AddWithValue("@OrderDate", order.OrderDate);
+                        cmd.Parameters.AddWithValue("@Status", order.Status);
+
+                        orderId = (int)cmd.ExecuteScalar();
+                    }
+
+                    // 2. Insert Order Products
+                    foreach (var item in order.OrderItems)
+                    {
+                        string productQuery = @"INSERT INTO OrderProducts
+                                          (OrderId, ProductId, BrandId, ProductName, Size, 
+                                           Price, Quantity, Subtotal, ProductThumbnailURL)
+                                          VALUES
+                                          (@OrderId, @ProductId, @BrandId, @ProductName, @Size,
+                                           @Price, @Quantity, @Subtotal, @ProductThumbnailURL)";
+
+                        using (SqlCommand cmd = new SqlCommand(productQuery, connection, transaction))
+                        {
+                            cmd.Parameters.AddWithValue("@OrderId", orderId);
+                            cmd.Parameters.AddWithValue("@ProductId", item.productId);
+                            cmd.Parameters.AddWithValue("@BrandId", item.brandId);
+                            cmd.Parameters.AddWithValue("@ProductName", item.productName);
+                            cmd.Parameters.AddWithValue("@Size", item.size);
+                            cmd.Parameters.AddWithValue("@Price", item.price);
+                            cmd.Parameters.AddWithValue("@Quantity", item.quantity);
+                            cmd.Parameters.AddWithValue("@Subtotal", item.subTotal);
+                            cmd.Parameters.AddWithValue("@ProductThumbnailURL", item.productThumbnailURL);
+
+                            cmd.ExecuteNonQuery();
+                        }
+                    }
+
+                    transaction.Commit();
+                    return orderId;
+                }
+                catch
+                {
+                    transaction.Rollback();
+                    throw;
+                }
+            }
+        }
+        public Order GetOrderById(int orderId)
+        {
+            Order order = null;
+            using (SqlConnection conn = new SqlConnection(_connectionString))
+            {
+                conn.Open();
+
+                // Fetch order details
+                string orderQuery = @"SELECT * FROM Orders WHERE OrderId = @OrderId";
+                using (SqlCommand cmd = new SqlCommand(orderQuery, conn))
+                {
+                    cmd.Parameters.AddWithValue("@OrderId", orderId);
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            order = new Order
+                            {
+                                OrderId = (int)reader["OrderId"],
+                                CustomerName = reader["CustomerName"].ToString(),
+                                Address = reader["Address"].ToString(),
+                                City = reader["City"].ToString(),
+                                Country = reader["Country"].ToString(),
+                                PostCode = reader["PostCode"].ToString(),
+                                Phone = reader["Phone"].ToString(),
+                                Email = reader["Email"].ToString(),
+                                OrderNote = reader["OrderNote"].ToString(),
+                                PaymentMethod = reader["PaymentMethod"].ToString(),
+                                Subtotal = Convert.ToDecimal(reader["Subtotal"]),
+                                Shipping = Convert.ToDecimal(reader["Shipping"]),
+                                Total = Convert.ToDecimal(reader["Total"]),
+                                OrderDate = Convert.ToDateTime(reader["OrderDate"]),
+                                Status = reader["Status"].ToString(),
+                                OrderItems = new List<Cart>()
+                            };
+                        }
+                    }
+                }
+
+                if (order != null)
+                {
+                    // Fetch order products (Cart items)
+                    string itemsQuery = @"SELECT * FROM OrderProducts WHERE OrderId = @OrderId";
+                    using (SqlCommand cmd = new SqlCommand(itemsQuery, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@OrderId", orderId);
+                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                Cart item = new Cart
+                                {
+                                    productName = reader["ProductName"].ToString(),
+                                    size = reader["Size"].ToString(),
+                                    quantity = Convert.ToInt32(reader["Quantity"]),
+                                    price = Convert.ToInt32(reader["Price"]),
+                                    subTotal = Convert.ToInt32(reader["Subtotal"]),
+                                    productThumbnailURL = reader["ProductThumbnailURL"].ToString()
+                                };
+
+                                order.OrderItems.Add(item);
+                            }
+                        }
+                    }
+                }
+            }
+
+            return order;
+        }
+
+    }
+}

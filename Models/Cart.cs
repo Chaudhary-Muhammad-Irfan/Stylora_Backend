@@ -8,6 +8,7 @@ namespace WebApplication1.Models
         public int cardId { get; set; } 
         public string userId { get; set; }
         public int productId { get; set; }
+        public int brandId { get; set; }
         public string brandName { get; set; }
         public string productName { get; set; }
         public string size { get; set; }

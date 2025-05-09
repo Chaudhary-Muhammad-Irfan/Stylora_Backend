@@ -31,6 +31,7 @@ namespace WebApplication1.Models.Repositories
             userId, 
             productId,
             brandName,
+            brandId,
             productName,
             productThumbnailURL,
             price,
@@ -43,6 +44,7 @@ namespace WebApplication1.Models.Repositories
             @userId,
             @productId,
             @brandName,
+            @brandId,
             @productName,
             @productThumbnailURL,
             @price,
@@ -69,6 +71,7 @@ namespace WebApplication1.Models.Repositories
                                 command.Parameters.AddWithValue("@userId", item.userId);
                                 command.Parameters.AddWithValue("@productId", item.productId);
                                 command.Parameters.AddWithValue("@brandName", item.brandName);
+                                command.Parameters.AddWithValue("@brandId", item.brandId);
                                 command.Parameters.AddWithValue("@productName", item.productName);
                                 command.Parameters.AddWithValue("@productThumbnailURL", item.productThumbnailURL);
                                 command.Parameters.AddWithValue("@price", item.price);
@@ -108,7 +111,8 @@ namespace WebApplication1.Models.Repositories
         P.price AS ProductPrice,
         C.quantity AS CartQuantity,
         P.price * C.quantity AS subTotal,
-        P.stock AS availableQuantity
+        P.stock AS availableQuantity,
+         P.brandId AS brandId
     FROM Cart C
     INNER JOIN Product P ON C.productId = P.productId
     WHERE C.userId = @userId";
@@ -137,7 +141,8 @@ namespace WebApplication1.Models.Repositories
                                 price = reader.GetInt32(7),
                                 quantity = reader.GetInt32(8),
                                 subTotal = reader.GetInt32(9),
-                                availableStock = reader.GetInt32(10)
+                                availableStock = reader.GetInt32(10),
+                                brandId=reader.GetInt32(11)
                             });
 
                             availableQuantities.Add(reader.GetInt32(10));
@@ -191,6 +196,21 @@ namespace WebApplication1.Models.Repositories
                 {
                     Console.WriteLine($"SQL Error removing from cart: {ex.Message}");
                     return false;
+                }
+            }
+        }
+        public void ClearCart(string userId)
+        {
+            using (SqlConnection connection = new SqlConnection(_connectionString))
+            {
+                connection.Open();
+
+                string query = "DELETE FROM Cart WHERE userId = @UserId";
+
+                using (SqlCommand cmd = new SqlCommand(query, connection))
+                {
+                    cmd.Parameters.AddWithValue("@UserId", userId);
+                    cmd.ExecuteNonQuery();
                 }
             }
         }

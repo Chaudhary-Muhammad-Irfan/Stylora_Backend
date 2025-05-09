@@ -1,28 +1,29 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
 using System.Security.Claims;
 using WebApplication1.Models;
 using WebApplication1.Models.Interfaces;
 using WebApplication1.Models.Repositories;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+using WebApplication1.Models.ViewModel;
 
 namespace WebApplication1.Controllers
-{ 
-    public class CustomerController : Controller 
+{
+    public class CustomerController : Controller
     {
         private readonly BrandRepository _brandRepository;
         private readonly ProductRepository _productRepository;
         private readonly WishlistRepository _wishlistRepository;
         private readonly CartRepoitory _cartRepository;
         private readonly IContactRepository _contactRepository;
-        public CustomerController(BrandRepository brandRepository, ProductRepository productRepository, WishlistRepository wishlistRepository, CartRepoitory cartRepoitory, IContactRepository contactRepository)
+        private readonly OrderRepository _orderRepository;
+        public CustomerController(BrandRepository brandRepository, ProductRepository productRepository, WishlistRepository wishlistRepository, CartRepoitory cartRepoitory, IContactRepository contactRepository, OrderRepository orderRepository)
         {
             _brandRepository = brandRepository;
             _productRepository = productRepository;
             _wishlistRepository = wishlistRepository;
             _cartRepository = cartRepoitory;
             _contactRepository = contactRepository;
+            _orderRepository = orderRepository;
         }
         public IActionResult getAllRegisteredBrands(string status = "Approved")
         {
@@ -74,25 +75,6 @@ namespace WebApplication1.Controllers
             ViewBag.CurrentPage = page;
 
             return View(paginatedProducts);
-        }
-        public IActionResult Checkout()
-        {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userId))
-            {
-                return RedirectToAction("Login", "Account");
-            }
-            var cartItems = _cartRepository.GetCartProducts(userId);
-            return View(cartItems.carts);
-        }
-        public IActionResult BankTransfer()
-        {
-            return View();
-        }
-
-        public IActionResult JazzCash()
-        {
-            return View();
         }
         [Authorize]
         [HttpGet]
@@ -255,7 +237,7 @@ namespace WebApplication1.Controllers
                 }
                 var cartItems = _cartRepository.GetCartProducts(userId);
                 ViewBag.availableQuantities = cartItems.availableQuantities;
-                return View(cartItems.carts); 
+                return View(cartItems.carts);
             }
             catch (Exception ex)
             {
@@ -346,7 +328,7 @@ namespace WebApplication1.Controllers
         [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult RemoveFromCart(int productId , string size)
+        public IActionResult RemoveFromCart(int productId, string size)
         {
             try
             {
@@ -357,7 +339,7 @@ namespace WebApplication1.Controllers
                     return RedirectToAction("Login", "Account");
                 }
 
-                bool success = _cartRepository.RemoveFromCart(userId, productId , size);
+                bool success = _cartRepository.RemoveFromCart(userId, productId, size);
 
                 if (!success)
                 {
@@ -376,6 +358,101 @@ namespace WebApplication1.Controllers
                 TempData["ErrorMessage"] = "Error removing item from cart";
                 return RedirectToAction("ViewCart");
             }
+        }
+        [HttpGet]
+        public IActionResult Checkout()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var cartDetails = _cartRepository.GetCartProducts(userId);
+            if (cartDetails.carts == null || !cartDetails.carts.Any())
+            {
+                return RedirectToAction("Index", "Cart");
+            }
+
+            // Calculate totals
+            decimal subtotal = cartDetails.carts.Sum(i => i.subTotal);
+            decimal shipping = subtotal * 0.05m;
+            decimal total = subtotal + shipping;
+
+            var model = new CheckoutViewModel
+            {
+                CartItems = cartDetails.carts,
+                Subtotal = subtotal,
+                Shipping = shipping,
+                Total = total
+            };
+
+            return View(model);
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Checkout(CheckoutViewModel model)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var cartDetails = _cartRepository.GetCartProducts(userId);
+            if (cartDetails.carts == null || !cartDetails.carts.Any())
+            {
+                return RedirectToAction("Index", "Cart");
+            }
+
+            // Create order object
+            Order order = new Order
+            {
+                CustomerName = model.CustomerName,
+                Address = model.Address,
+                City = model.City,
+                Country = model.Country,
+                PostCode = model.PostCode,
+                Phone = model.Phone,
+                Email = model.Email,
+                OrderNote = model.OrderNote,
+                PaymentMethod = model.PaymentMethod,
+                Subtotal = model.Subtotal,
+                Shipping = model.Shipping,
+                Total = model.Total,
+                OrderItems = cartDetails.carts
+            };
+
+            // Save order to database
+            OrderRepository orderRepo = new OrderRepository();
+            int orderId = orderRepo.PlaceOrder(order);
+
+            // Clear cart
+            _cartRepository.ClearCart(userId);
+
+            // Redirect to confirmation
+            return RedirectToAction("OrderConfirmation", new { id = orderId });
+        }
+        public IActionResult OrderConfirmation(int id)
+        {
+            var order = _orderRepository.GetOrderById(id);
+
+            if (order == null)
+            {
+                return NotFound();
+            }
+
+            return View(order); 
+        }
+
+        public IActionResult BankTransfer()
+        {
+            return View();
+        }
+
+        public IActionResult JazzCash()
+        {
+            return View();
         }
         [HttpPost]
         public IActionResult SubmitContact(Contact contact)
