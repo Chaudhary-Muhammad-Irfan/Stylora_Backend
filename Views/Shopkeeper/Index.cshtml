@@ -229,7 +229,6 @@
                                 <h1>Rs. @(Model.Stats?.TotalSales.ToString("N0") ?? "0")</h1>
                             </div>
                         </div>
-                        <small class="text-muted">Lifetime</small>
                     </div>
 
                     <div class="expenses">
@@ -240,7 +239,6 @@
                                 <h1>@(Model.Stats?.OrderCount.ToString() ?? "0")</h1>
                             </div>
                         </div>
-                        <small class="text-muted">Lifetime</small>
                     </div>
 
                     <div class="income">
@@ -251,7 +249,6 @@
                                 <h1>@(Model.Stats?.CustomerCount.ToString() ?? "0")</h1>
                             </div>
                         </div>
-                        <small class="text-muted">Lifetime</small>
                     </div>
                 </div>
 
@@ -264,7 +261,6 @@
                                 <th>OrderId</th>
                                 <th>Amount</th>
                                 <th>Status</th>
-                                <th></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -277,7 +273,9 @@
                                         <td>@order.OrderId</td>
                                         <td>Rs. @order.TotalAmount.ToString("N0")</td>
                                         <td class="@(order.Status == "Pending" ? "warning" : "success")">@order.Status</td>
-                                        <td class="primary">Details</td>
+                                        <td>
+                                            <a asp-action="detailsOfOrder" asp-controller="Shopkeeper" asp-route-id="@order.OrderId" class="btn btn-sm">View Details</a>
+                                        </td>
                                     </tr>
                                 }
                             }
@@ -312,7 +310,6 @@
                 <div class="profile">
                     <div class="info">
                         <p>Hey, <b>@(Model.ShopkeeperName ?? User.Identity?.Name)</b></p>
-                        <div class="text-muted">Shopkeeper</div>
                     </div>
                     <div class="profile-photo">
                         <img src="https://ui-avatars.com/api/?name=@(Model.ShopkeeperName ?? User.Identity?.Name)&background=7380ec&color=fff" alt="Profile">

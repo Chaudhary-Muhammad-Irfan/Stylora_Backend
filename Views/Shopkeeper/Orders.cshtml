@@ -86,7 +86,7 @@
                                 <td>@order.CustomerName</td>
                                 <td>RS. @order.TotalAmount.ToString()</td>
                                 <td>@order.Status</td>
-                                <td>@order.OrderDate.ToShortDateString()</td>
+                                <td>@order.OrderDate.ToString("f")</td> 
                                 <td>
                                     <a asp-action="detailsOfOrder" asp-controller="Shopkeeper" asp-route-id="@order.OrderId" class="btn btn-sm btn-primary">View</a>
                                 </td>

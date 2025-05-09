@@ -251,7 +251,8 @@ namespace WebApplication1.Controllers
         }
         public IActionResult detailsOfOrder(int id)
         {
-            return View();
+            var products = _orderRepository.GetOrderedProductsByOrderId(id);
+            return View(products);
         }
         public IActionResult Customers()
         {

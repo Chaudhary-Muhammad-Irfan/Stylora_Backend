@@ -296,7 +296,48 @@ namespace WebApplication1.Models.Repositories
 
             return orders;
         }
+        public List<OrderedProduct> GetOrderedProductsByOrderId(int orderId)
+        {
+            var products = new List<OrderedProduct>();
 
+            using (SqlConnection connection = new SqlConnection(_connectionString))
+            {
+                connection.Open();
+
+                string query = @"
+            SELECT 
+                ProductName,
+                Size,
+                Price,
+                Quantity,
+                ProductThumbnailURL,
+                OrderId
+            FROM OrderProducts
+            WHERE OrderId = @OrderId";
+
+                using (SqlCommand cmd = new SqlCommand(query, connection))
+                {
+                    cmd.Parameters.AddWithValue("@OrderId", orderId);
+
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            products.Add(new OrderedProduct
+                            {
+                                ProductName = reader.GetString(0),
+                                Size = reader.GetString(1),
+                                Price = reader.GetDecimal(2),
+                                Quantity = reader.GetInt32(3),
+                                ProductThumbnailURL = reader.IsDBNull(4) ? null : reader.GetString(4),
+                                OrderId=reader.GetInt32(5)
+                            });
+                        }
+                    }
+                }
+            }
+            return products;
+        }
         public string GetShopkeeperName(string userId)
         {
             using (SqlConnection connection = new SqlConnection(_connectionString))
