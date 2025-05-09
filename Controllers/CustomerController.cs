@@ -77,7 +77,13 @@ namespace WebApplication1.Controllers
         }
         public IActionResult Checkout()
         {
-            return View();
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                return RedirectToAction("Login", "Account");
+            }
+            var cartItems = _cartRepository.GetCartProducts(userId);
+            return View(cartItems.carts);
         }
         public IActionResult BankTransfer()
         {
@@ -248,6 +254,7 @@ namespace WebApplication1.Controllers
                     return RedirectToAction("Login", "Account");
                 }
                 var cartItems = _cartRepository.GetCartProducts(userId);
+                ViewBag.availableQuantities = cartItems.availableQuantities;
                 return View(cartItems.carts); 
             }
             catch (Exception ex)

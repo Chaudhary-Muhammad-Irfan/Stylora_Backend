@@ -91,23 +91,27 @@ namespace WebApplication1.Models.Repositories
                 }
             }
         }
-        public (int count , List<Cart> carts) GetCartProducts(string userId)
+        public (int count, List<int> availableQuantities, List<Cart> carts) GetCartProducts(string userId)
         {
             List<Cart> cartItems = new List<Cart>();
+            List<int> availableQuantities = new List<int>();
 
             const string query = @"
-        SELECT 
-            cardId,
-            userId,
-            productId,
-            brandName,
-            productName,size,
-            productThumbnailURL,
-            price,
-            quantity,
-            price * quantity AS subTotal
-        FROM Cart
-        WHERE userId = @userId";
+    SELECT 
+        C.cardId,
+        C.userId,
+        C.productId,
+        P.brandName AS BrandName,
+        P.productName AS ProductName,
+        C.size AS ProductSize,
+        P.productThumbnailURL AS ProductThumbnailURL,
+        P.price AS ProductPrice,
+        C.quantity AS CartQuantity,
+        P.price * C.quantity AS subTotal,
+        P.stock AS availableQuantity
+    FROM Cart C
+    INNER JOIN Product P ON C.productId = P.productId
+    WHERE C.userId = @userId";
 
             using (SqlConnection connection = new SqlConnection(_connectionString))
             using (SqlCommand command = new SqlCommand(query, connection))
@@ -132,18 +136,22 @@ namespace WebApplication1.Models.Repositories
                                 productThumbnailURL = reader.GetString(6),
                                 price = reader.GetInt32(7),
                                 quantity = reader.GetInt32(8),
-                                subTotal = reader.GetInt32(9)
+                                subTotal = reader.GetInt32(9),
+                                availableStock = reader.GetInt32(10)
                             });
+
+                            availableQuantities.Add(reader.GetInt32(10));
                         }
                     }
                 }
                 catch (SqlException ex)
                 {
                     Console.WriteLine($"SQL Error getting cart items: {ex.Message}");
-                    throw; 
+                    throw;
                 }
             }
-            return (cartItems.Count,  cartItems);
+
+            return (cartItems.Count, availableQuantities, cartItems);
         }
         public bool UpdateQuantity(int cartId, int newQuantity)
         {

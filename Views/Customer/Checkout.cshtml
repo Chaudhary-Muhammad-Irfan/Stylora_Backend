@@ -1,4 +1,19 @@
-﻿<style>
+﻿@model List<WebApplication1.Models.Cart>
+@{
+    // Calculate totals here at the top
+    decimal subtotal = 0;
+    decimal shipping = 0;
+    decimal total = 0;
+
+    if (Model != null && Model.Any())
+    {
+        subtotal = Model.Sum(i => i.subTotal);
+        shipping = subtotal * 0.05m;
+        total = subtotal + shipping;
+    }
+}
+
+<style>
     .checkout__container {
         max-width: 1200px;
         margin: 0 auto;
@@ -84,12 +99,36 @@
         font-size: 16px;
         color: #333;
     }
+
+    .table__title {
+        font-weight: 500;
+        margin-bottom: 5px;
+    }
+
+    .table__quantity {
+        color: #666;
+        font-size: 14px;
+    }
+
+    .table__price {
+        font-weight: 600;
+    }
+
+    .order__subtitle {
+        font-weight: 500;
+    }
+
+    .order__grand-total {
+        font-weight: 700;
+        color: #4CAF50;
+        font-size: 18px;
+    }
 </style>
 
 <main class="main">
     <section class="breadcrumb">
         <ul class="breadcrumb__list flex container">
-            <li><a href="index.html" class="breadcrumb__link">Home</a></li>
+            <li><a href="@Url.Action("Index", "Home")" class="breadcrumb__link">Home</a></li>
             <li><span class="breadcrumb__link">></span></li>
             <li><span class="breadcrumb__link">Shop</span></li>
             <li><span class="breadcrumb__link">></span></li>
@@ -124,42 +163,44 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td><img src="./assets/img/product-1-2.jpg" alt="" class="order__img" /></td>
-                            <td>
-                                <h3 class="table__title">Yidarton Women Summer Blue</h3>
-                                <p class="table__quantity">x 2</p>
-                            </td>
-                            <td><span class="table__price">$180.00</span></td>
-                        </tr>
-                        <tr>
-                            <td><img src="./assets/img/product-2-1.jpg" alt="" class="order__img" /></td>
-                            <td>
-                                <h3 class="table__title">LDB Moon Summer</h3>
-                                <p class="table__quantity">x 1</p>
-                            </td>
-                            <td><span class="table__price">$65.00</span></td>
-                        </tr>
-                        <tr>
-                            <td><img src="./assets/img/product-7-1.jpg" alt="" class="order__img" /></td>
-                            <td>
-                                <h3 class="table__title">Women Short Sleeve Loose</h3>
-                                <p class="table__quantity">x 2</p>
-                            </td>
-                            <td><span class="table__price">$35.00</span></td>
-                        </tr>
-                        <tr>
-                            <td><span class="order__subtitle">Subtotal</span></td>
-                            <td colspan="2"><span class="table__price">$280.00</span></td>
-                        </tr>
-                        <tr>
-                            <td><span class="order__subtitle">Shipping</span></td>
-                            <td colspan="2"><span class="table__price">Free Shipping</span></td>
-                        </tr>
-                        <tr>
-                            <td><span class="order__subtitle">Total</span></td>
-                            <td colspan="2"><span class="order__grand-total">$280.00</span></td>
-                        </tr>
+                        @if (Model != null && Model.Any())
+                        {
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        <img src="@Url.Content($"~/{item.productThumbnailURL}")"
+                                             alt="@item.productName"
+                                             class="order__img" />
+                                    </td>
+                                    <td>
+                                        <h3 class="table__title">@item.productName</h3>
+                                        <p class="table__quantity">Size: @item.size</p>
+                                        <p class="table__quantity">x @item.quantity</p>
+                                    </td>
+                                    <td><span class="table__price">Rs.@item.subTotal.ToString("N0")</span></td>
+                                </tr>
+                            }
+
+                            <tr>
+                                <td><span class="order__subtitle">Subtotal</span></td>
+                                <td colspan="2"><span class="table__price">Rs.@subtotal.ToString("N0")</span></td>
+                            </tr>
+                            <tr>
+                                <td><span class="order__subtitle">Shipping (5%)</span></td>
+                                <td colspan="2"><span class="table__price">Rs.@shipping.ToString("N0")</span></td>
+                            </tr>
+                            <tr>
+                                <td><span class="order__subtitle">Total</span></td>
+                                <td colspan="2"><span class="order__grand-total">Rs.@total.ToString("N0")</span></td>
+                            </tr>
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="3">Your cart is empty</td>
+                            </tr>
+                        }
                     </tbody>
                 </table>
 
@@ -202,6 +243,7 @@
                 window.location.href = 'JazzCash';
             } else if (cod) {
                 alert('Order placed successfully!');
+                window.location.href = '@Url.Action("Index", "Home")';
             }
         });
     });

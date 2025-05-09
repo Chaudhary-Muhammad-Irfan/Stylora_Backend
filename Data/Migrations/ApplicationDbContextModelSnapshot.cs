@@ -232,7 +232,7 @@ namespace WebApplication1.Data.Migrations
 
                     b.HasKey("brandId");
 
-                    b.ToTable("Brand");
+                    b.ToTable("Brand", (string)null);
                 });
 
             modelBuilder.Entity("WebApplication1.Models.Cart", b =>
@@ -280,7 +280,7 @@ namespace WebApplication1.Data.Migrations
 
                     b.HasKey("cardId");
 
-                    b.ToTable("Cart");
+                    b.ToTable("Cart", (string)null);
                 });
 
             modelBuilder.Entity("WebApplication1.Models.Contact", b =>
@@ -319,7 +319,7 @@ namespace WebApplication1.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Contacts");
+                    b.ToTable("Contacts", (string)null);
                 });
 
             modelBuilder.Entity("WebApplication1.Models.Product", b =>
@@ -385,7 +385,7 @@ namespace WebApplication1.Data.Migrations
 
                     b.HasKey("productId");
 
-                    b.ToTable("Product");
+                    b.ToTable("Product", (string)null);
                 });
 
             modelBuilder.Entity("WebApplication1.Models.Review", b =>
@@ -419,7 +419,7 @@ namespace WebApplication1.Data.Migrations
 
                     b.HasKey("ReviewId");
 
-                    b.ToTable("Review");
+                    b.ToTable("Review", (string)null);
                 });
 
             modelBuilder.Entity("WebApplication1.Models.UserType", b =>
@@ -535,7 +535,7 @@ namespace WebApplication1.Data.Migrations
 
                     b.HasKey("wishlistId");
 
-                    b.ToTable("Wishlist");
+                    b.ToTable("Wishlist", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
