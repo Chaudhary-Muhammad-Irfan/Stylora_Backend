@@ -243,5 +243,19 @@ namespace WebApplication1.Controllers
             _productRepository.MarkReviewsAsRead(userId);
             return View(reviews);
         }
+        public IActionResult Orders()
+        {
+            string userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var orders = _orderRepository.GetAllOrdersOfShopkeeper(userId);
+            return View(orders);
+        }
+        public IActionResult detailsOfOrder(int id)
+        {
+            return View();
+        }
+        public IActionResult Customers()
+        {
+            return View();
+        }
     }
 }

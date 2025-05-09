@@ -250,6 +250,52 @@ namespace WebApplication1.Models.Repositories
 
             return stats;
         }
+        public List<RecentOrder> GetAllOrdersOfShopkeeper(string shopkeeperId)
+        {
+            var orders = new List<RecentOrder>();
+
+            using (SqlConnection connection = new SqlConnection(_connectionString))
+            {
+                connection.Open();
+
+                string query = @"
+            SELECT DISTINCT 
+                o.OrderId, 
+                o.OrderDate, 
+                o.Total, 
+                o.Status, 
+                u.Name AS CustomerName
+            FROM Orders o
+            JOIN OrderProducts op ON o.OrderId = op.OrderId
+            JOIN Product p ON op.productId = p.productId
+            JOIN Brand b ON p.BrandId = b.BrandId
+            JOIN AspNetUsers u ON b.brandOwnerId = u.Id
+            WHERE b.brandOwnerId = @ShopkeeperId
+            ORDER BY o.OrderDate DESC";
+
+                using (SqlCommand cmd = new SqlCommand(query, connection))
+                {
+                    cmd.Parameters.AddWithValue("@ShopkeeperId", shopkeeperId);
+
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            orders.Add(new RecentOrder
+                            {
+                                OrderId = reader.GetInt32(0),
+                                OrderDate = reader.GetDateTime(1),
+                                TotalAmount = reader.GetDecimal(2),
+                                Status = reader.GetString(3),
+                                CustomerName = reader.GetString(4)
+                            });
+                        }
+                    }
+                }
+            }
+
+            return orders;
+        }
 
         public string GetShopkeeperName(string userId)
         {
