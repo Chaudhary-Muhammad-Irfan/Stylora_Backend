@@ -203,22 +203,25 @@ namespace WebApplication1.Models.Repositories
             {
                 connection.Open();
 
-                // Total Sales
+                // Corrected Total Sales - Using DISTINCT OrderId to avoid double-counting
                 string salesQuery = @"
-            SELECT SUM(o.Total)
-            FROM Orders o
-            JOIN OrderProducts op ON o.OrderId = op.OrderId
-            JOIN Product p ON op.ProductId = p.ProductId
-            JOIN Brand b ON p.BrandId = b.BrandId
-            WHERE b.BrandOwnerId = @ShopkeeperId";
+            SELECT ISNULL(SUM(DistinctOrderTotals.Total), 0)
+            FROM (
+                SELECT DISTINCT o.OrderId, o.Total
+                FROM Orders o
+                JOIN OrderProducts op ON o.OrderId = op.OrderId
+                JOIN Product p ON op.ProductId = p.ProductId
+                JOIN Brand b ON p.BrandId = b.BrandId
+                WHERE b.BrandOwnerId = @ShopkeeperId
+            ) AS DistinctOrderTotals";
 
                 using (SqlCommand cmd = new SqlCommand(salesQuery, connection))
                 {
                     cmd.Parameters.AddWithValue("@ShopkeeperId", shopkeeperId);
-                    stats.TotalSales = cmd.ExecuteScalar() != DBNull.Value ? Convert.ToDecimal(cmd.ExecuteScalar()) : 0;
+                    stats.TotalSales = Convert.ToDecimal(cmd.ExecuteScalar());
                 }
 
-                // Total Orders
+                // Total Orders (unchanged, already correct)
                 string orderCountQuery = @"
             SELECT COUNT(DISTINCT o.OrderId)
             FROM Orders o
@@ -233,14 +236,15 @@ namespace WebApplication1.Models.Repositories
                     stats.OrderCount = Convert.ToInt32(cmd.ExecuteScalar());
                 }
 
-                // Total Customers
+                // Total Customers (unchanged, already correct)
                 string customerCountQuery = @"
             SELECT COUNT(DISTINCT o.Email)
             FROM Orders o
             JOIN OrderProducts op ON o.OrderId = op.OrderId
             JOIN Product p ON op.ProductId = p.ProductId
             JOIN Brand b ON p.BrandId = b.BrandId
-            WHERE b.BrandOwnerId = @ShopkeeperId";
+            WHERE b.BrandOwnerId = @ShopkeeperId
+            AND o.Email IS NOT NULL";
 
                 using (SqlCommand cmd = new SqlCommand(customerCountQuery, connection))
                 {

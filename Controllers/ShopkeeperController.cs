@@ -265,7 +265,6 @@ namespace WebApplication1.Controllers
         }
         public IActionResult Report()
         {
-            var user = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var brandStatus = _brandRepository.GetBrandStatus(userId);
             int count = _productRepository.CountUnreadReviews(userId);
