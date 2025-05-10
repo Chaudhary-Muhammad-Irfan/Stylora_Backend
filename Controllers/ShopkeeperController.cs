@@ -195,7 +195,6 @@ namespace WebApplication1.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult DeleteProduct(string productCode)
         {
-            Console.WriteLine($"Deleting product with code: {productCode}");
             _productRepository.deleteProduct(productCode); 
             return RedirectToAction("GetAllProducts"); 
         }

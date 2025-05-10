@@ -33,7 +33,7 @@ namespace WebApplication1.Controllers
             ViewBag.last24HoursCustomers=_adminRepository.GetLast24HoursCustomers();
             ViewBag.last24HoursSales = _adminRepository.GetLast24HoursSales();
             var reviewStats = _adminRepository.GetReviewStats();
-            ViewBag.ReviewCount = reviewStats.Item1;
+            ViewBag.ReviewCount = reviewStats.Item1; 
             ViewBag.AverageRating = reviewStats.Item2;
             ViewBag.RecentOrders = _adminRepository.GetRecentOrders();
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -103,6 +103,22 @@ namespace WebApplication1.Controllers
         }
         public IActionResult Report()
         {
+            int unreadCount = _contactRepository.GetUnreadMessageCount();
+            ViewBag.UnreadMessageCount = unreadCount;
+            ViewBag.TotalSales = _adminRepository.GetTotalSales().ToString("N0") + " PKR";
+            ViewBag.TotalOrders = _adminRepository.GetTotalOrders();
+            ViewBag.TotalCustomers = _adminRepository.GetTotalCustomers();
+            ViewBag.ApprovedBrands = _adminRepository.GetApprovedBrands();
+            ViewBag.last24HoursOrders = _adminRepository.GetLast24HoursOrders();
+            ViewBag.last24HoursBrands = _adminRepository.GetLast24HoursApprovedBrands();
+            ViewBag.last24HoursCustomers = _adminRepository.GetLast24HoursCustomers();
+            ViewBag.last24HoursSales = _adminRepository.GetLast24HoursSales();
+            var reviewStats = _adminRepository.GetReviewStats();
+            ViewBag.ReviewCount = reviewStats.Item1;
+            ViewBag.AverageRating = reviewStats.Item2;
+            ViewBag.RecentOrders = _adminRepository.GetRecentOrders();
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            ViewBag.adminName = _orderRepository.GetShopkeeperName(userId);
             return View();
         }
     }

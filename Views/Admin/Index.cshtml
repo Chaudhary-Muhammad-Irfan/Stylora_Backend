@@ -16,7 +16,7 @@
 
 <body>
     <div class="container">
-        <aside>
+        <aside> 
             <div class="top">
                 <div class="logo">
                     <h1 class="text-muted">Stylora</h1>
@@ -65,12 +65,6 @@
                     </span>
                     <h3>Orders</h3>
                 </a>
-                <a href="#">
-                    <span class="material-icons-sharp">
-                        insights
-                    </span>
-                    <h3>Analytics</h3>
-                </a>
                 <a href="Admin/Messages">
                     <span class="material-icons-sharp">
                         mail_outline
@@ -84,11 +78,9 @@
                     </span>
                     <h3>Report</h3>
                 </a>
-                <a href="#">
-                    <span class="material-icons-sharp">
-                        settings
-                    </span>
-                    <h3>Settings</h3>
+                <a href="@Url.Action("ChangePassword", "Account")">
+                    <span class="material-icons-sharp">lock_reset</span>
+                    Change Password
                 </a>
                 @using (Html.BeginForm("Logout", "Account", FormMethod.Post, new { id = "logoutForm", @class = "d-inline" }))
                 {
