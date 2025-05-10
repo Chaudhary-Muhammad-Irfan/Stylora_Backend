@@ -121,14 +121,12 @@ namespace WebApplication1.Controllers
                 return StatusCode(500, new { success = false, message = ex.Message });
             }
         }
-
         [HttpGet]
         public IActionResult registerProduct()
         {
             return View(new Product());
         }
         [HttpPost]
-        //[ValidateAntiForgeryToken]
         public IActionResult registerProduct(Product product, IFormFile productThumbnail, List<IFormFile> productImages, IFormFile sizeChart)
         {
             try
@@ -195,9 +193,10 @@ namespace WebApplication1.Controllers
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult DeleteProduct(int productId)
+        public IActionResult DeleteProduct(string productCode)
         {
-            _productRepository.deleteProduct(productId);
+            Console.WriteLine($"Deleting product with code: {productCode}");
+            _productRepository.deleteProduct(productCode); 
             return RedirectToAction("GetAllProducts"); 
         }
         public IActionResult GetAllProducts()

@@ -356,20 +356,20 @@
                                     </td>
                                     <td data-label="Actions">
                                         <div class="d-flex action-buttons">
-                                            <a href="/Shopkeeper/DetailsOfProduct?productId=@product.productCode" class="btn btn-view me-2">
+                                            <a href="/Shopkeeper/DetailsOfProduct?productCode=@product.productCode" class="btn btn-view me-2">
                                                 <i class="fas fa-eye me-1"></i> View
                                             </a>
-                                            <!-- Change form ID to be unique for each product -->
-                                            <form id="deleteForm-@product.productId" asp-action="DeleteProduct" asp-controller="Shopkeeper" method="post">
+                                            <!-- Updated form to use productCode -->
+                                            <form id="deleteForm-@product.productCode" asp-action="DeleteProduct" asp-controller="Shopkeeper" method="post">
                                                 @Html.AntiForgeryToken()
-                                                <input type="hidden" name="productId" value="@product.productId">
-                                                <button type="button" class="btn btn-delete" data-bs-toggle="modal" data-bs-target="#deleteModal" data-product-id="@product.productId">
+                                                <input type="hidden" name="productCode" value="@product.productCode">
+                                                <button type="button" class="btn btn-delete" data-bs-toggle="modal" data-bs-target="#deleteModal" data-product-code="@product.productCode">
                                                     <i class="fas fa-trash me-1"></i> Delete
                                                 </button>
                                             </form>
                                         </div>
                                     </td>
-                                </tr>
+                                </tr> 
                             }
                         </tbody>
                     </table>
@@ -410,14 +410,14 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const deleteModal = document.getElementById('deleteModal');
-            let productIdToDelete = null;
+            let productCodeToDelete = null;
             let deleteForm = null;
 
-            // When delete button is clicked, store the product ID and form
+            // When delete button is clicked, store the product code and form
             deleteModal.addEventListener('show.bs.modal', function(event) {
                 const button = event.relatedTarget;
-                productIdToDelete = button.getAttribute('data-product-id');
-                deleteForm = document.getElementById('deleteForm-' + productIdToDelete);
+                productCodeToDelete = button.getAttribute('data-product-code');
+                deleteForm = document.getElementById('deleteForm-' + productCodeToDelete);
             });
 
             // When confirm delete is clicked, submit the correct form

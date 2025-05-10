@@ -1,4 +1,5 @@
 ﻿using Microsoft.CodeAnalysis.Elfie.Diagnostics;
+using Microsoft.CodeAnalysis.Elfie.Serialization;
 using Microsoft.Data.SqlClient;
 using Newtonsoft.Json;
 using System.Configuration;
@@ -68,14 +69,14 @@ namespace WebApplication1.Models.Repositories
                 throw new ApplicationException("Database operation failed. See inner exception.", ex);
             }
         }
-        public void deleteProduct(int productId)
+        public void deleteProduct(string productCode)
         {
-            string sql = "DELETE FROM Product WHERE productId = @productId";
+            string sql = "DELETE FROM Product WHERE productCode = @productCode";
             using (SqlConnection connection = new SqlConnection(_connectionString))
             {
                 using (SqlCommand command = new SqlCommand(sql, connection))
                 {
-                    command.Parameters.AddWithValue("@productId", productId);
+                    command.Parameters.AddWithValue("@productCode", productCode);
                     connection.Open();
                     command.ExecuteNonQuery();
                 }

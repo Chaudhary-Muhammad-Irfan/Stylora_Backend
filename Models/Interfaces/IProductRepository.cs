@@ -8,7 +8,7 @@ namespace WebApplication1.Models.Interfaces
     public interface IProductRepository
     {
         public void addProduct(Product product);
-        public void deleteProduct(int productId);
+        public void deleteProduct(string productCode);
         public (int BrandId, string BrandName) GetBrandInfoOfCurrentShopkeeper(string userId);
         public int GetBrandIdOfCurrentShopkeeper(string userId);
         // Getting Prodcuts of currently login shopkeeper
