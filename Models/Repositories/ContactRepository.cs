@@ -41,7 +41,7 @@ namespace WebApplication1.Models.Repositories
                 count = (int)cmd.ExecuteScalar();
             }
             return count;
-        }
+        } 
         public List<Contact> GetAllMessages()
         {
             List<Contact> contacts = new List<Contact>();

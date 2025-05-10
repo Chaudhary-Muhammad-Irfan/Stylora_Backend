@@ -5,5 +5,7 @@ namespace WebApplication1.Models.Interfaces
     {
         public bool addToWishlist(Wishlist item);
         public (int Count, List<Product> Products) GetWishlistProductsOfCurrentUser(string userId);
+        public bool RemoveFromWishlist(string userId, int productId);
     }
 }
+ 

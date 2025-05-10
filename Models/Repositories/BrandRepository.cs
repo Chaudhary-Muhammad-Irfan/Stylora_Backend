@@ -201,7 +201,6 @@ namespace WebApplication1.Models.Repositories
                 return (false, false, "No brand registered");
             }
         }
-        // In your BrandRepository or equivalent data access class
         public Brand GetBrandByOwnerId(string brandOwnerId)
         {
             using (var connection = new SqlConnection(_connectionString))

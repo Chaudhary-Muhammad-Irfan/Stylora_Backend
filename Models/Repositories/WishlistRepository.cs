@@ -93,7 +93,6 @@ namespace WebApplication1.Models.Repositories
 
             return (wishlistProducts.Count, wishlistProducts);
         }
-
         public bool RemoveFromWishlist(string userId, int productId)
         {
             const string query = @"
