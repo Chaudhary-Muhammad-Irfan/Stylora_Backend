@@ -53,13 +53,13 @@
                     </span>
                     <h3>Brand Owners</h3>
                 </a>
-                <a href="Admin/RegisteredUsers">
+                <a href="Admin/Customers">
                     <span class="material-icons-sharp">
                         person_outline
                     </span>
-                    <h3>All Registered Users</h3>
+                    <h3>Customers</h3>
                 </a>
-                <a href="#">
+                <a href="Admin/Orders">
                     <span class="material-icons-sharp">
                         receipt_long
                     </span>
@@ -78,11 +78,11 @@
                     <h3>Messages</h3>
                     <span class="message-count">@ViewBag.UnreadMessageCount</span>
                 </a>
-                <a href="#">
+                <a href="Admin/Report">
                     <span class="material-icons-sharp">
                         report_gmailerrorred
                     </span>
-                    <h3>Reports</h3>
+                    <h3>Report</h3>
                 </a>
                 <a href="#">
                     <span class="material-icons-sharp">
@@ -109,8 +109,12 @@
             <h1>Admin Panel</h1>
 
             <div class="date">
-                <input type="date">
+                <input type="date" id="todayDate">
             </div>
+
+            <script>
+                document.getElementById('todayDate').valueAsDate = new Date();
+            </script>
 
             <div class="insights">
                 <div class="sales">

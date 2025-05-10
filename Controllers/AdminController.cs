@@ -88,13 +88,20 @@ namespace WebApplication1.Controllers
         }
         public IActionResult Customers()
         {
-            return View();
+            var customers=_adminRepository.GetAllDistinctCustomers();
+            return View(customers);
         }
         public IActionResult Orders()
         {
-            return View();
+            var orders = _adminRepository.GetAllOrdersForAdmin();
+            return View(orders);
         }
         public IActionResult detailsOfOrder(int id)
+        {
+            var products=_orderRepository.GetOrderedProductsByOrderId(id);
+            return View(products);
+        }
+        public IActionResult Report()
         {
             return View();
         }
