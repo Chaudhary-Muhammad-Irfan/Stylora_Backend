@@ -155,7 +155,7 @@
                     <div class="dropdown__menu">
                         @if (User.Identity.IsAuthenticated)
                         {
-                            <a href="@Url.Action("MyAccount","Home")" class="dropdown__item">
+                            <a href="@Url.Action("MyAccount","Customer")" class="dropdown__item">
                                 My Account
                             </a>
                             <form asp-area="Identity" asp-page="/Account/Logout" method="post">

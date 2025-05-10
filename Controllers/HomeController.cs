@@ -7,7 +7,7 @@ using WebApplication1.Models;
 using WebApplication1.Models.Interfaces; 
 using WebApplication1.Models.Repositories;
 
-namespace WebApplication1.Controllers
+namespace WebApplication1.Controllers 
 {
     public class HomeController : Controller
     {
@@ -30,16 +30,6 @@ namespace WebApplication1.Controllers
             ViewBag.Categories = categories;
             ViewBag.Products = newProducts;
             ViewBag.Brands = brands;
-            return View();
-        }
-        [Authorize]
-        public IActionResult MyAccount()
-        {
-            return View();
-        }
-        [Authorize]
-        public IActionResult Cart()
-        {
             return View();
         }
         public IActionResult About()

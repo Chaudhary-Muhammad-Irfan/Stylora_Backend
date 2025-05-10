@@ -6,7 +6,7 @@ using WebApplication1.Models.Interfaces;
 using WebApplication1.Models.Repositories;
 using WebApplication1.Models.ViewModel;
 
-namespace WebApplication1.Controllers
+namespace WebApplication1.Controllers 
 {
     public class CustomerController : Controller
     {
@@ -475,6 +475,11 @@ namespace WebApplication1.Controllers
                 .ToList();
 
             return Json(new { success = false, message = "Validation errors", errors = errors });
+        }
+        [Authorize]
+        public IActionResult MyAccount()
+        {
+            return View();
         }
     }
 }
