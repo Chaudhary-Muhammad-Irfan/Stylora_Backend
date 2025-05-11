@@ -183,15 +183,30 @@ namespace WebApplication1.Controllers
                     return RedirectToAction("DetailsOfProduct", new { productId });
                 }
 
-                // Handle stock validation for selected size
+                // Validate size selection for products that require it
+                if (product.AvailableSizes != null && product.AvailableSizes.Count > 0 && string.IsNullOrEmpty(selectedSizes))
+                {
+                    TempData["ErrorMessage"] = "Please select a size for this product";
+                    return RedirectToAction("DetailsOfProduct", new { productId });
+                }
+
+                // Handle stock validation
                 int availableQuantity = 0;
+                bool sizeExists = false;
+
                 if (!string.IsNullOrEmpty(selectedSizes))
                 {
-                    // Find the index of the selected size in AvailableSizes
-                    int sizeIndex = product.AvailableSizes?.IndexOf(selectedSizes) ?? -1;
+                    // Split sizes if multiple are selected (comma-separated)
+                    var sizes = selectedSizes.Split(',').Select(s => s.Trim()).ToList();
+
+                    // For now, we'll just use the first size for quantity validation
+                    // You might want to handle multiple sizes differently
+                    var firstSize = sizes.First();
+
+                    int sizeIndex = product.AvailableSizes?.IndexOf(firstSize) ?? -1;
                     if (sizeIndex >= 0 && sizeIndex < product.stock.Count)
                     {
-                        // Parse the quantity for the selected size
+                        sizeExists = true;
                         if (int.TryParse(product.stock[sizeIndex], out int sizeQuantity))
                         {
                             availableQuantity = sizeQuantity;
@@ -200,19 +215,29 @@ namespace WebApplication1.Controllers
                 }
                 else
                 {
-                    // If no sizes, use the first stock value (or sum all if that makes sense for your business logic)
+                    // For products without sizes, use the first stock value
                     if (product.stock.Count > 0 && int.TryParse(product.stock[0], out int firstStock))
                     {
                         availableQuantity = firstStock;
+                        sizeExists = true;
                     }
                 }
 
-                // Validate quantity against available stock
-                quantity = Math.Max(1, Math.Min(quantity, availableQuantity));
-
-                if (product.AvailableSizes != null && product.AvailableSizes.Count > 0 && string.IsNullOrEmpty(selectedSizes))
+                if (!sizeExists)
                 {
-                    TempData["ErrorMessage"] = "Please select at least one size";
+                    TempData["ErrorMessage"] = "Selected size is not available";
+                    return RedirectToAction("DetailsOfProduct", new { productId });
+                }
+
+                // Validate quantity
+                if (quantity <= 0)
+                {
+                    quantity = 1;
+                }
+
+                if (quantity > availableQuantity)
+                {
+                    TempData["ErrorMessage"] = $"Only {availableQuantity} items available in selected size";
                     return RedirectToAction("DetailsOfProduct", new { productId });
                 }
 
@@ -221,11 +246,13 @@ namespace WebApplication1.Controllers
                     userId = userId,
                     productId = product.productId,
                     brandName = product.brandName,
+                    brandId = product.brandId,
                     productName = product.productName,
                     productThumbnailURL = product.productThumbnailURL,
                     price = product.price,
                     quantity = quantity,
-                    availableStock = availableQuantity, // Now passing the specific quantity for the selected size
+                    subTotal = product.price * quantity,
+                    availableStock = availableQuantity,
                     size = selectedSizes
                 };
 
@@ -233,11 +260,11 @@ namespace WebApplication1.Controllers
 
                 if (success)
                 {
-                    TempData["SuccessMessage"] = "Product(s) added to cart successfully";
+                    TempData["SuccessMessage"] = "Product added to cart successfully";
                 }
                 else
                 {
-                    TempData["ErrorMessage"] = "Some items were already in your cart";
+                    TempData["WarningMessage"] = "Product quantity updated in your cart";
                 }
 
                 return RedirectToAction("ViewCart");
@@ -245,7 +272,7 @@ namespace WebApplication1.Controllers
             catch (Exception ex)
             {
                 Console.WriteLine($"Error adding to cart: {ex.Message}");
-                TempData["ErrorMessage"] = "Error adding product to cart";
+                TempData["ErrorMessage"] = "Error adding product to cart. Please try again.";
                 return RedirectToAction("DetailsOfProduct", new { productId });
             }
         }
