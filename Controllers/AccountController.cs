@@ -6,7 +6,6 @@ using WebApplication1.Models.ViewModel;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages;
 using Microsoft.AspNetCore.Identity.UI.Services;
-using WebApplication1.Models.Services;
 
 namespace WebApplication1.Controllers
 {
@@ -15,22 +14,16 @@ namespace WebApplication1.Controllers
         private readonly SignInManager<UserType> _signInManager;
         private readonly UserManager<UserType> _userManager;
         private readonly ILogger<AccountController> _logger;
-        private readonly EmailValidationService _emailValidationService;
-        private readonly StrictEmailValidator _emailValidator;
         private readonly IEmailSender _emailSender;
         public AccountController(
             SignInManager<UserType> signInManager,
             UserManager<UserType> userManager,
             ILogger<AccountController> logger,
-            EmailValidationService emailValidationService,
-            StrictEmailValidator strictEmailValidator,
             IEmailSender emailSender)
         {
             _signInManager = signInManager;
             _userManager = userManager;
             _logger = logger;
-            _emailValidationService = emailValidationService;
-            _emailValidator = strictEmailValidator;
             _emailSender = emailSender;
         }
         [HttpGet]
@@ -83,12 +76,6 @@ namespace WebApplication1.Controllers
             }
 
             return View(model);
-        }
-        [HttpGet]
-        public async Task<IActionResult> ValidateEmail(string email)
-        {
-            var result = await _emailValidator.ValidateEmailAsync(email);
-            return Json(new { isValid = result.IsValid, message = result.Message });
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -207,18 +194,6 @@ namespace WebApplication1.Controllers
 
             var result = await _userManager.ConfirmEmailAsync(user, code);
             return View(result.Succeeded ? "ConfirmEmail" : "Error");
-        }
-        [HttpGet]
-        [AllowAnonymous]
-        public async Task<IActionResult> VerifyEmail(string email)
-        {
-            if (string.IsNullOrEmpty(email))
-            {
-                return BadRequest();
-            }
-
-            var isValid = await _emailValidationService.IsValidEmail(email);
-            return Json(new { isValid });
         }
         private void AddErrors(IdentityResult result)
         {
