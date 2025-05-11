@@ -420,7 +420,9 @@ namespace WebApplication1.Controllers
                 Subtotal = model.Subtotal,
                 Shipping = model.Shipping,
                 Total = model.Total,
-                OrderItems = cartDetails.carts
+                OrderItems = cartDetails.carts,
+                UserId=userId
+                
             };
 
             // Save order to database
@@ -479,7 +481,15 @@ namespace WebApplication1.Controllers
         [Authorize]
         public IActionResult MyAccount()
         {
-            return View();
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            ViewBag.CustomerName= _orderRepository.GetShopkeeperName(userId);
+            var orders = _orderRepository.GetOrdersByUserId(userId);
+            return View(orders);
+        }
+        public IActionResult detailsOfOrder(int orderId)
+        {
+            var products = _orderRepository.GetOrderedProductsByOrderId(orderId);
+            return View(products);
         }
     }
 }

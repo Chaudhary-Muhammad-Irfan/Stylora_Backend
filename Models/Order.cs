@@ -17,6 +17,7 @@
         public decimal Total { get; set; }
         public DateTime OrderDate { get; set; } = DateTime.Now;
         public string Status { get; set; } = "Pending";
-        public List<Cart> OrderItems { get; set; } = new List<Cart>(); 
+        public List<Cart> OrderItems { get; set; } = new List<Cart>();
+        public string UserId { get; set; }
     }
 }

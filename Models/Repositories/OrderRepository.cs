@@ -20,10 +20,10 @@ namespace WebApplication1.Models.Repositories
                     // 1. Insert Order
                     string orderQuery = @"INSERT INTO Orders 
                                     (CustomerName, Address, City, Country, PostCode, Phone, Email, 
-                                     OrderNote, PaymentMethod, Subtotal, Shipping, Total, OrderDate, Status)
+                                     OrderNote, PaymentMethod, Subtotal, Shipping, Total, OrderDate, Status,UserId)
                                     VALUES 
                                     (@CustomerName, @Address, @City, @Country, @PostCode, @Phone, @Email,
-                                     @OrderNote, @PaymentMethod, @Subtotal, @Shipping, @Total, @OrderDate, @Status);
+                                     @OrderNote, @PaymentMethod, @Subtotal, @Shipping, @Total, @OrderDate, @Status , @UserId);
                                     SELECT CAST(SCOPE_IDENTITY() as int)";
 
                     using (SqlCommand cmd = new SqlCommand(orderQuery, connection, transaction))
@@ -42,6 +42,7 @@ namespace WebApplication1.Models.Repositories
                         cmd.Parameters.AddWithValue("@Total", order.Total);
                         cmd.Parameters.AddWithValue("@OrderDate", order.OrderDate);
                         cmd.Parameters.AddWithValue("@Status", order.Status);
+                        cmd.Parameters.AddWithValue("@UserId", order.UserId);
 
                         orderId = (int)cmd.ExecuteScalar();
                     }
@@ -410,6 +411,47 @@ namespace WebApplication1.Models.Repositories
                 cmd.ExecuteNonQuery();
                 conn.Close();
             }
+        }
+        public List<Order> GetOrdersByUserId(string userId)
+        {
+            var orders = new List<Order>();
+
+            using (SqlConnection connection = new SqlConnection(_connectionString))
+            {
+                connection.Open();
+
+                string query = @"
+            SELECT 
+                OrderId,
+                CustomerName,
+                Total,
+                OrderDate,
+                Status
+            FROM Orders
+            WHERE UserId = @UserId
+            ORDER BY OrderDate DESC";
+
+                using (SqlCommand cmd = new SqlCommand(query, connection))
+                {
+                    cmd.Parameters.AddWithValue("@UserId", userId);
+
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            orders.Add(new Order
+                            {
+                                OrderId = reader.GetInt32(0),
+                                CustomerName = reader.GetString(1),
+                                Total = reader.GetDecimal(2),
+                                OrderDate = reader.GetDateTime(3),
+                                Status = reader.GetString(4)
+                            });
+                        }
+                    }
+                }
+            }
+            return orders;
         }
     }
 }

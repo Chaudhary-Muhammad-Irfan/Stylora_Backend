@@ -1,4 +1,10 @@
-﻿<body>
+﻿@model List<Order>
+@{
+    ViewData["Title"] = "My Account";
+    var customerName = ViewBag.CustomerName;
+}
+
+<body>
     <!--=============== MAIN ===============-->
     <main class="main">
         <!--=============== BREADCRUMB ===============-->
@@ -19,9 +25,6 @@
                     <p class="account__tab" data-target="#orders">
                         <i class="fi fi-rs-shopping-bag"></i> Orders
                     </p>
-                    <p class="account__tab" data-target="#address">
-                        <i class="fi fi-rs-marker"></i> My Address
-                    </p>
                     <p class="account__tab" data-target="#change-password">
                         <i class="fi fi-rs-settings-sliders"></i> Change Password
                     </p>
@@ -33,74 +36,90 @@
                 </div>
                 <div class="tabs__content">
                     <div class="tab__content active-tab" content id="dashboard">
-                        <h3 class="tab__header">Hello Rosie</h3>
+                        <h3 class="tab__header">Hello @customerName</h3>
                         <div class="tab__body">
                             <p class="tab__description">
                                 From your account dashboard. you can easily check & view your
-                                recent order, manage your shipping and billing addresses and
-                                edit your password and account details
+                                recent order, order details and edit your password.
                             </p>
                         </div>
                     </div>
                     <div class="tab__content" content id="orders">
                         <h3 class="tab__header">Your Orders</h3>
                         <div class="tab__body">
-                            <table class="placed__order-table">
-                                <thead>
-                                    <tr>
-                                        <th>Orders</th>
-                                        <th>Date</th>
-                                        <th>Status</th>
-                                        <th>Totals</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>#1357</td>
-                                        <td>March 19, 2022</td>
-                                        <td>Processing</td>
-                                        <td>$125.00</td>
-                                        <td><a href="#" class="view__order">View</a></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    <div class="tab__content" content id="address">
-                        <h3 class="tab__header">Shipping Address</h3>
-                        <div class="tab__body">
-                            <address class="address">
-                                3522 Interstate <br />
-                                75 Business Spur, <br />
-                                Sault Ste. <br />
-                                Marie, Mi 49783
-                            </address>
-                            <p class="city">New York</p>
-                            <a href="#" class="edit">Edit</a>
+                            @if (Model != null && Model.Any())
+                            {
+                                <table class="placed__order-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Order Id</th>
+                                            <th>Total</th>
+                                            <th>Ordered Date</th>
+                                            <th>Status</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var order in Model)
+                                        {
+                                            <tr>
+                                                <td>#@order.OrderId</td>
+                                                <td>RS.@order.Total</td>
+                                                <td>@order.OrderDate.ToString("MMMM dd, yyyy")</td>
+                                                <td>@order.Status</td>
+                                                <td>
+                                                    <a href="@Url.Action("detailsOfOrder", new { orderId = order.OrderId })"
+                                                       class="view__order"
+                                                       data-order-id="@order.OrderId">
+                                                        View
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            }
+                            else
+                            {
+                                <p>You haven't placed any orders yet.</p>
+                            }
                         </div>
                     </div>
                     <div class="tab__content" content id="change-password">
                         <h3 class="tab__header">Change Password</h3>
                         <div class="tab__body">
-                            <form class="form grid">
-                                <input type="password"
-                                       placeholder="Current Password"
-                                       class="form__input" />
-                                <input type="password"
-                                       placeholder="New Password"
-                                       class="form__input" />
-                                <input type="password"
-                                       placeholder="Confirm Password"
-                                       class="form__input" />
-                                <div class="form__btn">
-                                    <button class="btn btn--md">Save</button>
-                                </div>
-                            </form>
+                            <div class="form grid">
+                                <a asp-area="Identity" asp-page="/Account/Manage/ChangePassword"
+                                   class="btn btn--md">
+                                    Change Password
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </section>
     </main>
+
+    @section Scripts {
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // Tab switching functionality
+                const tabs = document.querySelectorAll('.account__tab');
+                tabs.forEach(tab => {
+                    tab.addEventListener('click', function() {
+                        const targetId = this.getAttribute('data-target');
+
+                        // Remove active class from all tabs and content
+                        document.querySelectorAll('.account__tab').forEach(t => t.classList.remove('active-tab'));
+                        document.querySelectorAll('.tab__content').forEach(c => c.classList.remove('active-tab'));
+
+                        // Add active class to clicked tab and corresponding content
+                        this.classList.add('active-tab');
+                        document.querySelector(targetId).classList.add('active-tab'));
+                    });
+                });
+            });
+        </script>
+    }
 </body>
