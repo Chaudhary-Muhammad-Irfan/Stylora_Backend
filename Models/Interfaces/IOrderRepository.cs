@@ -12,6 +12,7 @@ namespace WebApplication1.Models.Interfaces
         public List<OrderedProduct> GetOrderedProductsByOrderId(int orderId);
         public string GetShopkeeperName(string userId);
         public List<Order> GetDistinctCustomersByBrandOwnerId(string brandOwnerId);
-        public void DecreaseProductQuantity(int productId, int quantity);
+        public void DecreaseProductQuantity(int productId, int quantity, string size);
+        public List<Order> GetOrdersByUserId(string userId);
     }
 }

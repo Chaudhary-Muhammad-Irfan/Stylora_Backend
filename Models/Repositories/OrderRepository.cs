@@ -1,4 +1,5 @@
 ﻿using Microsoft.Data.SqlClient;
+using Newtonsoft.Json;
 using WebApplication1.Models.Interfaces;
 
 namespace WebApplication1.Models.Repositories
@@ -19,12 +20,12 @@ namespace WebApplication1.Models.Repositories
                 {
                     // 1. Insert Order
                     string orderQuery = @"INSERT INTO Orders 
-                                    (CustomerName, Address, City, Country, PostCode, Phone, Email, 
-                                     OrderNote, PaymentMethod, Subtotal, Shipping, Total, OrderDate, Status,UserId)
-                                    VALUES 
-                                    (@CustomerName, @Address, @City, @Country, @PostCode, @Phone, @Email,
-                                     @OrderNote, @PaymentMethod, @Subtotal, @Shipping, @Total, @OrderDate, @Status , @UserId);
-                                    SELECT CAST(SCOPE_IDENTITY() as int)";
+                            (CustomerName, Address, City, Country, PostCode, Phone, Email, 
+                             OrderNote, PaymentMethod, Subtotal, Shipping, Total, OrderDate, Status,UserId)
+                            VALUES 
+                            (@CustomerName, @Address, @City, @Country, @PostCode, @Phone, @Email,
+                             @OrderNote, @PaymentMethod, @Subtotal, @Shipping, @Total, @OrderDate, @Status , @UserId);
+                            SELECT CAST(SCOPE_IDENTITY() as int)";
 
                     using (SqlCommand cmd = new SqlCommand(orderQuery, connection, transaction))
                     {
@@ -47,16 +48,18 @@ namespace WebApplication1.Models.Repositories
                         orderId = (int)cmd.ExecuteScalar();
                     }
 
-                    // 2. Insert Order Products
+                    // 2. Insert Order Products and decrease quantities
                     foreach (var item in order.OrderItems)
                     {
-                        DecreaseProductQuantity(item.productId, item.quantity);
+                        // Decrease quantity for the specific size
+                        DecreaseProductQuantity(item.productId, item.quantity, item.size);
+
                         string productQuery = @"INSERT INTO OrderProducts
-                                          (OrderId, ProductId, BrandId, ProductName, Size, 
-                                           Price, Quantity, Subtotal, ProductThumbnailURL)
-                                          VALUES
-                                          (@OrderId, @ProductId, @BrandId, @ProductName, @Size,
-                                           @Price, @Quantity, @Subtotal, @ProductThumbnailURL)";
+                                  (OrderId, ProductId, BrandId, ProductName, Size, 
+                                   Price, Quantity, Subtotal, ProductThumbnailURL)
+                                  VALUES
+                                  (@OrderId, @ProductId, @BrandId, @ProductName, @Size,
+                                   @Price, @Quantity, @Subtotal, @ProductThumbnailURL)";
 
                         using (SqlCommand cmd = new SqlCommand(productQuery, connection, transaction))
                         {
@@ -64,7 +67,7 @@ namespace WebApplication1.Models.Repositories
                             cmd.Parameters.AddWithValue("@ProductId", item.productId);
                             cmd.Parameters.AddWithValue("@BrandId", item.brandId);
                             cmd.Parameters.AddWithValue("@ProductName", item.productName);
-                            cmd.Parameters.AddWithValue("@Size", item.size);
+                            cmd.Parameters.AddWithValue("@Size", item.size ?? (object)DBNull.Value);
                             cmd.Parameters.AddWithValue("@Price", item.price);
                             cmd.Parameters.AddWithValue("@Quantity", item.quantity);
                             cmd.Parameters.AddWithValue("@Subtotal", item.subTotal);
@@ -81,6 +84,71 @@ namespace WebApplication1.Models.Repositories
                 {
                     transaction.Rollback();
                     throw;
+                }
+            }
+        }
+        public void DecreaseProductQuantity(int productId, int quantity, string size)
+        {
+            using (SqlConnection conn = new SqlConnection(_connectionString))
+            {
+                conn.Open();
+
+                // First get the current stock and sizes
+                string getQuery = @"SELECT stock, AvailableSizes FROM Product WHERE productId = @ProductId";
+                string stockJson = "";
+                string sizesJson = "";
+
+                using (SqlCommand getCmd = new SqlCommand(getQuery, conn))
+                {
+                    getCmd.Parameters.AddWithValue("@ProductId", productId);
+                    using (SqlDataReader reader = getCmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            stockJson = reader.GetString(0);
+                            sizesJson = reader.GetString(1);
+                        }
+                    }
+                }
+
+                // Parse the JSON data
+                var sizes = JsonConvert.DeserializeObject<List<string>>(sizesJson);
+                var stock = JsonConvert.DeserializeObject<List<string>>(stockJson);
+
+                // Find the index of the size and update the quantity
+                if (!string.IsNullOrEmpty(size))
+                {
+                    int sizeIndex = sizes.IndexOf(size);
+                    if (sizeIndex >= 0 && sizeIndex < stock.Count)
+                    {
+                        if (int.TryParse(stock[sizeIndex], out int currentQty))
+                        {
+                            int newQty = currentQty - quantity;
+                            if (newQty < 0) newQty = 0; // Prevent negative quantities
+                            stock[sizeIndex] = newQty.ToString();
+                        }
+                    }
+                }
+                else
+                {
+                    // For products without sizes, update the first quantity
+                    if (stock.Count > 0 && int.TryParse(stock[0], out int currentQty))
+                    {
+                        int newQty = currentQty - quantity;
+                        if (newQty < 0) newQty = 0;
+                        stock[0] = newQty.ToString();
+                    }
+                }
+
+                // Update the product with new stock values
+                string updateQuery = @"UPDATE Product SET stock = @NewStock WHERE productId = @ProductId";
+                string newStockJson = JsonConvert.SerializeObject(stock);
+
+                using (SqlCommand updateCmd = new SqlCommand(updateQuery, conn))
+                {
+                    updateCmd.Parameters.AddWithValue("@ProductId", productId);
+                    updateCmd.Parameters.AddWithValue("@NewStock", newStockJson);
+                    updateCmd.ExecuteNonQuery();
                 }
             }
         }
@@ -397,20 +465,6 @@ namespace WebApplication1.Models.Repositories
                 }
             }
             return orders;
-        }
-        public void DecreaseProductQuantity(int productId, int quantity)
-        {
-            using (SqlConnection conn = new SqlConnection(_connectionString))
-            {
-                string query = "UPDATE Product SET stock = stock - @quantity WHERE productId = @ProductId";
-
-                SqlCommand cmd = new SqlCommand(query, conn);
-                cmd.Parameters.AddWithValue("@ProductId", productId);
-                cmd.Parameters.AddWithValue("@quantity", quantity);
-                conn.Open();
-                cmd.ExecuteNonQuery();
-                conn.Close();
-            }
         }
         public List<Order> GetOrdersByUserId(string userId)
         {
