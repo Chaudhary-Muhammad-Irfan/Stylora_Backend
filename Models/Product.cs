@@ -17,10 +17,10 @@ namespace WebApplication1.Models
         public string tagLine { get; set; }
         public int price { get; set; }
         public int discount { get; set; }
-        public int stock { get; set; }
+        public List<string> stock { get; set; } = new List<string>();
         [NotMapped]
         public IFormFile productThumbnail { get; set; }
-        [NotMapped]
+        [NotMapped] 
         public IFormFile sizeChart { get; set; }
         [NotMapped]
         public List<IFormFile> productImages { get; set; }

@@ -26,13 +26,9 @@ namespace WebApplication1.Controllers
         private readonly UserManager<UserType> _userManager;
         private readonly OrderRepository _orderRepository;
         private readonly SignInManager<UserType> _signInManager;
-        public ShopkeeperController(
-             IWebHostEnvironment env,
-             BrandRepository brandRepository,
-             ProductRepository productRepository,
-             UserManager<UserType> userManager,
-             OrderRepository orderRepository,
-             SignInManager<UserType> signInManager)
+        public ShopkeeperController(IWebHostEnvironment env,BrandRepository brandRepository,
+             ProductRepository productRepository,UserManager<UserType> userManager,
+             OrderRepository orderRepository,SignInManager<UserType> signInManager)
         {
             _env = env;
             _brandRepository = brandRepository;
@@ -136,41 +132,78 @@ namespace WebApplication1.Controllers
             {
                 // Get user/brand info
                 var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return RedirectToAction("Login", "Account");
+                }
+
                 var brandDetails = _productRepository.GetBrandInfoOfCurrentShopkeeper(userId);
-                // Assign brand details to product
+                // Process sizes and quantities
                 product.AvailableSizes = Request.Form["AvailableSizes"].ToList();
                 product.brandId = brandDetails.BrandId;
                 product.brandName = brandDetails.BrandName;
-                // Process thumbnail
+
+                // Initialize stock list
+                product.stock = new List<string>();
+
+                // Process each selected size with its quantity
+                foreach (var size in product.AvailableSizes)
+                {
+                    var quantityInputName = $"quantity{size}";
+                    var quantityValue = Request.Form[quantityInputName].FirstOrDefault();
+
+                    // Validate quantity - default to "1" if invalid
+                    if (!int.TryParse(quantityValue, out int qty) || qty < 1)
+                    {
+                        quantityValue = "1"; // Default quantity
+                    }
+
+                    product.stock.Add(quantityValue);
+                }
+
+                // Validate at least one size has been selected
+                if (product.AvailableSizes.Count == 0)
+                {
+                    ModelState.AddModelError("", "Please select at least one size");
+                    return View(product);
+                }
+
+                // Process thumbnail image
                 if (productThumbnail != null && productThumbnail.Length > 0)
                 {
                     product.productThumbnailURL = SaveImage(productThumbnail);
                     ModelState.Remove("productThumbnailURL");
                 }
-                var brandSubstring = product.brandName.Length >= 5 ? product.brandName.Substring(0, 5) : product.brandName;
-                var productNameSubstring = product.productName.Length >= 5 ? product.productName.Substring(0, 5) : product.productName;
+                else
+                {
+                    ModelState.AddModelError("productThumbnail", "Product thumbnail is required");
+                }
 
-                // Creating product code
-                Random random = new Random();
-                int uniqueNumber = random.Next(1, 99999);  // Generates a random number between 1 and 99999
-                var ProductCode = $"{brandSubstring}-{productNameSubstring}-{uniqueNumber}";
-                product.productCode = ProductCode;
-                Console.WriteLine($"Product Code: {product.productCode}");
                 // Process gallery images
                 if (productImages != null && productImages.Count > 0)
                 {
                     product.productImagesURL = ImagesToUrls(productImages);
                     ModelState.Remove("productImagesURL");
                 }
+                else
+                {
+                    ModelState.AddModelError("productImages", "At least one product image is required");
+                }
 
-                // Process size chart image (NEW)
+                // Process size chart (optional)
                 if (sizeChart != null && sizeChart.Length > 0)
                 {
                     product.sizeChartURL = SaveImage(sizeChart);
                     ModelState.Remove("sizeChartURL");
                 }
-                // Handle sizes
-                product.AvailableSizes = Request.Form["AvailableSizes"].ToList();
+
+                // Generate product code
+                var brandSubstring = product.brandName.Length >= 5 ?
+                    product.brandName.Substring(0, 5) : product.brandName;
+                var productNameSubstring = product.productName.Length >= 5 ?
+                    product.productName.Substring(0, 5) : product.productName;
+                var uniqueNumber = new Random().Next(1, 99999);
+                product.productCode = $"{brandSubstring}-{productNameSubstring}-{uniqueNumber}";
 
                 // Validate model
                 if (!ModelState.IsValid)
@@ -182,10 +215,10 @@ namespace WebApplication1.Controllers
                     return View(product);
                 }
 
-                // Add to database
+                // Save to database
                 _productRepository.addProduct(product);
-                // Success - redirect to confirmation or listing
-                return RedirectToAction("getAllProducts"); // Fixed action name
+                TempData["SuccessMessage"] = "Product registered successfully!";
+                return RedirectToAction("getAllProducts");
             }
             catch (Exception ex)
             {

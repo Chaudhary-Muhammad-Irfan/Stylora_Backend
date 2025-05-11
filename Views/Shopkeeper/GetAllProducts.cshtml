@@ -333,7 +333,7 @@
                                 <th>Product Name</th>
                                 <th>Product Code</th>
                                 <th>Category</th>
-                                <th>Quantity</th>
+                                <th>Sizes & Quantity</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -351,8 +351,30 @@
                                     <td data-label="Category">
                                         <span class="badge-category">@product.productCategory</span>
                                     </td>
-                                    <td data-label="Quantity" class="@(product.stock > 0 ? "stock-in" : "stock-out")">
-                                        @product.stock
+                                    <td data-label="Sizes & Quantities">
+                                        @if (product.AvailableSizes != null && product.AvailableSizes.Count > 0)
+                                        {
+                                            <div class="d-flex flex-column">
+                                                <!-- Size Row -->
+                                                <div class="d-flex justify-content-between mb-1">
+                                                    @foreach (var size in product.AvailableSizes)
+                                                    {
+                                                        <span class="fw-bold">@size</span>
+                                                    }
+                                                </div>
+                                                <!-- Quantity Row -->
+                                                <div class="d-flex justify-content-between">
+                                                    @foreach (var quantity in product.stock)
+                                                    {
+                                                        <span>@quantity</span>
+                                                    }
+                                                </div>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">No sizes specified</span>
+                                        }
                                     </td>
                                     <td data-label="Actions">
                                         <div class="d-flex action-buttons">

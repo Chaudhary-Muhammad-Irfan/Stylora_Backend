@@ -74,27 +74,34 @@
             background: linear-gradient(to bottom right, #ffffff, #f8f9fa);
         }
 
-        .size-option label {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: var(--secondary-color);
-            border: 2px solid #dee2e6;
+        .size-option {
             display: flex;
+            flex-direction: column;
             align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-weight: 600;
-            color: var(--text-color);
+            margin-bottom: 1rem;
         }
 
-        .size-option input:checked + label {
-            background: var(--primary-color);
-            color: white;
-            border-color: var(--primary-color);
-            transform: scale(1.1);
-        }
+            .size-option label {
+                width: 60px;
+                height: 60px;
+                border-radius: 50%;
+                background: var(--secondary-color);
+                border: 2px solid #dee2e6;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                font-weight: 600;
+                color: var(--text-color);
+            }
+
+            .size-option input[type="checkbox"]:checked + label {
+                background: var(--primary-color);
+                color: white;
+                border-color: var(--primary-color);
+                transform: scale(1.1);
+            }
 
         .file-upload {
             border: 2px dashed #dee2e6;
@@ -185,62 +192,101 @@
             color: #6c757d;
             margin-top: 5px;
         }
+
+        .size-quantity-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .size-quantity-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
     </style>
 </head>
 <body>
     <div class="product-form-container">
         <h2 class="form-title">Product Registration</h2>
-        <form method="post"
-              asp-controller="Shopkeeper"
-              
-              asp-action="registerProduct"
-              id="productForm"
-              enctype="multipart/form-data">
+        <form method="post" asp-controller="Shopkeeper" asp-action="registerProduct" id="productForm" enctype="multipart/form-data">
             @Html.AntiForgeryToken()
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
             <!-- Product Details Section -->
             <div class="form-section">
                 <div class="mb-4">
                     <label class="form-label fw-bold">Product Name</label>
-                    <input type="text" class="form-control" name="productName" required>
+                    <input type="text" class="form-control" asp-for="productName" required>
                 </div>
                 <div class="mb-4">
                     <label class="form-label fw-bold">Product Category</label>
-                    <input type="text" class="form-control" name="productCategory" required>
+                    <input type="text" class="form-control" asp-for="productCategory" required>
                     <div class="promo-examples">
                         Examples: "Formal, Kurta, Lehenga, Frak............"
                     </div>
                 </div>
                 <div class="mb-4">
                     <label class="form-label fw-bold">Product Description</label>
-                    <textarea class="form-control" name="productDescription" rows="4" required></textarea>
+                    <textarea class="form-control" asp-for="productDescription" rows="4" required></textarea>
                 </div>
 
                 <div class="row g-3">
-                    <div class="col-md-4">
+                    <div class="col-md-6">
                         <label class="form-label fw-bold">Price (PKR)</label>
-                        <input type="number" class="form-control" name="price" required>
+                        <input type="number" class="form-control" asp-for="price" required>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-6">
                         <label class="form-label fw-bold">Discount %</label>
-                        <input type="number" class="form-control" name="discount" value="0" min="0" max="100">
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label fw-bold">Quantity</label>
-                        <input type="number" class="form-control" name="stock" min="1" required>
+                        <input type="number" class="form-control" asp-for="discount" value="0" min="0" max="100">
                     </div>
                 </div>
 
-                <!-- New Promotional Field -->
                 <div class="mt-4 promo-field">
                     <label class="form-label fw-bold">Special Offer Tagline</label>
-                    <input type="text" class="form-control"
-                           name="tagLine"
-                           placeholder="Enter attention-grabbing offer"
-                           maxlength="60">
+                    <input type="text" class="form-control" asp-for="tagLine" placeholder="Enter attention-grabbing offer" maxlength="60">
                     <div class="promo-examples">
                         Examples: "Buy 1 Get 1 Free!", "Purchase Now for Chance to Win!",
                         "Limited Time Offer!", "Free Gift with Purchase!"
+                    </div>
+                </div>
+            </div>
+
+            <!-- Size & Quantity Section -->
+            <div class="form-section">
+                <label class="form-label fw-bold mb-3">Available Sizes & Quantities</label>
+                <div class="size-quantity-container">
+                    <div class="size-quantity-group">
+                        <div class="size-option">
+                            <input type="checkbox" name="AvailableSizes" value="S" id="sizeS" onchange="toggleQuantityInput('sizeS')">
+                            <label for="sizeS">S</label>
+                        </div>
+                        <input type="number" id="quantityS" name="stock" class="form-control mt-2 quantity-input"
+                               placeholder="Qty" min="1" style="display: none; width: 100px;">
+                    </div>
+                    <div class="size-quantity-group">
+                        <div class="size-option">
+                            <input type="checkbox" name="AvailableSizes" value="M" id="sizeM" onchange="toggleQuantityInput('sizeM')">
+                            <label for="sizeM">M</label>
+                        </div>
+                        <input type="number" id="quantityM" name="stock" class="form-control mt-2 quantity-input"
+                               placeholder="Qty" min="1" style="display: none; width: 100px;">
+                    </div>
+                    <div class="size-quantity-group">
+                        <div class="size-option">
+                            <input type="checkbox" name="AvailableSizes" value="L" id="sizeL" onchange="toggleQuantityInput('sizeL')">
+                            <label for="sizeL">L</label>
+                        </div>
+                        <input type="number" id="quantityL" name="stock" class="form-control mt-2 quantity-input"
+                               placeholder="Qty" min="1" style="display: none; width: 100px;">
+                    </div>
+                    <div class="size-quantity-group">
+                        <div class="size-option">
+                            <input type="checkbox" name="AvailableSizes" value="XL" id="sizeXL" onchange="toggleQuantityInput('sizeXL')">
+                            <label for="sizeXL">XL</label>
+                        </div>
+                        <input type="number" id="quantityXL" name="stock" class="form-control mt-2 quantity-input"
+                               placeholder="Qty" min="1" style="display: none; width: 100px;">
                     </div>
                 </div>
             </div>
@@ -263,8 +309,7 @@
                         <i class="fas fa-images fa-2x text-muted mb-3"></i>
                         <p class="mb-0">Upload product gallery (up to 10 images)</p>
                         <small class="text-muted">Show different angles and details</small>
-                        <input type="file" id="productImages" name="productImages" class="d-none"
-                               accept="image/*" multiple required>
+                        <input type="file" id="productImages" name="productImages" class="d-none" accept="image/*" multiple required>
                     </div>
                     <div id="imagePreviews" class="mt-3 d-flex flex-wrap"></div>
                 </div>
@@ -277,29 +322,6 @@
                         <input type="file" id="sizeChart" name="sizeChart" class="d-none" accept="image/*">
                     </div>
                     <div id="sizeChartPreview" class="mt-3"></div>
-                </div>
-            </div>
-
-            <!-- Size Selection -->
-            <div class="form-section">
-                <label class="form-label fw-bold mb-3">Available Sizes</label>
-                <div class="d-flex flex-wrap gap-3">
-                    <div class="size-option">
-                        <input type="checkbox" name="AvailableSizes" value="S" id="sizeS">
-                        <label for="sizeS">S</label>
-                    </div>
-                    <div class="size-option">
-                        <input type="checkbox" name="AvailableSizes" value="M" id="sizeM">
-                        <label for="sizeM">M</label>
-                    </div>
-                    <div class="size-option">
-                        <input type="checkbox" name="AvailableSizes" value="L" id="sizeL">
-                        <label for="sizeL">L</label>
-                    </div>
-                    <div class="size-option">
-                        <input type="checkbox" name="AvailableSizes" value="XL" id="sizeXL">
-                        <label for="sizeXL">XL</label>
-                    </div>
                 </div>
             </div>
 
@@ -360,39 +382,58 @@
             Array.from(this.files).forEach(file => createPreview(file, container));
         });
 
-        // Size Chart (FIXED: Moved outside gallery handler)
+        // Size Chart
         document.getElementById('sizeChart').addEventListener('change', function() {
             const container = document.getElementById('sizeChartPreview');
             container.innerHTML = '';
             if (this.files[0]) createPreview(this.files[0], container);
         });
 
-        // Form Submission (FIXED: Proper reset flow)
-                document.getElementById('productForm').addEventListener('submit', function() {
-            const sizesSelected = document.querySelectorAll('input[name="AvailableSizes"]:checked').length;
-            if(!sizesSelected) {
-                alert('Please select at least one size');
-                return false; // Only prevent if validation fails
+        // Toggle quantity input visibility
+        function toggleQuantityInput(sizeId) {
+            const checkbox = document.getElementById(sizeId);
+            const quantityInput = document.getElementById('quantity' + sizeId.substring(4));
+
+            if (checkbox.checked) {
+                quantityInput.style.display = 'block';
+                quantityInput.required = true;
+            } else {
+                quantityInput.style.display = 'none';
+                quantityInput.required = false;
+                quantityInput.value = '';
             }
-            return true; // Allow form to submit
+        }
+
+        // Form submission validation
+        document.getElementById('productForm').addEventListener('submit', function(e) {
+            const sizesSelected = document.querySelectorAll('input[name="AvailableSizes"]:checked');
+            if(sizesSelected.length === 0) {
+                alert('Please select at least one size');
+                e.preventDefault();
+                return false;
+            }
+
+            // Validate that all selected sizes have quantities
+            let allQuantitiesValid = true;
+            sizesSelected.forEach(size => {
+                const sizeId = size.id;
+                const quantityInput = document.getElementById('quantity' + sizeId.substring(4));
+                if (!quantityInput.value || parseInt(quantityInput.value) < 1) {
+                    allQuantitiesValid = false;
+                    quantityInput.style.border = '2px solid red';
+                } else {
+                    quantityInput.style.border = '';
+                }
+            });
+
+            if (!allQuantitiesValid) {
+                alert('Please enter valid quantities for all selected sizes');
+                e.preventDefault();
+                return false;
+            }
+
+            return true;
         });
-        // document.getElementById('productForm').addEventListener('submit', function(e) {
-        //     e.preventDefault();
-
-        //     const sizesSelected = document.querySelectorAll('input[name="AvailableSizes"]:checked').length;
-        //     if(!sizesSelected) return alert('Please select at least one size');
-
-        //     // Show success message
-        //     document.querySelector('.success-overlay').style.display = 'flex';
-
-        //     // Reset form after displaying message
-        //     setTimeout(() => {
-        //         this.reset();
-        //         document.getElementById('thumbnailPreview').innerHTML = '';
-        //         document.getElementById('imagePreviews').innerHTML = '';
-        //         document.getElementById('sizeChartPreview').innerHTML = '';
-        //     }, 0);
-        // });
 
         // Redirect Function
         function redirectToDashboard() {

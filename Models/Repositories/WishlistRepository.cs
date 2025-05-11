@@ -15,8 +15,7 @@ namespace WebApplication1.Models.Repositories
         productId, 
         productName, 
         productThumbnailURL, 
-        price, 
-        stock
+        price
     )
     SELECT 
         @userId, 
@@ -25,8 +24,7 @@ namespace WebApplication1.Models.Repositories
         p.productId, 
         p.productName, 
         p.productThumbnailURL, 
-        p.price, 
-        p.stock
+        p.price
     FROM Product p
     WHERE p.productId = @productId
     AND NOT EXISTS (
@@ -61,7 +59,7 @@ namespace WebApplication1.Models.Repositories
             using (SqlConnection conn = new SqlConnection(_connectionString))
             {
                 string query = @"SELECT productId, productName, productThumbnailURL,
-                         price, brandId, brandName, stock 
+                         price, brandId, brandName 
                          FROM Wishlist 
                          WHERE userId = @userId";
 
@@ -81,8 +79,7 @@ namespace WebApplication1.Models.Repositories
                                 productThumbnailURL = reader["productThumbnailURL"].ToString(),
                                 price = Convert.ToInt32(reader["price"]),
                                 brandId = Convert.ToInt32(reader["brandId"]),
-                                brandName = reader["brandName"].ToString(),
-                                stock = Convert.ToInt32(reader["stock"])
+                                brandName = reader["brandName"].ToString()
                             };
 
                             wishlistProducts.Add(product);

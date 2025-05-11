@@ -20,17 +20,17 @@ namespace WebApplication1.Models.Repositories
                 using (SqlConnection connection = new SqlConnection(_connectionString))
                 {
                     connection.Open();
-                    string query = @"INSERT INTO Product (brandId, brandName,productCode, productName, productCategory, productDescription, 
-        tagLine, price, discount, stock, productThumbnailURL, 
-        productImagesURL, sizeChartURL, AvailableSizes , DateAdded)
-        VALUES 
-       (@brandId, @brandName, @productCode, @productName, @productCategory, @productDescription,
-        @tagLine, @price, @discount, @stock, @productThumbnailURL, 
-        @productImagesURL, @sizeChartURL, @AvailableSizes , GETDATE());
-        SELECT SCOPE_IDENTITY();";
+                    string query = @"INSERT INTO Product (brandId, brandName, productCode, productName, productCategory, productDescription, 
+                            tagLine, price, discount, stock, productThumbnailURL, 
+                            productImagesURL, sizeChartURL, AvailableSizes, DateAdded)
+                            VALUES 
+                            (@brandId, @brandName, @productCode, @productName, @productCategory, @productDescription,
+                            @tagLine, @price, @discount, @stock, @productThumbnailURL, 
+                            @productImagesURL, @sizeChartURL, @AvailableSizes, GETDATE());
+                            SELECT SCOPE_IDENTITY();";
+
                     using (SqlCommand command = new SqlCommand(query, connection))
                     {
-                        // Add parameters
                         command.Parameters.AddWithValue("@brandId", product.brandId);
                         command.Parameters.AddWithValue("@brandName", product.brandName);
                         command.Parameters.AddWithValue("@productCode", product.productCode);
@@ -40,26 +40,21 @@ namespace WebApplication1.Models.Repositories
                         command.Parameters.AddWithValue("@tagLine", (object)product.tagLine ?? DBNull.Value);
                         command.Parameters.AddWithValue("@price", product.price);
                         command.Parameters.AddWithValue("@discount", product.discount);
-                        command.Parameters.AddWithValue("@stock", product.stock);
+
+                        var stockJson = JsonConvert.SerializeObject(product.stock);
+                        command.Parameters.AddWithValue("@stock", stockJson);
+
                         command.Parameters.AddWithValue("@productThumbnailURL", (object)product.productThumbnailURL ?? DBNull.Value);
                         command.Parameters.AddWithValue("@sizeChartURL", (object)product.sizeChartURL ?? DBNull.Value);
-                        command.Parameters.AddWithValue("@DateAdded", DateTime.Now);
-                        // Handle list serialization
-                        var imagesJson = product.productImagesURL != null ?
-                            JsonConvert.SerializeObject(product.productImagesURL) :
-                            (object)DBNull.Value;
+
+                        var imagesJson = JsonConvert.SerializeObject(product.productImagesURL);
                         command.Parameters.AddWithValue("@productImagesURL", imagesJson);
-                        var sizesJson = product.AvailableSizes != null ?
-                            JsonConvert.SerializeObject(product.AvailableSizes) :
-                            (object)DBNull.Value;
+
+                        var sizesJson = JsonConvert.SerializeObject(product.AvailableSizes);
                         command.Parameters.AddWithValue("@AvailableSizes", sizesJson);
-                        // command.ExecuteNonQuery();
 
                         var newId = command.ExecuteScalar();
                         Console.WriteLine($"New product ID: {newId}");
-
-
-                        Console.WriteLine("Product added to database");
                     }
                 }
             }
@@ -137,14 +132,17 @@ namespace WebApplication1.Models.Repositories
                 }
             }
         }
-        // Getting Prodcuts of currently login shopkeeper
         public List<Product> GetAllProducts(string userId)
         {
             List<Product> products = new List<Product>();
             using (SqlConnection connection = new SqlConnection(_connectionString))
             {
-                string query = @"select productName,productCode , productCategory,stock,productThumbnailURL from Product
-            WHERE brandId = (select top 1 brandId from Brand WHERE brandOwnerId = @userId order by brandId)";
+                string query = @"SELECT p.productName, p.productCode, p.productCategory, 
+                         p.stock, p.productThumbnailURL, p.AvailableSizes
+                         FROM Product p
+                         WHERE p.brandId = 
+                         (SELECT TOP 1 brandId FROM Brand WHERE brandOwnerId = @userId ORDER BY brandId)";
+
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
                     command.Parameters.AddWithValue("@UserId", userId);
@@ -155,14 +153,41 @@ namespace WebApplication1.Models.Repositories
                         {
                             while (reader.Read())
                             {
+                                // Deserialize stock quantities from JSON
+                                List<string> stock = new List<string>();
+                                if (!reader.IsDBNull(3))
+                                {
+                                    try
+                                    {
+                                        stock = JsonConvert.DeserializeObject<List<string>>(reader.GetString(3));
+                                    }
+                                    catch
+                                    {
+                                        stock = new List<string>();
+                                    }
+                                }
+
+                                // Deserialize available sizes from JSON
+                                List<string> availableSizes = new List<string>();
+                                if (!reader.IsDBNull(5))
+                                {
+                                    try
+                                    {
+                                        availableSizes = JsonConvert.DeserializeObject<List<string>>(reader.GetString(5));
+                                    }
+                                    catch
+                                    {
+                                        availableSizes = new List<string>();
+                                    }
+                                }
                                 Product product = new Product
                                 {
                                     productName = reader.GetString(0),
                                     productCode = reader.GetString(1),
                                     productCategory = reader.GetString(2),
-                                    stock = reader.GetInt32(3),
-                                    productThumbnailURL=reader.GetString(4)
-                                    
+                                    stock = stock,
+                                    productThumbnailURL = reader.IsDBNull(4) ? null : reader.GetString(4),
+                                    AvailableSizes = availableSizes
                                 };
                                 products.Add(product);
                             }
@@ -175,23 +200,22 @@ namespace WebApplication1.Models.Repositories
                     }
                 }
             }
-
             return products;
         }
-        // Getting products of current Brand
         public List<Product> GetAllProductsOfCurrentBrand(int brandId)
         {
             List<Product> products = new List<Product>();
             using (SqlConnection connection = new SqlConnection(_connectionString))
             {
                 string query = @"SELECT productId, productCode, brandId, brandName, productName, productCategory, 
-                productDescription, tagLine, price, discount, stock, productThumbnailURL, 
-                productImagesURL, sizeChartURL, AvailableSizes
-                FROM Product
-                WHERE brandId = @brandId";
+                        productDescription, tagLine, price, discount, stock, productThumbnailURL, 
+                        productImagesURL, sizeChartURL, AvailableSizes
+                        FROM Product
+                        WHERE brandId = @brandId";
+
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
-                    command.Parameters.AddWithValue("@brandId",brandId);
+                    command.Parameters.AddWithValue("@brandId", brandId);
                     try
                     {
                         connection.Open();
@@ -199,7 +223,21 @@ namespace WebApplication1.Models.Repositories
                         {
                             while (reader.Read())
                             {
-                                // Safe JSON deserialization
+                                // Deserialize stock
+                                List<string> stock = new List<string>();
+                                if (!reader.IsDBNull(10))
+                                {
+                                    try
+                                    {
+                                        stock = JsonConvert.DeserializeObject<List<string>>(reader.GetString(10));
+                                    }
+                                    catch
+                                    {
+                                        stock = new List<string>();
+                                    }
+                                }
+
+                                // Deserialize images
                                 List<string> images = new List<string>();
                                 if (!reader.IsDBNull(12))
                                 {
@@ -212,6 +250,8 @@ namespace WebApplication1.Models.Repositories
                                         images = new List<string>();
                                     }
                                 }
+
+                                // Deserialize sizes
                                 List<string> sizes = new List<string>();
                                 if (!reader.IsDBNull(14))
                                 {
@@ -224,6 +264,7 @@ namespace WebApplication1.Models.Repositories
                                         sizes = new List<string>();
                                     }
                                 }
+
                                 Product product = new Product
                                 {
                                     productId = reader.GetInt32(0),
@@ -236,7 +277,7 @@ namespace WebApplication1.Models.Repositories
                                     tagLine = reader.IsDBNull(7) ? null : reader.GetString(7),
                                     price = reader.GetInt32(8),
                                     discount = reader.GetInt32(9),
-                                    stock = reader.GetInt32(10),
+                                    stock = stock,
                                     productThumbnailURL = reader.IsDBNull(11) ? null : reader.GetString(11),
                                     productImagesURL = images,
                                     sizeChartURL = reader.IsDBNull(13) ? null : reader.GetString(13),
@@ -255,29 +296,30 @@ namespace WebApplication1.Models.Repositories
             }
             return products;
         }
+
         public Product getProductByID(int productId)
         {
             using (SqlConnection connection = new SqlConnection(_connectionString))
             {
                 string query = @"
-        SELECT 
-            productId,              -- 0
-            productCode,            -- 1
-            brandId,               -- 2
-            brandName,             -- 3
-            productName,           -- 4
-            productCategory,       -- 5
-            productDescription,    -- 6
-            tagLine,               -- 7
-            price,                 -- 8
-            discount,              -- 9
-            stock,                 -- 10
-            productThumbnailURL,   -- 11
-            productImagesURL,      -- 12 (JSON)
-            sizeChartURL,          -- 13
-            AvailableSizes         -- 14 (JSON)
-        FROM Product 
-        WHERE productId = @productId";
+            SELECT 
+                productId,              -- 0
+                productCode,            -- 1
+                brandId,                -- 2
+                brandName,              -- 3
+                productName,            -- 4
+                productCategory,        -- 5
+                productDescription,     -- 6
+                tagLine,                -- 7
+                price,                  -- 8
+                discount,               -- 9
+                stock,                  -- 10 (JSON)
+                productThumbnailURL,    -- 11
+                productImagesURL,       -- 12 (JSON)
+                sizeChartURL,           -- 13
+                AvailableSizes         -- 14 (JSON)
+            FROM Product 
+            WHERE productId = @productId";
 
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
@@ -290,6 +332,24 @@ namespace WebApplication1.Models.Repositories
                         {
                             if (reader.Read())
                             {
+                                // Handle stock
+                                List<string> stock = new List<string>();
+                                if (!reader.IsDBNull(10))
+                                {
+                                    string stockJson = reader.GetString(10).Trim();
+                                    if (!string.IsNullOrEmpty(stockJson))
+                                    {
+                                        try
+                                        {
+                                            stock = JsonConvert.DeserializeObject<List<string>>(stockJson);
+                                        }
+                                        catch (Exception ex)
+                                        {
+                                            Console.WriteLine($"Error deserializing stock: {ex.Message}");
+                                        }
+                                    }
+                                }
+
                                 // Handle product images
                                 List<string> images = new List<string>();
                                 if (!reader.IsDBNull(12))
@@ -338,11 +398,11 @@ namespace WebApplication1.Models.Repositories
                                     tagLine = reader.IsDBNull(7) ? null : reader.GetString(7),
                                     price = reader.GetInt32(8),
                                     discount = reader.GetInt32(9),
-                                    stock = reader.GetInt32(10),
+                                    stock = stock,
                                     productThumbnailURL = reader.IsDBNull(11) ? null : reader.GetString(11),
-                                    productImagesURL = images ?? new List<string>(),
+                                    productImagesURL = images,
                                     sizeChartURL = reader.IsDBNull(13) ? null : reader.GetString(13),
-                                    AvailableSizes = sizes ?? new List<string>()
+                                    AvailableSizes = sizes
                                 };
                             }
                             return null;

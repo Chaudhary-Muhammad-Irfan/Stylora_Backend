@@ -100,7 +100,6 @@ namespace WebApplication1.Controllers
                     productName = product.productName,
                     productThumbnailURL = product.productThumbnailURL,
                     price = product.price,
-                    stock = product.stock,
                     brandId = product.brandId,
                     brandName = product.brandName
                 };
@@ -184,7 +183,32 @@ namespace WebApplication1.Controllers
                     return RedirectToAction("DetailsOfProduct", new { productId });
                 }
 
-                quantity = Math.Max(1, Math.Min(quantity, product.stock));
+                // Handle stock validation for selected size
+                int availableQuantity = 0;
+                if (!string.IsNullOrEmpty(selectedSizes))
+                {
+                    // Find the index of the selected size in AvailableSizes
+                    int sizeIndex = product.AvailableSizes?.IndexOf(selectedSizes) ?? -1;
+                    if (sizeIndex >= 0 && sizeIndex < product.stock.Count)
+                    {
+                        // Parse the quantity for the selected size
+                        if (int.TryParse(product.stock[sizeIndex], out int sizeQuantity))
+                        {
+                            availableQuantity = sizeQuantity;
+                        }
+                    }
+                }
+                else
+                {
+                    // If no sizes, use the first stock value (or sum all if that makes sense for your business logic)
+                    if (product.stock.Count > 0 && int.TryParse(product.stock[0], out int firstStock))
+                    {
+                        availableQuantity = firstStock;
+                    }
+                }
+
+                // Validate quantity against available stock
+                quantity = Math.Max(1, Math.Min(quantity, availableQuantity));
 
                 if (product.AvailableSizes != null && product.AvailableSizes.Count > 0 && string.IsNullOrEmpty(selectedSizes))
                 {
@@ -201,7 +225,7 @@ namespace WebApplication1.Controllers
                     productThumbnailURL = product.productThumbnailURL,
                     price = product.price,
                     quantity = quantity,
-                    availableStock = product.stock,
+                    availableStock = availableQuantity, // Now passing the specific quantity for the selected size
                     size = selectedSizes
                 };
 

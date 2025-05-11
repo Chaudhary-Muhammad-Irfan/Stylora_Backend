@@ -13,6 +13,5 @@ namespace WebApplication1.Models
         public string productName { get; set; }
         public string productThumbnailURL { get; set; }
         public int price { get; set; }
-        public int stock { get; set; }
     }
 }

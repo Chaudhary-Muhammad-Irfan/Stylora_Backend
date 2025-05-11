@@ -85,11 +85,15 @@
         }
 
         /* Size chart image */
+        .size-chart-container {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
         .size-chart-image {
-            max-width: 100%;
+            max-width: 300px;
             height: auto;
-            display: block;
-            margin: 0 auto;
             border: 1px solid #ddd;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -100,6 +104,7 @@
             display: flex;
             gap: 10px;
             flex-wrap: wrap;
+            margin-bottom: 20px;
         }
 
         .size__link {
@@ -108,6 +113,8 @@
             border-radius: 4px;
             cursor: pointer;
             transition: all 0.3s ease;
+            position: relative;
+            text-align: center;
         }
 
             .size__link:hover {
@@ -121,15 +128,42 @@
                 border-color: #2a9d8f;
             }
 
-        @@media (min-width: 768px) {
-            .size-chart-image {
-                max-width: 80%;
-            }
+        .size-quantity {
+            font-size: 0.8em;
+            display: block;
+            margin-top: 3px;
+            color: #666;
         }
 
-        @@media (min-width: 1200px) {
+        .selected .size-quantity {
+            color: #eee;
+        }
+
+        .quantity-selector {
+            margin-top: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+            .quantity-selector input {
+                width: 60px;
+                padding: 8px;
+                text-align: center;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+            }
+
+        .stock-warning {
+            color: #dc3545;
+            font-size: 0.9em;
+            margin-top: 5px;
+            display: none;
+        }
+
+        @@media (max-width: 768px) {
             .size-chart-image {
-                max-width: 60%;
+                max-width: 200px;
             }
         }
     </style>
@@ -199,14 +233,19 @@
 
                     <!-- Size Selection -->
                     <div class="details__size flex">
-                        <span class="details__size-title">Size</span>
+                        <span class="details__size-title">Available Sizes</span>
                         <ul class="size__list" id="sizeList">
                             @if (Model.Product.AvailableSizes != null && Model.Product.AvailableSizes.Count > 0)
                             {
-                                foreach (var size in Model.Product.AvailableSizes)
+                                for (int i = 0; i < Model.Product.AvailableSizes.Count; i++)
                                 {
+                                    var size = Model.Product.AvailableSizes[i];
+                                    var quantity = i < Model.Product.stock.Count ? Model.Product.stock[i] : "0";
                                     <li>
-                                        <p class="size__link" data-size="@size">@size</p>
+                                        <p class="size__link" data-size="@size" data-quantity="@quantity">
+                                            @size
+                                            <span class="size-quantity">(@quantity available)</span>
+                                        </p>
                                     </li>
                                 }
                             }
@@ -217,18 +256,24 @@
                         </ul>
                         <input type="hidden" id="selectedSizes" name="selectedSizes" value="" />
                     </div>
+
                     @if (TempData["FromWishlist"] != null && (bool)TempData["FromWishlist"])
                     {
                         <div class="alert alert-info">
                             Please select a size to add this product to your cart
                         </div>
                     }
+
                     <!-- Add to Cart Section -->
                     <div class="details__action">
                         @using (Html.BeginForm("AddToCart", "Customer", FormMethod.Post, new { @class = "add-to-cart-form" }))
                         {
                             @Html.AntiForgeryToken()
-                            <input type="number" name="quantity" class="quantity" value="1" min="1" max="@Model.Product.stock" />
+                            <div class="quantity-selector">
+                                <label for="quantity">Quantity:</label>
+                                <input type="number" name="quantity" class="quantity" id="quantityInput" value="1" min="1" />
+                                <span class="stock-warning" id="stockWarning"></span>
+                            </div>
                             <input type="hidden" name="productId" value="@Model.Product.productId" />
                             <input type="hidden" name="selectedSizes" id="formSelectedSizes" value="" />
                             <button type="submit" class="btn btn--sm" id="addToCartBtn">Add To Cart</button>
@@ -238,37 +283,26 @@
                             <i class="fi fi-rs-heart"></i>
                         </a>
                     </div>
-                    <!-- Stock Information -->
-                    <ul class="details__meta">
-                        <li class="meta__list flex">
-                            <h3>Availability:</h3>@Model.Product.stock Items in Stock
-                        </li>
-                    </ul>
                 </div>
             </div>
+
+            <!-- Size Chart Section -->
+            @if (!string.IsNullOrEmpty(Model.Product.sizeChartURL))
+            {
+                <div class="size-chart-container container">
+                    <img src="@Url.Content($"~/{Model.Product.sizeChartURL}")"
+                         alt="Size Chart"
+                         class="size-chart-image" />
+                </div>
+            }
         </section>
 
         <!-- Tabs Section -->
         <section class="details__tab container">
             <div class="detail__tabs">
-                <span class="detail__tab active-tab" data-target="#size-chart">
-                    Size Chart
-                </span>
-                <span class="detail__tab" data-target="#reviews">Reviews(@Model.Reviews.Count)</span>
+                <span class="detail__tab active-tab" data-target="#reviews">Reviews(@Model.Reviews.Count)</span>
             </div>
             <div class="details__tabs-content">
-                <div class="details__tab-content" content id="size-chart">
-                    @if (!string.IsNullOrEmpty(Model.Product.sizeChartURL))
-                    {
-                        <img src="@Url.Content($"~/{Model.Product.sizeChartURL}")"
-                             alt="Size Chart"
-                             class="size-chart-image" />
-                    }
-                    else
-                    {
-                        <p>No size chart available for this product</p>
-                    }
-                </div>
                 <div class="details__tab-content" content id="reviews">
                     <!-- Reviews Section -->
                     @if (!Model.Reviews.Any())
@@ -344,26 +378,20 @@
                     {
                         <div class="product__item">
                             <div class="product__banner">
-                                <a href="@Url.Action("DetailsOfProduct", "Product", new { productId = relatedProduct.productId })" class="product__images">
-                                    <img src="@Url.Content(relatedProduct.productThumbnailURL)"
+                                <a href="@Url.Action("DetailsOfProduct", "Customer", new { productId = relatedProduct.productId })" class="product__images">
+                                    <img src="~/@Url.Content(relatedProduct.productThumbnailURL)"
                                          alt="@relatedProduct.productName"
                                          class="product__img default" />
                                 </a>
                             </div>
                             <div class="product__content">
                                 <span class="product__category">@relatedProduct.productCategory</span>
-                                <a href="@Url.Action("DetailsOfProduct", "Product", new { productId = relatedProduct.productId })">
+                                <a href="@Url.Action("DetailsOfProduct", "Customer", new { productId = relatedProduct.productId })">
                                     <h3 class="product__title">@relatedProduct.productName</h3>
                                 </a>
-                                <div class="product__rating">
-                                    @* You can re-enable star rating for related products if needed *@
-                                </div>
                                 <div class="product__price flex">
                                     <span class="new__price">Rs. @relatedProduct.price.ToString("N0")</span>
                                 </div>
-                                <a href="#" class="action__btn cart__btn" aria-label="Add To Cart">
-                                    <i class="fi fi-rs-shopping-bag-add"></i>
-                                </a>
                             </div>
                         </div>
                     }
@@ -373,20 +401,31 @@
     </main>
 
     <script>
-                // Size selection functionality
+        // Size selection functionality
         document.addEventListener('DOMContentLoaded', function() {
             const sizeLinks = document.querySelectorAll('.size__link');
             const selectedSizesInput = document.getElementById('selectedSizes');
             const formSelectedSizesInput = document.getElementById('formSelectedSizes');
             const addToCartBtn = document.getElementById('addToCartBtn');
+            const quantityInput = document.getElementById('quantityInput');
+            const stockWarning = document.getElementById('stockWarning');
 
-            // Track selected sizes
+            // Track selected sizes and their quantities
             let selectedSizes = [];
+            let sizeQuantities = {};
+
+            // Initialize size quantities
+            sizeLinks.forEach(link => {
+                const size = link.getAttribute('data-size');
+                const quantity = parseInt(link.getAttribute('data-quantity')) || 0;
+                sizeQuantities[size] = quantity;
+            });
 
             // Handle size selection
             sizeLinks.forEach(link => {
                 link.addEventListener('click', function() {
                     const size = this.getAttribute('data-size');
+                    const maxQuantity = sizeQuantities[size] || 0;
 
                     if (this.classList.contains('selected')) {
                         // Deselect
@@ -396,6 +435,14 @@
                         // Select
                         this.classList.add('selected');
                         selectedSizes.push(size);
+
+                        // Update quantity max value
+                        quantityInput.max = maxQuantity;
+                        if (parseInt(quantityInput.value) > maxQuantity) {
+                            quantityInput.value = maxQuantity;
+                            stockWarning.textContent = `Maximum available quantity for ${size} is ${maxQuantity}`;
+                            stockWarning.style.display = 'block';
+                        }
                     }
 
                     // Update hidden inputs
@@ -409,10 +456,50 @@
                 });
             });
 
+            // Quantity validation
+            quantityInput.addEventListener('change', function() {
+                if (selectedSizes.length === 1) {
+                    const selectedSize = selectedSizes[0];
+                    const maxQuantity = sizeQuantities[selectedSize] || 0;
+
+                    if (parseInt(this.value) > maxQuantity) {
+                        this.value = maxQuantity;
+                        stockWarning.textContent = `Maximum available quantity for ${selectedSize} is ${maxQuantity}`;
+                        stockWarning.style.display = 'block';
+                    } else {
+                        stockWarning.style.display = 'none';
+                    }
+                }
+            });
+
+            // Form submission validation
+            document.querySelector('.add-to-cart-form').addEventListener('submit', function(e) {
+                if (selectedSizes.length === 0 &&
+                    document.getElementById('sizeList').children.length > 0) {
+                    e.preventDefault();
+                    alert('Please select at least one size');
+                    return false;
+                }
+
+                if (selectedSizes.length === 1) {
+                    const selectedSize = selectedSizes[0];
+                    const maxQuantity = sizeQuantities[selectedSize] || 0;
+                    const requestedQuantity = parseInt(quantityInput.value) || 1;
+
+                    if (requestedQuantity > maxQuantity) {
+                        e.preventDefault();
+                        alert(`You cannot order more than ${maxQuantity} items for size ${selectedSize}`);
+                        return false;
+                    }
+                }
+                return true;
+            });
+
             // Initial button state
             addToCartBtn.disabled = selectedSizes.length === 0 &&
                                   document.getElementById('sizeList').children.length > 0;
         });
+
         function changeMainImage(clickedImage) {
             // Remove active class from all images
             const allImages = document.querySelectorAll('.details__small-img');
@@ -458,7 +545,7 @@
                     method: "POST",
                     body: formData
                 })
-                .then(response => { 
+                .then(response => {
                     if (response.ok) {
                         document.getElementById("successMessage").style.display = "block";
                         form.reset(); // Optional: clear form
