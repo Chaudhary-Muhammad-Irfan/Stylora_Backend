@@ -11,5 +11,6 @@ namespace WebApplication1.Models.Interfaces
         public List<Brand> SearchBrandsByName(string searchTerm, string status);
         public (bool HasBrand, bool IsApproved, string Status) GetBrandStatus(string userId);
         public Brand GetBrandByOwnerId(string brandOwnerId);
+        public void DeleteStoreAndUser(string userId);
     }
 } 

@@ -154,46 +154,49 @@ namespace WebApplication1.Models.Repositories
         }
         public List<RecentOrder> GetRecentOrders(string shopkeeperId)
         {
-            var orders = new List<RecentOrder>();
+            var recentOrders = new List<RecentOrder>();
 
-            using (SqlConnection connection = new SqlConnection(_connectionString))
+            using (var connection = new SqlConnection(_connectionString))
             {
                 connection.Open();
 
-                string query = @"
-            SELECT DISTINCT o.OrderId, o.OrderDate, o.Total AS TotalAmount, 
-                         o.Status, u.Name AS CustomerName
-            FROM Orders o
-            JOIN OrderProducts op ON o.OrderId = op.OrderId
-            JOIN Product p ON op.ProductId = p.ProductId
-            JOIN Brand b ON p.BrandId = b.BrandId
-            JOIN AspNetUsers u ON o.Email = u.Email
-            WHERE b.BrandOwnerId = @ShopkeeperId
-              AND o.OrderDate >= DATEADD(day, -1, GETDATE())
-            ORDER BY o.OrderDate";
+                // Query to get the 3 most recent orders for products belonging to the shopkeeper's brand
+                var query = @"
+                    SELECT TOP 3 
+                        o.OrderId,
+                        o.OrderDate,
+                        o.Total AS TotalAmount,
+                        o.Status,
+                        o.CustomerName
+                    FROM Orders o
+                    INNER JOIN OrderProducts op ON o.OrderId = op.OrderId
+                    INNER JOIN Product p ON op.ProductId = p.productId
+                    INNER JOIN Brand b ON p.brandId = b.brandId
+                    WHERE b.brandOwnerId = @ShopkeeperId
+                    ORDER BY o.OrderDate DESC";
 
-                using (SqlCommand cmd = new SqlCommand(query, connection))
+                using (var command = new SqlCommand(query, connection))
                 {
-                    cmd.Parameters.AddWithValue("@ShopkeeperId", shopkeeperId);
+                    command.Parameters.AddWithValue("@ShopkeeperId", shopkeeperId);
 
-                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    using (var reader = command.ExecuteReader())
                     {
                         while (reader.Read())
                         {
-                            orders.Add(new RecentOrder
+                            recentOrders.Add(new RecentOrder
                             {
-                                OrderId = reader.GetInt32(0),
-                                OrderDate = reader.GetDateTime(1),
-                                TotalAmount = reader.GetDecimal(2),
-                                Status = reader.GetString(3),
-                                CustomerName = reader.GetString(4)
+                                OrderId = reader.GetInt32(reader.GetOrdinal("OrderId")),
+                                OrderDate = reader.GetDateTime(reader.GetOrdinal("OrderDate")),
+                                TotalAmount = reader.GetDecimal(reader.GetOrdinal("TotalAmount")),
+                                Status = reader.GetString(reader.GetOrdinal("Status")),
+                                CustomerName = reader.GetString(reader.GetOrdinal("CustomerName"))
                             });
                         }
                     }
                 }
             }
 
-            return orders;
+            return recentOrders;
         }
         public DashboardStats GetDashboardStats(string shopkeeperId)
         {
