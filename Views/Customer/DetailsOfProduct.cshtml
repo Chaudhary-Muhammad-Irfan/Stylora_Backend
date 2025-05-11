@@ -84,63 +84,68 @@
             animation: fadeIn 0.5s ease-in-out;
         }
 
-        /* Size chart image */
-        .size-chart-container {
-            display: flex;
-            justify-content: flex-end;
-            margin-top: 20px;
-        }
-
-        .size-chart-image {
-            max-width: 300px;
-            height: auto;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
         /* Size selection styles */
-        .size__list {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
+        .size-grid-container {
             margin-bottom: 20px;
         }
 
-        .size__link {
-            padding: 8px 15px;
+        .size-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 5px;
+        }
+
+        .size-cell {
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             border: 1px solid #ddd;
             border-radius: 4px;
             cursor: pointer;
             transition: all 0.3s ease;
-            position: relative;
-            text-align: center;
         }
 
-            .size__link:hover {
+            .size-cell:hover {
                 background-color: #f5f5f5;
             }
 
-            .size__link.selected {
+            .size-cell.selected {
                 background-color: #2a9d8f;
                 color: white;
-                font-weight: bold;
                 border-color: #2a9d8f;
             }
 
-        .size-quantity {
+        .quantity-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        .quantity-cell {
+            width: 50px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-size: 0.8em;
-            display: block;
-            margin-top: 3px;
             color: #666;
         }
 
-        .selected .size-quantity {
-            color: #eee;
+        .selected + .quantity-row .quantity-cell {
+            color: #2a9d8f;
+            font-weight: bold;
+        }
+
+        /* Quantity selector */
+        .quantity-section {
+            margin-top: 25px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
         }
 
         .quantity-selector {
-            margin-top: 15px;
             display: flex;
             align-items: center;
             gap: 10px;
@@ -161,9 +166,66 @@
             display: none;
         }
 
+        /* Wishlist button */
+        .wishlist-btn {
+            color: #000;
+            font-size: 24px;
+            transition: all 0.3s ease;
+            margin-left: 15px;
+        }
+
+            .wishlist-btn:hover {
+                color: #dc3545;
+                transform: scale(1.1);
+            }
+
+        /* Size chart styles */
+        .detail__tabs {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .detail__tab {
+            padding: 8px 15px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+            .detail__tab:hover {
+                background-color: #f5f5f5;
+            }
+
+            .detail__tab.active-tab {
+                background-color: #2a9d8f;
+                color: white;
+            }
+
+        .details__tab-content {
+            display: none;
+        }
+
+            .details__tab-content.active-tab-content {
+                display: block;
+            }
+
+        .size-chart-image {
+            max-width: 500px;
+            height: auto;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Add to cart button */
+        .add-to-cart-btn {
+            margin-top: 20px;
+        }
+
         @@media (max-width: 768px) {
             .size-chart-image {
-                max-width: 200px;
+                max-width: 100%;
             }
         }
     </style>
@@ -234,26 +296,36 @@
                     <!-- Size Selection -->
                     <div class="details__size flex">
                         <span class="details__size-title">Available Sizes</span>
-                        <ul class="size__list" id="sizeList">
-                            @if (Model.Product.AvailableSizes != null && Model.Product.AvailableSizes.Count > 0)
-                            {
-                                for (int i = 0; i < Model.Product.AvailableSizes.Count; i++)
+                        <div class="size-grid-container">
+                            <div class="size-row" id="sizeList">
+                                @if (Model.Product.AvailableSizes != null && Model.Product.AvailableSizes.Count > 0)
                                 {
-                                    var size = Model.Product.AvailableSizes[i];
-                                    var quantity = i < Model.Product.stock.Count ? Model.Product.stock[i] : "0";
-                                    <li>
-                                        <p class="size__link" data-size="@size" data-quantity="@quantity">
+                                    for (int i = 0; i < Model.Product.AvailableSizes.Count; i++)
+                                    {
+                                        var size = Model.Product.AvailableSizes[i];
+                                        <div class="size-cell" data-size="@size" data-index="@i">
                                             @size
-                                            <span class="size-quantity">(@quantity available)</span>
-                                        </p>
-                                    </li>
+                                        </div>
+                                    }
                                 }
-                            }
-                            else
-                            {
-                                <li>No sizes available</li>
-                            }
-                        </ul>
+                                else
+                                {
+                                    <div>No sizes available</div>
+                                }
+                            </div>
+                            <div class="quantity-row">
+                                @if (Model.Product.AvailableSizes != null && Model.Product.stock != null)
+                                {
+                                    for (int i = 0; i < Model.Product.AvailableSizes.Count; i++)
+                                    {
+                                        var quantity = i < Model.Product.stock.Count ? Model.Product.stock[i] : "0";
+                                        <div class="quantity-cell" data-index="@i">
+                                            @quantity
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        </div>
                         <input type="hidden" id="selectedSizes" name="selectedSizes" value="" />
                     </div>
 
@@ -269,42 +341,48 @@
                         @using (Html.BeginForm("AddToCart", "Customer", FormMethod.Post, new { @class = "add-to-cart-form" }))
                         {
                             @Html.AntiForgeryToken()
-                            <div class="quantity-selector">
-                                <label for="quantity">Quantity:</label>
-                                <input type="number" name="quantity" class="quantity" id="quantityInput" value="1" min="1" />
-                                <span class="stock-warning" id="stockWarning"></span>
+                            <div class="quantity-section">
+                                <div class="quantity-selector">
+                                    <label for="quantity">Quantity:</label>
+                                    <input type="number" name="quantity" class="quantity" id="quantityInput" value="1" min="1" />
+                                    <span class="stock-warning" id="stockWarning"></span>
+                                </div>
+                                <a href="/Customer/AddToWishlist?productId=@Model.Product.productId" class="wishlist-btn">
+                                    <i class="fi fi-rs-heart"></i>
+                                </a>
                             </div>
                             <input type="hidden" name="productId" value="@Model.Product.productId" />
                             <input type="hidden" name="selectedSizes" id="formSelectedSizes" value="" />
-                            <button type="submit" class="btn btn--sm" id="addToCartBtn">Add To Cart</button>
+                            <button type="submit" class="btn btn--sm add-to-cart-btn" id="addToCartBtn">Add To Cart</button>
                         }
-
-                        <a href="/Customer/AddToWishlist?productId=@Model.Product.productId" class="details__action-btn">
-                            <i class="fi fi-rs-heart"></i>
-                        </a>
                     </div>
                 </div>
             </div>
-
-            <!-- Size Chart Section -->
-            @if (!string.IsNullOrEmpty(Model.Product.sizeChartURL))
-            {
-                <div class="size-chart-container container">
-                    <img src="@Url.Content($"~/{Model.Product.sizeChartURL}")"
-                         alt="Size Chart"
-                         class="size-chart-image" />
-                </div>
-            }
         </section>
 
         <!-- Tabs Section -->
         <section class="details__tab container">
             <div class="detail__tabs">
+                <span class="detail__tab" data-target="#size-chart">Size Chart</span>
                 <span class="detail__tab active-tab" data-target="#reviews">Reviews(@Model.Reviews.Count)</span>
             </div>
             <div class="details__tabs-content">
-                <div class="details__tab-content" content id="reviews">
-                    <!-- Reviews Section -->
+                <!-- Size Chart Tab -->
+                <div class="details__tab-content" id="size-chart">
+                    @if (!string.IsNullOrEmpty(Model.Product.sizeChartURL))
+                    {
+                        <img src="@Url.Content($"~/{Model.Product.sizeChartURL}")"
+                             alt="Size Chart"
+                             class="size-chart-image" />
+                    }
+                    else
+                    {
+                        <p>No size chart available for this product</p>
+                    }
+                </div>
+
+                <!-- Reviews Tab -->
+                <div class="details__tab-content active-tab-content" id="reviews">
                     @if (!Model.Reviews.Any())
                     {
                         <div class="form__message">There are no reviews for this product. Be the first to review!</div>
@@ -382,7 +460,18 @@
                                     <img src="~/@Url.Content(relatedProduct.productThumbnailURL)"
                                          alt="@relatedProduct.productName"
                                          class="product__img default" />
+                                    <img src="~/@Url.Content(relatedProduct.productThumbnailURL)"
+                                         alt="@relatedProduct.productName"
+                                         class="product__img hover" />
                                 </a>
+                                <div class="product__actions">
+                                    <a href="/Customer/DetailsOfProduct?productId=@relatedProduct.productId" class="action__btn" aria-label="Quick View">
+                                        <i class="fi fi-rs-eye"></i>
+                                    </a>
+                                    <a href="/Customer/AddToWishlist?productId=@relatedProduct.productId" class="action__btn" aria-label="Add to Wishlist">
+                                        <i class="fi fi-rs-heart"></i>
+                                    </a>
+                                </div>
                             </div>
                             <div class="product__content">
                                 <span class="product__category">@relatedProduct.productCategory</span>
@@ -403,7 +492,7 @@
     <script>
         // Size selection functionality
         document.addEventListener('DOMContentLoaded', function() {
-            const sizeLinks = document.querySelectorAll('.size__link');
+            const sizeCells = document.querySelectorAll('.size-cell');
             const selectedSizesInput = document.getElementById('selectedSizes');
             const formSelectedSizesInput = document.getElementById('formSelectedSizes');
             const addToCartBtn = document.getElementById('addToCartBtn');
@@ -415,15 +504,17 @@
             let sizeQuantities = {};
 
             // Initialize size quantities
-            sizeLinks.forEach(link => {
-                const size = link.getAttribute('data-size');
-                const quantity = parseInt(link.getAttribute('data-quantity')) || 0;
+            sizeCells.forEach(cell => {
+                const index = cell.getAttribute('data-index');
+                const size = cell.getAttribute('data-size');
+                const quantityCell = document.querySelector(`.quantity-cell[data-index="${index}"]`);
+                const quantity = parseInt(quantityCell.textContent) || 0;
                 sizeQuantities[size] = quantity;
             });
 
             // Handle size selection
-            sizeLinks.forEach(link => {
-                link.addEventListener('click', function() {
+            sizeCells.forEach(cell => {
+                cell.addEventListener('click', function() {
                     const size = this.getAttribute('data-size');
                     const maxQuantity = sizeQuantities[size] || 0;
 
@@ -432,9 +523,10 @@
                         this.classList.remove('selected');
                         selectedSizes = selectedSizes.filter(s => s !== size);
                     } else {
-                        // Select
+                        // Select only one size at a time
+                        sizeCells.forEach(c => c.classList.remove('selected'));
                         this.classList.add('selected');
-                        selectedSizes.push(size);
+                        selectedSizes = [size];
 
                         // Update quantity max value
                         quantityInput.max = maxQuantity;
@@ -451,8 +543,7 @@
                     formSelectedSizesInput.value = sizesString;
 
                     // Update button state
-                    addToCartBtn.disabled = selectedSizes.length === 0 &&
-                                         document.getElementById('sizeList').children.length > 0;
+                    addToCartBtn.disabled = selectedSizes.length === 0;
                 });
             });
 
@@ -474,10 +565,9 @@
 
             // Form submission validation
             document.querySelector('.add-to-cart-form').addEventListener('submit', function(e) {
-                if (selectedSizes.length === 0 &&
-                    document.getElementById('sizeList').children.length > 0) {
+                if (selectedSizes.length === 0) {
                     e.preventDefault();
-                    alert('Please select at least one size');
+                    alert('Please select a size');
                     return false;
                 }
 
@@ -495,9 +585,23 @@
                 return true;
             });
 
+            // Tab switching functionality
+            const tabs = document.querySelectorAll('.detail__tab');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    // Remove active class from all tabs and content
+                    document.querySelectorAll('.detail__tab').forEach(t => t.classList.remove('active-tab'));
+                    document.querySelectorAll('.details__tab-content').forEach(c => c.classList.remove('active-tab-content'));
+
+                    // Add active class to clicked tab and corresponding content
+                    this.classList.add('active-tab');
+                    const targetId = this.getAttribute('data-target');
+                    document.querySelector(targetId).classList.add('active-tab-content');
+                });
+            });
+
             // Initial button state
-            addToCartBtn.disabled = selectedSizes.length === 0 &&
-                                  document.getElementById('sizeList').children.length > 0;
+            addToCartBtn.disabled = selectedSizes.length === 0;
         });
 
         function changeMainImage(clickedImage) {
@@ -548,7 +652,8 @@
                 .then(response => {
                     if (response.ok) {
                         document.getElementById("successMessage").style.display = "block";
-                        form.reset(); // Optional: clear form
+                        form.reset();
+                        updateStars(-1); // Reset stars
                         setTimeout(() => {
                             document.getElementById("successMessage").style.display = "none";
                         }, 5000);
