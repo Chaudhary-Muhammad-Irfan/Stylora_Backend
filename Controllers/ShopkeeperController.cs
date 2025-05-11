@@ -25,18 +25,21 @@ namespace WebApplication1.Controllers
         private readonly ProductRepository _productRepository;
         private readonly UserManager<UserType> _userManager;
         private readonly OrderRepository _orderRepository;
+        private readonly SignInManager<UserType> _signInManager;
         public ShopkeeperController(
              IWebHostEnvironment env,
              BrandRepository brandRepository,
              ProductRepository productRepository,
              UserManager<UserType> userManager,
-             OrderRepository orderRepository)
+             OrderRepository orderRepository,
+             SignInManager<UserType> signInManager)
         {
             _env = env;
             _brandRepository = brandRepository;
             _productRepository = productRepository;
             _userManager = userManager;
             _orderRepository = orderRepository;
+            _signInManager = signInManager;
         }
         public async Task<IActionResult> Index()
         { 
@@ -281,22 +284,12 @@ namespace WebApplication1.Controllers
             ViewBag.ratingAverage = ratingStats.AverageRating;
             return View(model);
         }
-        public IActionResult Analytics()
+        public IActionResult DeleteAccount()
         {
-            var user = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var brandStatus = _brandRepository.GetBrandStatus(userId);
-            int count = _productRepository.CountUnreadReviews(userId);
-            ViewBag.Count = count;
-            ViewBag.HasApprovedBrand = brandStatus.IsApproved;
-            ViewBag.BrandStatus = brandStatus.Status;
-            var model = new ShopkeeperDashboardViewModel
-            {
-                ShopkeeperName = _orderRepository.GetShopkeeperName(userId),
-                Stats = _orderRepository.GetDashboardStats(userId),
-                RecentOrders = _orderRepository.GetRecentOrders(userId)
-            };
-            return View(model);
+            _brandRepository.DeleteStoreAndUser(userId);
+            _signInManager.SignOutAsync().GetAwaiter().GetResult();
+            return RedirectToAction("Index", "Home");
         }
     }
 }

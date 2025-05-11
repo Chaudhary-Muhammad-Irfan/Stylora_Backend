@@ -246,5 +246,29 @@ namespace WebApplication1.Models.Repositories
 
             return null; 
         }
+        public void DeleteStoreAndUser(string userId)
+        {
+            using (SqlConnection connection = new SqlConnection(_connectionString))
+            {
+                connection.Open();
+
+                // Step 1: Delete store (Brand)
+                string deleteBrandQuery = "DELETE FROM Brand WHERE BrandOwnerId = @UserId";
+                using (SqlCommand cmd = new SqlCommand(deleteBrandQuery, connection))
+                {
+                    cmd.Parameters.AddWithValue("@UserId", userId);
+                    cmd.ExecuteNonQuery();
+                }
+
+                // Step 2: Delete login account (AspNetUsers)
+                string deleteUserQuery = "DELETE FROM AspNetUsers WHERE Id = @UserId";
+                using (SqlCommand cmd = new SqlCommand(deleteUserQuery, connection))
+                {
+                    cmd.Parameters.AddWithValue("@UserId", userId);
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
     }
 }

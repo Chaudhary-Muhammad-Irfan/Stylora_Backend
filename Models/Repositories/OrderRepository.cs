@@ -159,8 +159,6 @@ namespace WebApplication1.Models.Repositories
             using (var connection = new SqlConnection(_connectionString))
             {
                 connection.Open();
-
-                // Query to get the 3 most recent orders for products belonging to the shopkeeper's brand
                 var query = @"
                     SELECT TOP 3 
                         o.OrderId,
@@ -195,7 +193,6 @@ namespace WebApplication1.Models.Repositories
                     }
                 }
             }
-
             return recentOrders;
         }
         public DashboardStats GetDashboardStats(string shopkeeperId)
