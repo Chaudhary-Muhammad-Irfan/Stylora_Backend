@@ -4,7 +4,7 @@ using NuGet.Protocol.Core.Types;
 using System.Diagnostics;
 using System.Security.Claims;
 using WebApplication1.Models;
-using WebApplication1.Models.Interfaces; 
+using WebApplication1.Models.Interfaces;  
 using WebApplication1.Models.Repositories;
 using WebApplication1.Models.Interfaces;
 
@@ -31,6 +31,10 @@ namespace WebApplication1.Controllers
             ViewBag.Categories = categories;
             ViewBag.Products = newProducts;
             ViewBag.Brands = brands;
+            var data = _repository.GetCountsSummary();
+            ViewBag.Customer = data.NonShopkeeperCount;
+            ViewBag.Product = data.ProductCount;
+            ViewBag.Brand = data.BrandCount;
             return View();
         }
         public IActionResult About()

@@ -301,7 +301,125 @@ namespace WebApplication1.Models.Repositories
             }
             return products;
         }
+        public Product getProductByCode(string productCode)
+        {
+            using (SqlConnection connection = new SqlConnection(_connectionString))
+            {
+                string query = @"
+            SELECT 
+                productId,              -- 0
+                productCode,            -- 1
+                brandId,                -- 2
+                brandName,              -- 3
+                productName,            -- 4
+                productCategory,        -- 5
+                productDescription,     -- 6
+                tagLine,                -- 7
+                price,                  -- 8
+                discount,               -- 9
+                stock,                  -- 10 (JSON)
+                productThumbnailURL,    -- 11
+                productImagesURL,       -- 12 (JSON)
+                sizeChartURL,           -- 13
+                AvailableSizes         -- 14 (JSON)
+            FROM Product 
+            WHERE productCode = @productCode";
 
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@productCode", productCode);
+
+                    try
+                    {
+                        connection.Open();
+                        using (SqlDataReader reader = command.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                // Handle stock
+                                List<string> stock = new List<string>();
+                                if (!reader.IsDBNull(10))
+                                {
+                                    string stockJson = reader.GetString(10).Trim();
+                                    if (!string.IsNullOrEmpty(stockJson))
+                                    {
+                                        try
+                                        {
+                                            stock = JsonConvert.DeserializeObject<List<string>>(stockJson);
+                                        }
+                                        catch (Exception ex)
+                                        {
+                                            Console.WriteLine($"Error deserializing stock: {ex.Message}");
+                                        }
+                                    }
+                                }
+
+                                // Handle product images
+                                List<string> images = new List<string>();
+                                if (!reader.IsDBNull(12))
+                                {
+                                    string imagesJson = reader.GetString(12).Trim();
+                                    if (!string.IsNullOrEmpty(imagesJson))
+                                    {
+                                        try
+                                        {
+                                            images = JsonConvert.DeserializeObject<List<string>>(imagesJson);
+                                        }
+                                        catch (Exception ex)
+                                        {
+                                            Console.WriteLine($"Error deserializing images: {ex.Message}");
+                                        }
+                                    }
+                                }
+
+                                // Handle available sizes
+                                List<string> sizes = new List<string>();
+                                if (!reader.IsDBNull(14))
+                                {
+                                    string sizesJson = reader.GetString(14).Trim();
+                                    if (!string.IsNullOrEmpty(sizesJson))
+                                    {
+                                        try
+                                        {
+                                            sizes = JsonConvert.DeserializeObject<List<string>>(sizesJson);
+                                        }
+                                        catch (Exception ex)
+                                        {
+                                            Console.WriteLine($"Error deserializing sizes: {ex.Message}");
+                                        }
+                                    }
+                                }
+
+                                return new Product
+                                {
+                                    productId = reader.GetInt32(0),
+                                    productCode = reader.GetString(1),
+                                    brandId = reader.GetInt32(2),
+                                    brandName = reader.IsDBNull(3) ? null : reader.GetString(3),
+                                    productName = reader.GetString(4),
+                                    productCategory = reader.GetString(5),
+                                    productDescription = reader.GetString(6),
+                                    tagLine = reader.IsDBNull(7) ? null : reader.GetString(7),
+                                    price = reader.GetInt32(8),
+                                    discount = reader.GetInt32(9),
+                                    stock = stock,
+                                    productThumbnailURL = reader.IsDBNull(11) ? null : reader.GetString(11),
+                                    productImagesURL = images,
+                                    sizeChartURL = reader.IsDBNull(13) ? null : reader.GetString(13),
+                                    AvailableSizes = sizes
+                                };
+                            }
+                            return null;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error retrieving product: {ex.Message}");
+                        throw;
+                    }
+                }
+            }
+        }
         public Product getProductByID(int productId)
         {
             using (SqlConnection connection = new SqlConnection(_connectionString))
@@ -417,6 +535,55 @@ namespace WebApplication1.Models.Repositories
                     {
                         Console.WriteLine($"Error retrieving product: {ex.Message}");
                         throw;
+                    }
+                }
+            }
+        }
+        public bool UpdateProduct(Product product)
+        {
+            using (SqlConnection connection = new SqlConnection(_connectionString))
+            {
+                string query = @"
+            UPDATE Product 
+            SET 
+                productName = @productName,
+                productCategory = @productCategory,
+                productDescription = @productDescription,
+                tagLine = @tagLine,
+                price = @price,
+                discount = @discount,
+                stock = @stock,
+                productThumbnailURL = @productThumbnailURL,
+                productImagesURL = @productImagesURL,
+                sizeChartURL = @sizeChartURL,
+                AvailableSizes = @AvailableSizes
+            WHERE productCode = @productCode";
+
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@productName", product.productName);
+                    command.Parameters.AddWithValue("@productCategory", product.productCategory);
+                    command.Parameters.AddWithValue("@productDescription", product.productDescription);
+                    command.Parameters.AddWithValue("@tagLine", (object)product.tagLine ?? DBNull.Value);
+                    command.Parameters.AddWithValue("@price", product.price);
+                    command.Parameters.AddWithValue("@discount", product.discount);
+                    command.Parameters.AddWithValue("@stock", JsonConvert.SerializeObject(product.stock ?? new List<string>()));
+                    command.Parameters.AddWithValue("@productThumbnailURL", (object)product.productThumbnailURL ?? DBNull.Value);
+                    command.Parameters.AddWithValue("@productImagesURL", JsonConvert.SerializeObject(product.productImagesURL ?? new List<string>()));
+                    command.Parameters.AddWithValue("@sizeChartURL", (object)product.sizeChartURL ?? DBNull.Value);
+                    command.Parameters.AddWithValue("@AvailableSizes", JsonConvert.SerializeObject(product.AvailableSizes ?? new List<string>()));
+                    command.Parameters.AddWithValue("@productCode", product.productCode);
+
+                    try
+                    {
+                        connection.Open();
+                        int rowsAffected = command.ExecuteNonQuery();
+                        return rowsAffected > 0;
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error updating product: {ex.Message}");
+                        return false;
                     }
                 }
             }
@@ -786,6 +953,35 @@ namespace WebApplication1.Models.Repositories
             }
 
             return (reviewCount, averageRating);
+        }
+        public (int BrandCount, int ProductCount, int NonShopkeeperCount) GetCountsSummary()
+        {
+            int brandCount = 0, productCount = 0, nonShopkeeperCount = 0;
+
+            string query = @"
+            SELECT 
+                (SELECT COUNT(*) FROM Brand) AS BrandCount,
+                (SELECT COUNT(*) FROM Product) AS ProductCount,
+                (SELECT COUNT(*) FROM AspNetUsers WHERE isShopkeeper = 0) AS NonShopkeeperCount;
+        ";
+
+            using (SqlConnection connection = new SqlConnection(_connectionString))
+            using (SqlCommand command = new SqlCommand(query, connection))
+            {
+                connection.Open();
+
+                using (SqlDataReader reader = command.ExecuteReader())
+                {
+                    if (reader.Read())
+                    {
+                        brandCount = reader.GetInt32(0);
+                        productCount = reader.GetInt32(1);
+                        nonShopkeeperCount = reader.GetInt32(2);
+                    }
+                }
+            }
+
+            return (brandCount, productCount, nonShopkeeperCount);
         }
     }
 }

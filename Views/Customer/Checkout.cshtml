@@ -157,8 +157,8 @@
                     <input type="hidden" asp-for="Total" />
 
                     <!-- Payment Method Selection -->
-                    <div class="payment__methods">
-                        @* <h3 class="checkout__title payment__title">Payment Method</h3>
+                    @* <div class="payment__methods">
+                        <h3 class="checkout__title payment__title">Payment Method</h3>
                         <div class="payment__option">
                             <input type="radio" asp-for="PaymentMethod" id="bank" value="BankTransfer" class="payment__input" />
                             <label for="bank" class="payment__label">Direct Bank Transfer</label>
@@ -166,12 +166,12 @@
                         <div class="payment__option">
                             <input type="radio" asp-for="PaymentMethod" id="jazz" value="JazzCash" class="payment__input" />
                             <label for="jazz" class="payment__label">JazzCash/EasyPaisa</label>
-                        </div> *@
+                        </div>
                         <div class="payment__option">
                             <input type="radio" asp-for="PaymentMethod" id="cod" value="COD" class="payment__input" checked />
                             <label for="cod" class="payment__label">Cash on Delivery</label>
                         </div>
-                    </div>
+                    </div> *@
 
                     <button type="submit" class="btn btn--md">Place Order</button>
                 }

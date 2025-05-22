@@ -1,8 +1,594 @@
-﻿<body>
+﻿<style>
+    .main{
+        margin-top:-95px;
+    }
+    /* Hero Section Enhancements */
+    .home__container {
+        position: relative;
+        min-height: calc(100vh - 80px); /* Adjusted to account for header */
+        align-items: center;
+        overflow: hidden;
+        background: linear-gradient(135deg, #f5f7fa 0%, #e4f0e8 100%);
+        margin-top: 0;
+        padding-top: 0;
+    }
+
+    .home__content {
+        z-index: 10;
+        position: relative;
+        padding-top: 1rem;
+    }
+
+    .home__title {
+        font-size: 2.8rem; /* Reduced from 4rem */
+        line-height: 1.2;
+        margin-bottom: 1.5rem;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+        .home__title span.text-gradient {
+            background: linear-gradient(45deg, #28a745, #5cb85c, #7bd389);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: gradientShift 8s ease infinite;
+            background-size: 200% 200%;
+        }
+
+    @@keyframes gradientShift {
+        0%
+
+    {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+
+    }
+
+    .rotating-words {
+        display: inline-block;
+        position: relative;
+        height: 1.2em;
+        overflow: hidden;
+    }
+
+        .rotating-words span {
+            display: block;
+            position: absolute;
+            white-space: nowrap;
+            opacity: 0;
+            animation: rotateWords 9s infinite;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+            .rotating-words span:nth-child(1) {
+                color: #28a745;
+            }
+
+            .rotating-words span:nth-child(2) {
+                color: #5cb85c;
+                animation-delay: 3s;
+            }
+
+            .rotating-words span:nth-child(3) {
+                color: #7bd389;
+                animation-delay: 6s;
+            }
+
+    @@keyframes rotateWords {
+        0%
+
+    {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    5% {
+        opacity: 1;
+        transform: translateY(0px);
+    }
+
+    25% {
+        opacity: 1;
+        transform: translateY(0px);
+    }
+
+    30% {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    }
+
+    .home__description {
+        font-size: 1.1rem;
+        max-width: 600px;
+        margin-bottom: 2rem;
+        position: relative;
+    }
+
+        .home__description::after {
+            content: '';
+            position: absolute;
+            bottom: -1rem;
+            left: 0;
+            width: 50px;
+            height: 3px;
+            background: linear-gradient(90deg, #28a745, transparent);
+            animation: lineExpand 1.5s ease-out forwards;
+        }
+
+    @@keyframes lineExpand {
+        0%
+
+    {
+        width: 0;
+    }
+
+    100% {
+        width: 150px;
+    }
+
+    }
+
+    .home__buttons {
+        display: flex;
+        gap: 1.5rem;
+        margin-top: 2rem;
+    }
+
+    .btn-primary {
+        background: linear-gradient(45deg, #28a745, #5cb85c);
+        border: none;
+        color: white;
+        box-shadow: 0 4px 20px rgba(40, 167, 69, 0.3);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 25px rgba(40, 167, 69, 0.4);
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: 0.5s;
+        }
+
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+
+    .btn-outline {
+        border: 2px solid #28a745;
+        background: transparent;
+        color: #28a745;
+        transition: all 0.3s ease;
+    }
+
+        .btn-outline:hover {
+            background: rgba(40, 167, 69, 0.1);
+            transform: translateY(-3px);
+        }
+
+    .pulse {
+        animation: pulse 2s infinite;
+    }
+
+    @@keyframes pulse {
+        0%
+
+    {
+        box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7);
+    }
+
+    70% {
+        box-shadow: 0 0 0 15px rgba(40, 167, 69, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(40, 167, 69, 0);
+    }
+
+    }
+
+    .home__stats {
+        display: flex;
+        gap: 2rem;
+        margin-top: 3rem;
+        flex-wrap: wrap;
+    }
+
+    .stat-item {
+        text-align: center;
+        position: relative;
+        padding: 1rem;
+        background: rgba(255,255,255,0.8);
+        border-radius: 12px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+        min-width: 100px;
+    }
+
+        .stat-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+    .stat-number {
+        font-size: 2rem;
+        font-weight: 700;
+        display: block;
+        background: linear-gradient(45deg, #28a745, #5cb85c);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+    }
+
+    .stat-label {
+        font-size: 0.9rem;
+        color: #555;
+        font-weight: 500;
+    }
+
+    .home__img-container {
+        position: relative;
+        perspective: 1000px;
+        animation: floatImage 6s ease-in-out infinite;
+    }
+
+    @@keyframes floatImage {
+        0%, 100%
+
+    {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-20px);
+    }
+
+    }
+
+    .home__img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 1rem;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.2);
+        transform-style: preserve-3d;
+        border: 8px solid white;
+    }
+
+    .parallax {
+        transform: perspective(1000px) rotateY(-10deg) rotateX(5deg);
+        transition: transform 0.5s ease;
+    }
+
+    .scroll-indicator {
+        position: absolute;
+        bottom: 2rem;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        color: #28a745;
+        opacity: 0.7;
+        animation: bounce 2s infinite;
+        cursor: pointer;
+    }
+
+        .scroll-indicator span {
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .scroll-indicator svg {
+            animation: scrollArrow 1.5s infinite;
+        }
+
+    @@keyframes bounce {
+        0%, 20%, 50%, 80%, 100%
+
+    {
+        transform: translateY(0) translateX(-50%);
+    }
+
+    40% {
+        transform: translateY(-20px) translateX(-50%);
+    }
+
+    60% {
+        transform: translateY(-10px) translateX(-50%);
+    }
+
+    }
+
+    @@keyframes scrollArrow {
+        0%, 100%
+
+    {
+        opacity: 0.5;
+        transform: translateY(0);
+    }
+
+    50% {
+        opacity: 1;
+        transform: translateY(5px);
+    }
+
+    }
+
+    /* Animated background elements */
+    .bg-elements {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        z-index: 1;
+    }
+
+    .bg-element {
+        position: absolute;
+        border-radius: 50%;
+        background: rgba(40, 167, 69, 0.05);
+        animation: floatBg 15s infinite linear;
+    }
+
+        .bg-element:nth-child(1) {
+            width: 300px;
+            height: 300px;
+            top: -50px;
+            left: -50px;
+            animation-delay: 0s;
+        }
+
+        .bg-element:nth-child(2) {
+            width: 200px;
+            height: 200px;
+            bottom: -30px;
+            right: 20%;
+            animation-delay: 3s;
+        }
+
+        .bg-element:nth-child(3) {
+            width: 150px;
+            height: 150px;
+            top: 30%;
+            right: -30px;
+            animation-delay: 6s;
+        }
+
+    @@keyframes floatBg {
+        0%
+
+    {
+        transform: translateY(0) rotate(0deg);
+    }
+
+    50% {
+        transform: translateY(-50px) rotate(180deg);
+    }
+
+    100% {
+        transform: translateY(0) rotate(360deg);
+    }
+
+    }
+
+    /* Glow effect */
+    .glow {
+        position: absolute;
+        width: 200px;
+        height: 200px;
+        background: radial-gradient(circle, rgba(40, 167, 69, 0.2) 0%, rgba(40, 167, 69, 0) 70%);
+        border-radius: 50%;
+        filter: blur(10px);
+        animation: pulseGlow 4s infinite alternate;
+    }
+
+    .glow-1 {
+        top: 20%;
+        left: 10%;
+    }
+
+    .glow-2 {
+        bottom: 15%;
+        right: 10%;
+        animation-delay: 2s;
+    }
+
+    @@keyframes pulseGlow {
+        0%
+
+    {
+        transform: scale(0.8);
+        opacity: 0.6;
+    }
+
+    100% {
+        transform: scale(1.2);
+        opacity: 0.9;
+    }
+
+    }
+
+    /* Ensure header stays clickable */
+    header {
+        position: relative;
+        z-index: 1000;
+    }
+</style>
+
+<body>
     <!--=============== MAIN ===============-->
     <main class="main">
         <!--=============== HOME ===============-->
         <section class="home section--lg">
+            <div class="bg-elements">
+                <div class="bg-element"></div>
+                <div class="bg-element"></div>
+                <div class="bg-element"></div>
+                <div class="glow glow-1"></div>
+                <div class="glow glow-2"></div>
+            </div>
+
+            <div class="home__container container grid">
+                <div class="home__content">
+                    <span class="home__subtitle animate__animated animate__fadeInDown">Exclusive Collection</span>
+                    <h1 class="home__title animate__animated animate__fadeInUp animate__delay-1s">
+                        Elevate Your <span class="text-gradient">Style</span>
+                        <div class="rotating-words">
+                            <span>This Summer</span>
+                            <span>Every Day</span>
+                            <span>Right Now</span>
+                        </div>
+                    </h1>
+                    <p class="home__description animate__animated animate__fadeInUp animate__delay-2s">
+                        Discover curated fashion pieces that tell your story.
+                    </p>
+
+                    <div class="home__stats animate__animated animate__fadeIn animate__delay-4s">
+                        <div class="stat-item">
+                            <span class="stat-number" data-count=@ViewBag.Brand></span>
+                            <span class="stat-label">Premium Brands</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number" data-count=@ViewBag.Product></span>
+                            <span class="stat-label">Quality Products</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number" data-count=@ViewBag.Customer></span>
+                            <span class="stat-label">Happy Customers</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="home__img-container animate__animated animate__fadeInRight animate__delay-2s">
+                    <img src="~/img/bn1.jpeg" class="home__img parallax" alt="Fashion Collection" />
+                </div>
+            </div>
+
+            <div class="scroll-indicator animate__animated animate__fadeInUp animate__delay-5s">
+                <span>Scroll Down</span>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M7 10L12 15L17 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+            </div>
+        </section>
+
+        @await Html.PartialAsync("_categories", (IEnumerable<WebApplication1.Models.Product>)ViewBag.Categories)
+        @await Html.PartialAsync("_shop", (IEnumerable<WebApplication1.Models.Brand>)ViewBag.Brands)
+        @await Html.PartialAsync("_deals")
+        <section class="section new__arrivals" id="new-arrivals">
+            <h2 class="section__title">New Arrived Products</h2>
+            @await Html.PartialAsync("_New_Arrivals", (IEnumerable<WebApplication1.Models.Product>)ViewBag.Products)
+        </section>
+    </main>
+
+    <script>
+        // Counter animation
+        const counters = document.querySelectorAll('.stat-number');
+        const speed = 200;
+
+        counters.forEach(counter => {
+            const target = +counter.getAttribute('data-count');
+            const count = +counter.innerText;
+            const increment = target / speed;
+
+            if (count < target) {
+                counter.innerText = Math.ceil(count + increment);
+                setTimeout(updateCount, 1);
+            } else {
+                counter.innerText = target + '+';
+            }
+
+            function updateCount() {
+                const count = +counter.innerText;
+                if (count < target) {
+                    counter.innerText = Math.ceil(count + increment);
+                    setTimeout(updateCount, 1);
+                } else {
+                    counter.innerText = target + '+';
+                }
+            }
+        });
+
+        // Enhanced parallax effect
+        document.addEventListener('mousemove', (e) => {
+            const img = document.querySelector('.parallax');
+            const container = document.querySelector('.home__img-container');
+            const x = (window.innerWidth - e.pageX * 0.8) / 100;
+            const y = (window.innerHeight - e.pageY * 0.8) / 100;
+
+            img.style.transform = `perspective(1000px) rotateY(${x}deg) rotateX(${y}deg)`;
+            container.style.transform = `translateY(${-y/2}px) translateX(${-x/2}px)`;
+        });
+
+        // Scroll indicator click handler
+        document.querySelector('.scroll-indicator').addEventListener('click', () => {
+            window.scrollBy({
+                top: window.innerHeight - 100,
+                behavior: 'smooth'
+            });
+        });
+
+        // Animate elements on scroll into view
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate__animated', 'animate__fadeInUp');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.stat-item').forEach(item => {
+            observer.observe(item);
+        });
+    </script>
+</body>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@* <body>
+    <!--=============== MAIN ===============-->
+    <main class="main">
+        <!--=============== HOME ===============-->
+        <section class="home section--lg"> 
             <div class="home__container container grid">
                 <div class="home__content">
                     <span class="home__subtitle">Hot Promotions</span>
@@ -25,4 +611,4 @@
             @await Html.PartialAsync("_New_Arrivals", (IEnumerable<WebApplication1.Models.Product>)ViewBag.Products)
         </section>
     </main> 
-</body>
+</body> *@

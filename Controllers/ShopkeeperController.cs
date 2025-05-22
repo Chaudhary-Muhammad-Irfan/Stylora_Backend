@@ -1,6 +1,7 @@
 ﻿using AspNetCoreGeneratedDocument;
 using Azure.Core;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis;
@@ -242,8 +243,128 @@ namespace WebApplication1.Controllers
         {
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             var products = _productRepository.GetAllProducts(userId);
-            return View(products);
+            return View(products); 
         }
+        public IActionResult EditProduct(string productCode)
+        {
+            var product = _productRepository.getProductByCode(productCode);
+            return View(product);
+        }
+        [HttpPost]
+        public IActionResult UpdateProduct(Product product, IFormFile productThumbnail, List<IFormFile> productImages, IFormFile sizeChart)
+        {
+            try
+            {
+                // Get the existing product data
+                var existingProduct = _productRepository.getProductByCode(product.productCode);
+                if (existingProduct == null)
+                {
+                    ModelState.AddModelError("", "Product not found");
+                    return View("EditProduct", product);
+                }
+
+                // Process sizes and quantities
+                product.AvailableSizes = Request.Form["AvailableSizes"].ToList();
+
+                // Initialize stock list
+                product.stock = new List<string>();
+
+                // Process each selected size with its quantity
+                foreach (var size in product.AvailableSizes)
+                {
+                    var quantityInputName = $"quantity{size}";
+                    var quantityValue = Request.Form[quantityInputName].FirstOrDefault();
+
+                    // Validate quantity - default to "1" if invalid
+                    if (!int.TryParse(quantityValue, out int qty) || qty < 1)
+                    {
+                        quantityValue = "1"; // Default quantity
+                    }
+
+                    product.stock.Add(quantityValue);
+                }
+
+                // Validate at least one size has been selected
+                if (product.AvailableSizes.Count == 0)
+                {
+                    ModelState.AddModelError("", "Please select at least one size");
+                    return View("EditProduct", product);
+                }
+
+                // Process thumbnail image (only if new one is uploaded)
+                if (productThumbnail != null && productThumbnail.Length > 0)
+                {
+                    product.productThumbnailURL = SaveImage(productThumbnail);
+                }
+                else
+                {
+                    // Keep existing thumbnail if no new one uploaded
+                    product.productThumbnailURL = existingProduct.productThumbnailURL;
+                }
+
+                // Process gallery images (only if new ones are uploaded)
+                if (productImages != null && productImages.Count > 0)
+                {
+                    // Add new images to existing ones
+                    product.productImagesURL = existingProduct.productImagesURL.Concat(ImagesToUrls(productImages)).ToList();
+                }
+                else
+                {
+                    // Keep existing images if no new ones uploaded
+                    product.productImagesURL = existingProduct.productImagesURL;
+                }
+
+                // Process size chart (only if new one is uploaded)
+                if (sizeChart != null && sizeChart.Length > 0)
+                {
+                    product.sizeChartURL = SaveImage(sizeChart);
+                }
+                else
+                {
+                    // Keep existing size chart if no new one uploaded
+                    product.sizeChartURL = existingProduct.sizeChartURL;
+                }
+
+                // Clear image-related model state errors since they're optional for updates
+                ModelState.Remove("productThumbnail");
+                ModelState.Remove("productThumbnailURL");
+                ModelState.Remove("productImages");
+                ModelState.Remove("productImagesURL");
+                ModelState.Remove("sizeChart");
+                ModelState.Remove("sizeChartURL");
+
+                // Validate model
+                if (!ModelState.IsValid)
+                {
+                    var errors = ModelState
+                        .Where(x => x.Value.Errors.Count > 0)
+                        .Select(x => $"{x.Key}: {x.Value.Errors.First().ErrorMessage}");
+                    Console.WriteLine("Validation Errors:\n" + string.Join("\n", errors));
+                    return View("EditProduct", product);
+                }
+
+                // Update in database
+                bool success = _productRepository.UpdateProduct(product);
+
+                if (success)
+                {
+                    TempData["SuccessMessage"] = "Product updated successfully!";
+                    return RedirectToAction("GetAllProducts");
+                }
+                else
+                {
+                    ModelState.AddModelError("", "Failed to update product. Please try again.");
+                    return View("EditProduct", product);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"ERROR: {ex}");
+                ModelState.AddModelError("", "An error occurred while updating the product.");
+                return View("EditProduct", product);
+            }
+        }
+
         // A function to save the single image and return the URL
         private string SaveImage(IFormFile file)
         {

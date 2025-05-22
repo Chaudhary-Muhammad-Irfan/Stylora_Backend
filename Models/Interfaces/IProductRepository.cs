@@ -15,7 +15,9 @@ namespace WebApplication1.Models.Interfaces
         public List<Product> GetAllProducts(string userId);
         // Getting products of current Brand
         public List<Product> GetAllProductsOfCurrentBrand(int brandId);
+        public bool UpdateProduct(Product product);
         public Product getProductByID(int productId);
+        public Product getProductByCode(string productCode);
         public void AddReview(Review review);
         public List<Review> GetReviewsByProductId(int productId);
         public DataTable GetReviewsOfShopkeeperProducts(string shopkeeperId);
@@ -26,5 +28,6 @@ namespace WebApplication1.Models.Interfaces
         public List<Product> GetNewArrivals();
         public List<Brand> GetNewlyAddedBrands();
         public (int ReviewCount, decimal AverageRating) GetShopkeeperReviewStats(string brandOwnerId);
+        public (int BrandCount, int ProductCount, int NonShopkeeperCount) GetCountsSummary();
     }
 }

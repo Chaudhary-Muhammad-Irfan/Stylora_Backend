@@ -194,6 +194,57 @@
             flex-direction: column;
             align-items: center;
         }
+
+        .success-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .success-message {
+            background: white;
+            padding: 3rem;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            animation: popIn 0.3s ease;
+        }
+
+        @@keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @@keyframes popIn {
+            0% {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+
+            80% {
+                transform: scale(1.05);
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
     </style>
 </head>
 <body>
@@ -275,7 +326,7 @@
                     <div class="file-upload" onclick="document.getElementById('thumbnail').click()">
                         @if (!string.IsNullOrEmpty(Model?.productThumbnailURL))
                         {
-                            <img src="@Model.productThumbnailURL" class="preview-image mb-2" id="currentThumbnail">
+                            <img src="~/@Model.productThumbnailURL" class="preview-image mb-2" id="currentThumbnail">
                         }
                         else
                         {
@@ -295,7 +346,7 @@
                             <div class="d-flex flex-wrap">
                                 @foreach (var imageUrl in Model.productImagesURL)
                                 {
-                                    <img src="@imageUrl" class="preview-image me-2 mb-2">
+                                    <img src="~/@imageUrl" class="preview-image me-2 mb-2">
                                 }
                             </div>
                         }
@@ -314,7 +365,7 @@
                     <div class="file-upload" onclick="document.getElementById('sizeChart').click()">
                         @if (!string.IsNullOrEmpty(Model?.sizeChartURL))
                         {
-                            <img src="@Model.sizeChartURL" class="preview-image" id="currentSizeChart">
+                            <img src="~/@Model.sizeChartURL" class="preview-image" id="currentSizeChart">
                         }
                         else
                         {
@@ -336,6 +387,20 @@
                 </a>
             </div>
         </form>
+    </div>
+    <!-- Success Overlay -->
+    <div id="successOverlay" class="success-overlay" style="@(TempData["SuccessMessage"] != null ? "display: flex;" : "display: none;")">
+        <div class="success-message">
+            <div class="mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" fill="#28a745" class="bi bi-check-circle" viewBox="0 0 16 16">
+                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z" />
+                    <path d="M10.97 4.97a.235.235 0 0 0-.02.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-1.071-1.05z" />
+                </svg>
+            </div>
+            <h3 class="mb-3">Success!</h3>
+            <p class="mb-4">@TempData["SuccessMessage"]</p>
+            <button class="btn btn-success" onclick="hideSuccessOverlay()">Continue Editing</button>
+        </div>
     </div>
     <script>
         const createPreview = (file, container) => {
@@ -427,6 +492,15 @@
 
             return true;
         });
+                // Success message handling
+        function hideSuccessOverlay() {
+            document.getElementById('successOverlay').style.display = 'none';
+        }
+
+        // Auto-hide success message after 5 seconds
+        setTimeout(() => {
+            hideSuccessOverlay();
+        }, 5000);
     </script>
 </body>
 </html>

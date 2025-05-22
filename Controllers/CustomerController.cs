@@ -469,7 +469,7 @@ namespace WebApplication1.Controllers
                 Phone = model.Phone,
                 Email = model.Email,
                 OrderNote = model.OrderNote,
-                PaymentMethod = model.PaymentMethod,
+                PaymentMethod = "COD",
                 Subtotal = model.Subtotal,
                 Shipping = model.Shipping,
                 Total = model.Total,
@@ -480,9 +480,9 @@ namespace WebApplication1.Controllers
 
             // Save order to database
             //OrderRepository orderRepo = new OrderRepository("Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=Stylora;Integrated Security=True");
-            _orderRepository1.PlaceOrder(order);
+            var id=_orderRepository1.PlaceOrder(order);
             //int orderId = orderRepo.PlaceOrder(order);
-
+            order.OrderId = id;
             // Clear cart
             _cartRepository.ClearCart(userId);
 

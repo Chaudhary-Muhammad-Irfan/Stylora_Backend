@@ -378,7 +378,7 @@
                                     </td>
                                     <td data-label="Actions">
                                         <div class="d-flex action-buttons">
-                                            <a href="/Shopkeeper/DetailsOfProduct?productCode=@product.productCode" class="btn btn-view me-2">
+                                            <a href="/Shopkeeper/EditProduct?productCode=@product.productCode" class="btn btn-view me-2">
                                                 <i class="fas fa-eye me-1"></i> View
                                             </a>
                                             <!-- Updated form to use productCode -->
@@ -446,7 +446,7 @@
             document.getElementById('confirmDelete').addEventListener('click', function() {
                 if (deleteForm) {
                     deleteForm.submit();
-                }
+                } 
             });
 
             // Add data-label attributes for mobile responsive table
