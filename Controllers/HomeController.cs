@@ -6,14 +6,15 @@ using System.Security.Claims;
 using WebApplication1.Models;
 using WebApplication1.Models.Interfaces; 
 using WebApplication1.Models.Repositories;
+using WebApplication1.Models.Interfaces;
 
 namespace WebApplication1.Controllers 
 {
     public class HomeController : Controller 
     {
         private readonly ILogger<HomeController> _logger; 
-        private readonly ProductRepository _repository;
-        public HomeController(ILogger<HomeController> logger , ProductRepository repository)
+        private readonly IProductRepository _repository;
+        public HomeController(ILogger<HomeController> logger , IProductRepository repository)
         {
             _logger = logger;
             _repository = repository;
@@ -33,7 +34,7 @@ namespace WebApplication1.Controllers
             return View();
         }
         public IActionResult About()
-        {
+        { 
            
             return View();
         }

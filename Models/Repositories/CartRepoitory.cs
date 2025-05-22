@@ -5,7 +5,11 @@ namespace WebApplication1.Models.Repositories
 {
     public class CartRepoitory : ICartRepository
     {
-        private readonly string _connectionString = "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=Stylora;Integrated Security=True";
+        private readonly string _connectionString;
+        public CartRepoitory(IConfiguration configuration)
+        {
+            _connectionString = configuration.GetConnectionString("DefaultConnection");
+        }
         public bool AddToCart(Cart item)
         {
             // Handle multiple sizes if provided (comma-separated)

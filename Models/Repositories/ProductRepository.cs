@@ -12,7 +12,12 @@ namespace WebApplication1.Models.Repositories
 {
     public class ProductRepository : IProductRepository
     {
-        private readonly string _connectionString = "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=Stylora;Integrated Security=True";
+        private readonly string _connectionString;
+        public ProductRepository(IConfiguration configuration)
+        {
+            _connectionString = configuration.GetConnectionString("DefaultConnection");
+        }
+         
         public void addProduct(Product product)
         {
             try
@@ -624,14 +629,14 @@ namespace WebApplication1.Models.Repositories
             {
                 using (SqlConnection conn = new SqlConnection(_connectionString))
                 {
-                    // Modified query to ensure we get valid results
                     string query = @"
-            SELECT TOP 5 productId, productCategory, productThumbnailURL
-            FROM Product
-            WHERE productCategory IS NOT NULL 
-            AND productThumbnailURL IS NOT NULL
-            AND productThumbnailURL <> ''
-            ORDER BY productCategory";
+                SELECT productCategory, MIN(productId) AS productId, MIN(productThumbnailURL) AS productThumbnailURL
+                FROM Product
+                WHERE productCategory IS NOT NULL 
+                  AND productThumbnailURL IS NOT NULL
+                  AND productThumbnailURL <> ''
+                GROUP BY productCategory
+                ORDER BY productCategory";
 
                     SqlCommand cmd = new SqlCommand(query, conn);
                     conn.Open();
@@ -642,8 +647,8 @@ namespace WebApplication1.Models.Repositories
                         {
                             products.Add(new Product
                             {
-                                productId = reader.GetInt32(0),
-                                productCategory = reader.GetString(1).Trim(),
+                                productCategory = reader.GetString(0).Trim(),
+                                productId = reader.GetInt32(1),
                                 productThumbnailURL = reader.GetString(2)
                             });
                         }
@@ -652,12 +657,12 @@ namespace WebApplication1.Models.Repositories
             }
             catch (Exception ex)
             {
-                // Log the error
                 Debug.WriteLine($"Repository error: {ex.Message}");
             }
 
             return products;
         }
+
         public List<Product> GetNewArrivals()
         {
             List<Product> products = new List<Product>();

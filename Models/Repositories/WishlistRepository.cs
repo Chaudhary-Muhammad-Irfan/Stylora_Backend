@@ -4,7 +4,11 @@ namespace WebApplication1.Models.Repositories
 {
     public class WishlistRepository : IWishlistRepository
     {
-        private readonly string _connectionString = "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=Stylora;Integrated Security=True";
+        private readonly string _connectionString;
+        public WishlistRepository(IConfiguration configuration)
+        {
+            _connectionString = configuration.GetConnectionString("DefaultConnection");
+        }
         public bool addToWishlist(Wishlist item)
         {
             const string query = @"

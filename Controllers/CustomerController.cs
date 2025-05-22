@@ -10,13 +10,14 @@ namespace WebApplication1.Controllers
 {
     public class CustomerController : Controller
     {
-        private readonly BrandRepository _brandRepository;
-        private readonly ProductRepository _productRepository;
-        private readonly WishlistRepository _wishlistRepository;
-        private readonly CartRepoitory _cartRepository;
+        private readonly IBrandRepository _brandRepository;
+        private readonly IProductRepository _productRepository;
+        private readonly IWishlistRepository _wishlistRepository;
+        private readonly ICartRepository _cartRepository;
         private readonly IContactRepository _contactRepository;
-        private readonly OrderRepository _orderRepository;
-        public CustomerController(BrandRepository brandRepository, ProductRepository productRepository, WishlistRepository wishlistRepository, CartRepoitory cartRepoitory, IContactRepository contactRepository, OrderRepository orderRepository)
+        private readonly IOrderRepository _orderRepository;
+        private readonly OrderRepository _orderRepository1;
+        public CustomerController(IBrandRepository brandRepository, IProductRepository productRepository, IWishlistRepository wishlistRepository, ICartRepository cartRepoitory, IContactRepository contactRepository, IOrderRepository orderRepository,OrderRepository order)
         {
             _brandRepository = brandRepository;
             _productRepository = productRepository;
@@ -24,6 +25,7 @@ namespace WebApplication1.Controllers
             _cartRepository = cartRepoitory;
             _contactRepository = contactRepository;
             _orderRepository = orderRepository;
+            _orderRepository1 = order;
         }
         public IActionResult getAllRegisteredBrands(string status = "Approved")
         {
@@ -477,14 +479,15 @@ namespace WebApplication1.Controllers
             };
 
             // Save order to database
-            OrderRepository orderRepo = new OrderRepository();
-            int orderId = orderRepo.PlaceOrder(order);
+            //OrderRepository orderRepo = new OrderRepository("Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=Stylora;Integrated Security=True");
+            _orderRepository1.PlaceOrder(order);
+            //int orderId = orderRepo.PlaceOrder(order);
 
             // Clear cart
             _cartRepository.ClearCart(userId);
 
             // Redirect to confirmation
-            return RedirectToAction("OrderConfirmation", new { id = orderId });
+            return RedirectToAction("OrderConfirmation", new { id = order.OrderId });
         }
         public IActionResult OrderConfirmation(int id)
         {
@@ -502,7 +505,6 @@ namespace WebApplication1.Controllers
         {
             return View();
         }
-
         public IActionResult JazzCash()
         {
             return View();

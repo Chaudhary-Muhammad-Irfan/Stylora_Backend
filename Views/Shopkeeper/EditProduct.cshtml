@@ -2,23 +2,13 @@
 @{
     Layout = null;
 }
-@if (!ViewData.ModelState.IsValid)
-{
-    <div class="alert alert-danger">
-        <ul>
-            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
-            {
-                <li>@error.ErrorMessage</li>
-            }
-        </ul>
-    </div>
-}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Product Registration</title>
+    <title>Edit Product</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -208,47 +198,43 @@
 </head>
 <body>
     <div class="product-form-container">
-        <h2 class="form-title">Product Registration</h2>
-        <form method="post" asp-controller="Shopkeeper" asp-action="registerProduct" id="productForm" enctype="multipart/form-data">
+        <h2 class="form-title">Edit Product</h2>
+        <form method="post" asp-controller="Shopkeeper" asp-action="UpdateProduct" id="productForm" enctype="multipart/form-data">
             @Html.AntiForgeryToken()
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="productId" />
+            <input type="hidden" asp-for="productCode" />
+            <input type="hidden" asp-for="brandId" />
+            <input type="hidden" asp-for="brandName" />
 
             <!-- Product Details Section -->
             <div class="form-section">
                 <div class="mb-4">
                     <label class="form-label fw-bold">Product Name</label>
-                    <input type="text" class="form-control" asp-for="productName" required>
+                    <input type="text" class="form-control" asp-for="productName" value="@Model?.productName" required>
                 </div>
                 <div class="mb-4">
                     <label class="form-label fw-bold">Product Category</label>
-                    <input type="text" class="form-control" asp-for="productCategory" required>
-                    <div class="promo-examples">
-                        Examples: "Formal, Kurta, Lehenga, Frak............"
-                    </div>
+                    <input type="text" class="form-control" asp-for="productCategory" value="@Model?.productCategory" required>
                 </div>
                 <div class="mb-4">
                     <label class="form-label fw-bold">Product Description</label>
-                    <textarea class="form-control" asp-for="productDescription" rows="4" required></textarea>
+                    <textarea class="form-control" asp-for="productDescription" rows="4" required>@Model?.productDescription</textarea>
                 </div>
 
                 <div class="row g-3">
                     <div class="col-md-6">
                         <label class="form-label fw-bold">Price (PKR)</label>
-                        <input type="number" class="form-control" asp-for="price" required>
+                        <input type="number" class="form-control" asp-for="price" value="@(Model?.price.ToString() ?? "0")" required>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label fw-bold">Discount %</label>
-                        <input type="number" class="form-control" asp-for="discount" value="0" min="0" max="100">
+                        <input type="number" class="form-control" asp-for="discount" value="@(Model?.discount.ToString() ?? "0")" min="0" max="100">
                     </div>
                 </div>
 
                 <div class="mt-4 promo-field">
                     <label class="form-label fw-bold">Special Offer Tagline</label>
-                    <input type="text" class="form-control" asp-for="tagLine" placeholder="Enter attention-grabbing offer" maxlength="60">
-                    <div class="promo-examples">
-                        Examples: "Buy 1 Get 1 Free!", "Purchase Now for Chance to Win!",
-                        "Limited Time Offer!", "Free Gift with Purchase!"
-                    </div>
+                    <input type="text" class="form-control" asp-for="tagLine" value="@Model?.tagLine" maxlength="60">
                 </div>
             </div>
 
@@ -256,38 +242,29 @@
             <div class="form-section">
                 <label class="form-label fw-bold mb-3">Available Sizes & Quantities</label>
                 <div class="size-quantity-container">
-                    <div class="size-quantity-group">
-                        <div class="size-option">
-                            <input type="checkbox" name="AvailableSizes" value="S" id="sizeS" onchange="toggleQuantityInput('sizeS')">
-                            <label for="sizeS">S</label>
-                        </div>
-                        <input type="number" id="quantityS" name="quantityS" class="form-control mt-2 quantity-input"
-                               placeholder="Qty" min="1" style="display: none; width: 100px;">
-                    </div>
-                    <div class="size-quantity-group">
-                        <div class="size-option">
-                            <input type="checkbox" name="AvailableSizes" value="M" id="sizeM" onchange="toggleQuantityInput('sizeM')">
-                            <label for="sizeM">M</label>
-                        </div>
-                        <input type="number" id="quantityM" name="quantityM" class="form-control mt-2 quantity-input"
-                               placeholder="Qty" min="1" style="display: none; width: 100px;">
-                    </div>
-                    <div class="size-quantity-group">
-                        <div class="size-option">
-                            <input type="checkbox" name="AvailableSizes" value="L" id="sizeL" onchange="toggleQuantityInput('sizeL')">
-                            <label for="sizeL">L</label>
-                        </div>
-                        <input type="number" id="quantityL" name="quantityL" class="form-control mt-2 quantity-input"
-                               placeholder="Qty" min="1" style="display: none; width: 100px;">
-                    </div>
-                    <div class="size-quantity-group">
-                        <div class="size-option">
-                            <input type="checkbox" name="AvailableSizes" value="XL" id="sizeXL" onchange="toggleQuantityInput('sizeXL')">
-                            <label for="sizeXL">XL</label>
-                        </div>
-                        <input type="number" id="quantityXL" name="quantityXL" class="form-control mt-2 quantity-input"
-                               placeholder="Qty" min="1" style="display: none; width: 100px;">
-                    </div>
+                    @{
+                        var availableSizes = Model?.AvailableSizes ?? new List<string>();
+                        var stockQuantities = Model?.stock ?? new List<string>();
+                        var sizes = new List<string> { "S", "M", "L", "XL" };
+
+                        foreach (var size in sizes)
+                        {
+                            var isChecked = availableSizes?.Contains(size) ?? false;
+                            var sizeIndex = isChecked ? availableSizes.IndexOf(size) : -1;
+                            var quantity = (isChecked && sizeIndex >= 0 && sizeIndex < stockQuantities?.Count) ? stockQuantities[sizeIndex] : "1";
+
+                            <div class="size-quantity-group">
+                                <div class="size-option">
+                                    <input type="checkbox" name="AvailableSizes" value="@size" id="size@(size)"
+                                    @(isChecked ? "checked" : "") onchange="toggleQuantityInput('size@(size)')">
+                                    <label for="size@(size)">@size</label>
+                                </div>
+                                <input type="number" id="quantity@(size)" name="stock" class="form-control mt-2 quantity-input"
+                                       value="@quantity" placeholder="Qty" min="1"
+                                       style="@(isChecked ? "" : "display: none;") width: 100px;">
+                            </div>
+                        }
+                    }
                 </div>
             </div>
 
@@ -296,9 +273,16 @@
                 <div class="mb-4">
                     <label class="form-label fw-bold">Main Thumbnail</label>
                     <div class="file-upload" onclick="document.getElementById('thumbnail').click()">
-                        <i class="fas fa-camera fa-2x text-muted mb-3"></i>
-                        <p class="mb-0">Click to upload featured image</p>
-                        <input type="file" id="thumbnail" name="productThumbnail" class="d-none" accept="image/*" required>
+                        @if (!string.IsNullOrEmpty(Model?.productThumbnailURL))
+                        {
+                            <img src="@Model.productThumbnailURL" class="preview-image mb-2" id="currentThumbnail">
+                        }
+                        else
+                        {
+                            <i class="fas fa-camera fa-2x text-muted mb-3"></i>
+                            <p class="mb-0">Click to upload featured image</p>
+                        }
+                        <input type="file" id="thumbnail" name="productThumbnail" class="d-none" accept="image/*">
                     </div>
                     <div id="thumbnailPreview" class="mt-3"></div>
                 </div>
@@ -306,46 +290,54 @@
                 <div class="mb-4">
                     <label class="form-label fw-bold">Gallery Images</label>
                     <div class="file-upload" onclick="document.getElementById('productImages').click()">
-                        <i class="fas fa-images fa-2x text-muted mb-3"></i>
-                        <p class="mb-0">Upload product gallery (up to 10 images)</p>
-                        <small class="text-muted">Show different angles and details</small>
-                        <input type="file" id="productImages" name="productImages" class="d-none" accept="image/*" multiple required>
+                        @if (Model?.productImagesURL != null && Model.productImagesURL.Count > 0)
+                        {
+                            <div class="d-flex flex-wrap">
+                                @foreach (var imageUrl in Model.productImagesURL)
+                                {
+                                    <img src="@imageUrl" class="preview-image me-2 mb-2">
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <i class="fas fa-images fa-2x text-muted mb-3"></i>
+                            <p class="mb-0">Upload product gallery (up to 10 images)</p>
+                        }
+                        <input type="file" id="productImages" name="productImages" class="d-none" accept="image/*" multiple>
                     </div>
                     <div id="imagePreviews" class="mt-3 d-flex flex-wrap"></div>
                 </div>
+
                 <div class="mb-4">
                     <label class="form-label fw-bold">Size Chart Image</label>
                     <div class="file-upload" onclick="document.getElementById('sizeChart').click()">
-                        <i class="fas fa-ruler-combined fa-2x text-muted mb-3"></i>
-                        <p class="mb-0">Upload size chart</p>
-                        <small class="text-muted">Shows measurements for each size</small>
+                        @if (!string.IsNullOrEmpty(Model?.sizeChartURL))
+                        {
+                            <img src="@Model.sizeChartURL" class="preview-image" id="currentSizeChart">
+                        }
+                        else
+                        {
+                            <i class="fas fa-ruler-combined fa-2x text-muted mb-3"></i>
+                            <p class="mb-0">Upload size chart</p>
+                        }
                         <input type="file" id="sizeChart" name="sizeChart" class="d-none" accept="image/*">
                     </div>
                     <div id="sizeChartPreview" class="mt-3"></div>
                 </div>
             </div>
 
-            <button type="submit" class="submit-btn mt-4">
-                <i class="fas fa-cloud-upload-alt me-2"></i>Publish Product
-            </button>
+            <div class="d-flex justify-content-between mt-4">
+                <button type="submit" class="submit-btn me-2">
+                    <i class="fas fa-save me-2"></i>Update Product
+                </button>
+                <a href="/Shopkeeper/getAllProducts" class="btn btn-secondary" style="padding: 16px 32px; border-radius: 12px;">
+                    <i class="fas fa-times me-2"></i>Cancel
+                </a>
+            </div>
         </form>
     </div>
-
-    <!-- Success Message Overlay -->
-    <div class="success-overlay">
-        <div class="success-message">
-            <i class="fas fa-check-circle text-success fa-4x mb-4"></i>
-            <h2 class="h3 mb-3">Product Added Successfully!</h2>
-            <p class="mb-4">Your product has been successfully listed in the store.</p>
-            <button class="btn btn-primary-custom" onclick="redirectToDashboard()"
-                    style="background: var(--primary-color); color: white; padding: 12px 24px; border-radius: 8px;">
-                Close & Continue
-            </button>
-        </div>
-    </div>
-
     <script>
-        // Image Preview Handling
         const createPreview = (file, container) => {
             const reader = new FileReader();
             reader.onload = (e) => {
@@ -368,28 +360,30 @@
             reader.readAsDataURL(file);
         };
 
-        // Thumbnail
         document.getElementById('thumbnail').addEventListener('change', function() {
             const container = document.getElementById('thumbnailPreview');
             container.innerHTML = '';
-            if (this.files[0]) createPreview(this.files[0], container);
+            if (this.files[0]) {
+                createPreview(this.files[0], container);
+                document.getElementById('currentThumbnail')?.remove();
+            }
         });
 
-        // Gallery Images
         document.getElementById('productImages').addEventListener('change', function() {
             const container = document.getElementById('imagePreviews');
             container.innerHTML = '';
             Array.from(this.files).forEach(file => createPreview(file, container));
         });
 
-        // Size Chart
         document.getElementById('sizeChart').addEventListener('change', function() {
             const container = document.getElementById('sizeChartPreview');
             container.innerHTML = '';
-            if (this.files[0]) createPreview(this.files[0], container);
+            if (this.files[0]) {
+                createPreview(this.files[0], container);
+                document.getElementById('currentSizeChart')?.remove();
+            }
         });
 
-        // Toggle quantity input visibility
         function toggleQuantityInput(sizeId) {
             const checkbox = document.getElementById(sizeId);
             const quantityInput = document.getElementById('quantity' + sizeId.substring(4));
@@ -397,6 +391,7 @@
             if (checkbox.checked) {
                 quantityInput.style.display = 'block';
                 quantityInput.required = true;
+                if (!quantityInput.value) quantityInput.value = '1';
             } else {
                 quantityInput.style.display = 'none';
                 quantityInput.required = false;
@@ -404,7 +399,7 @@
             }
         }
 
-                document.getElementById('productForm').addEventListener('submit', function(e) {
+        document.getElementById('productForm').addEventListener('submit', function(e) {
             const sizesSelected = document.querySelectorAll('input[name="AvailableSizes"]:checked');
             if(sizesSelected.length === 0) {
                 alert('Please select at least one size');
@@ -412,17 +407,13 @@
                 return false;
             }
 
-            // Validate that all selected sizes have quantities
             let allQuantitiesValid = true;
             sizesSelected.forEach(size => {
                 const sizeId = size.id;
                 const quantityInput = document.getElementById('quantity' + sizeId.substring(4));
-
-                // Ensure quantity is set and valid
                 if (!quantityInput.value || parseInt(quantityInput.value) < 1) {
                     allQuantitiesValid = false;
                     quantityInput.style.border = '2px solid red';
-                    quantityInput.value = "1"; // Set default value
                 } else {
                     quantityInput.style.border = '';
                 }
@@ -436,11 +427,6 @@
 
             return true;
         });
-        // Redirect Function
-        function redirectToDashboard() {
-            document.querySelector('.success-overlay').style.display = 'none';
-            window.location.href = '/Shopkeeper/getAllProducts';
-        }
     </script>
 </body>
 </html>

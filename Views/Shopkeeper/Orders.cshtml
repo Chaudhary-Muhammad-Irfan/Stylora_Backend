@@ -1,4 +1,4 @@
-﻿@model List<WebApplication1.Models.RecentOrder>
+﻿@model WebApplication1.Models.ViewModel.ShopkeeperOrdersViewModel
 @{
     Layout = null;
 }
@@ -46,13 +46,40 @@
             font-size: 1.2rem;
             color: #6c757d;
         }
-        @@media (max-width: 768px) {
-            .table-responsive
 
-        {
-            overflow-x: auto;
+        .sales-summary {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 25px;
         }
 
+        .filter-buttons {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .filter-btn.active {
+            background-color: #0d6efd;
+            color: white;
+        }
+
+        .sales-highlight {
+            font-weight: bold;
+            color: #0d6efd;
+        }
+
+        @@media (max-width: 768px) {
+            .table-responsive {
+                overflow-x: auto;
+            }
+
+            .filter-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
         }
     </style>
 </head>
@@ -60,9 +87,37 @@
     <div class="container container-custom">
         <h2 class="title">Orders</h2>
 
-        @if (Model == null || !Model.Any())
+        <!-- Sales Summary -->
+        <div class="sales-summary">
+            @if (Model.CurrentFilter == "all" || Model.CurrentFilter == "30d")
+            {
+                <p>You have earned <span class="sales-highlight">Rs. @Model.Last30dSales.ToString("N0")</span> in last 30 days with <span class="sales-highlight">@Model.Last30dCount</span> orders</p>
+            }
+            @if (Model.CurrentFilter == "all" || Model.CurrentFilter == "7d")
+            {
+                <p>You have earned <span class="sales-highlight">Rs. @Model.Last7dSales.ToString("N0")</span> in last 7 days with <span class="sales-highlight">@Model.Last7dCount</span> orders</p>
+            }
+            @if (Model.CurrentFilter == "all" || Model.CurrentFilter == "24h")
+            {
+                <p>You have earned <span class="sales-highlight">Rs. @Model.Last24hSales.ToString("N0")</span> in last 24 hours with <span class="sales-highlight">@Model.Last24hCount</span> orders</p>
+            }
+        </div>
+
+        <!-- Filter Buttons -->
+        <div class="filter-buttons">
+            <a asp-action="Orders" asp-route-timeFilter="all"
+               class="btn btn-outline-primary filter-btn @(Model.CurrentFilter == "all" ? "active" : "")">All Orders</a>
+            <a asp-action="Orders" asp-route-timeFilter="24h"
+               class="btn btn-outline-primary filter-btn @(Model.CurrentFilter == "24h" ? "active" : "")">Last 24 Hours</a>
+            <a asp-action="Orders" asp-route-timeFilter="7d"
+               class="btn btn-outline-primary filter-btn @(Model.CurrentFilter == "7d" ? "active" : "")">Last 7 Days</a>
+            <a asp-action="Orders" asp-route-timeFilter="30d"
+               class="btn btn-outline-primary filter-btn @(Model.CurrentFilter == "30d" ? "active" : "")">Last 30 Days</a>
+        </div>
+
+        @if (Model.Orders == null || !Model.Orders.Any())
         {
-            <p class="no-orders">No orders found for this shopkeeper.</p>
+            <p class="no-orders">No orders found for this period.</p>
         }
         else
         {
@@ -79,14 +134,14 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var order in Model)
+                        @foreach (var order in Model.Orders)
                         {
                             <tr>
                                 <td>@order.OrderId</td>
                                 <td>@order.CustomerName</td>
-                                <td>RS. @order.TotalAmount.ToString()</td>
+                                <td>RS. @order.TotalAmount.ToString("N0")</td>
                                 <td>@order.Status</td>
-                                <td>@order.OrderDate.ToString("f")</td> 
+                                <td>@order.OrderDate.ToString("f")</td>
                                 <td>
                                     <a asp-action="detailsOfOrder" asp-controller="Shopkeeper" asp-route-id="@order.OrderId" class="btn btn-sm btn-primary">View</a>
                                 </td>

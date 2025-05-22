@@ -12,6 +12,7 @@ using System.Data;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using WebApplication1.Models;
+using WebApplication1.Models.Interfaces;
 using WebApplication1.Models.Repositories;
 using WebApplication1.Models.ViewModel;
 
@@ -21,14 +22,16 @@ namespace WebApplication1.Controllers
     public class ShopkeeperController : Controller
     {
         private readonly IWebHostEnvironment _env;
-        private readonly BrandRepository _brandRepository;
-        private readonly ProductRepository _productRepository;
+        private readonly IBrandRepository _brandRepository;
+        private readonly IProductRepository _productRepository;
         private readonly UserManager<UserType> _userManager;
+        private readonly IOrderRepository _orderRepository1;
         private readonly OrderRepository _orderRepository;
         private readonly SignInManager<UserType> _signInManager;
-        public ShopkeeperController(IWebHostEnvironment env,BrandRepository brandRepository,
-             ProductRepository productRepository,UserManager<UserType> userManager,
-             OrderRepository orderRepository,SignInManager<UserType> signInManager)
+        public ShopkeeperController(IWebHostEnvironment env,IBrandRepository brandRepository,
+             IProductRepository productRepository,UserManager<UserType> userManager,
+             OrderRepository orderRepository,SignInManager<UserType> signInManager,
+             IOrderRepository order)
         {
             _env = env;
             _brandRepository = brandRepository;
@@ -36,6 +39,7 @@ namespace WebApplication1.Controllers
             _userManager = userManager;
             _orderRepository = orderRepository;
             _signInManager = signInManager;
+            _orderRepository1 = order;
         }
         public async Task<IActionResult> Index()
         { 
@@ -125,7 +129,7 @@ namespace WebApplication1.Controllers
         {
             return View(new Product());
         }
-        [HttpPost]
+        [HttpPost] 
         public IActionResult registerProduct(Product product, IFormFile productThumbnail, List<IFormFile> productImages, IFormFile sizeChart)
         {
             try
@@ -280,11 +284,24 @@ namespace WebApplication1.Controllers
             _productRepository.MarkReviewsAsRead(userId);
             return View(reviews);
         }
-        public IActionResult Orders()
+        public IActionResult Orders(string timeFilter = "all")
         {
             string userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var orders = _orderRepository.GetAllOrdersOfShopkeeper(userId);
-            return View(orders);
+            var result = _orderRepository.GetAllOrdersOfShopkeeper(userId, timeFilter);
+
+            var viewModel = new ShopkeeperOrdersViewModel
+            {
+                Orders = result.orders,
+                Last24hSales = result.last24hSales,
+                Last24hCount = result.last24hCount,
+                Last7dSales = result.last7dSales,
+                Last7dCount = result.last7dCount,
+                Last30dSales = result.last30dSales,
+                Last30dCount = result.last30dCount,
+                CurrentFilter = timeFilter
+            };
+
+            return View(viewModel);
         }
         public IActionResult detailsOfOrder(int id)
         {

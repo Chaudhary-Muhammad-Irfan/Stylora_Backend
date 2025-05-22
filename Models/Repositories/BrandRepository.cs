@@ -4,7 +4,11 @@ namespace WebApplication1.Models.Repositories
 {
     public class BrandRepository : IBrandRepository
     {
-        private readonly string _connectionString = "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=Stylora;Integrated Security=True";
+        private readonly string _connectionString;
+        public BrandRepository(IConfiguration configuration)
+        {
+            _connectionString = configuration.GetConnectionString("DefaultConnection");
+        }
         public void Add(Brand brand)
         {
             try

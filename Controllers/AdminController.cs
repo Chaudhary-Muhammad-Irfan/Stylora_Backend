@@ -8,12 +8,12 @@ namespace WebApplication1.Controllers
 {
     public class AdminController : Controller  
     {
-        private readonly BrandRepository _brandRepo;
+        private readonly IBrandRepository _brandRepo;
         private readonly IContactRepository _contactRepository;
-        private readonly AdminRepository _adminRepository;
-        private readonly OrderRepository _orderRepository;
+        private readonly IAdminRepository _adminRepository;
+        private readonly IOrderRepository _orderRepository;
 
-        public AdminController(BrandRepository brandRepo, IContactRepository contactRepository, AdminRepository adminRepository, OrderRepository orderRepository)
+        public AdminController(IBrandRepository brandRepo, IContactRepository contactRepository, IAdminRepository adminRepository, IOrderRepository orderRepository)
         {
             _brandRepo = brandRepo;
             _contactRepository = contactRepository;

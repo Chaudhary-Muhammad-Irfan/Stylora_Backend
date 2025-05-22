@@ -6,7 +6,11 @@ namespace WebApplication1.Models.Repositories
 {
     public class OrderRepository : IOrderRepository
     {
-        private readonly string _connectionString = "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=Stylora;Integrated Security=True";
+        private readonly string _connectionString;
+        public OrderRepository(IConfiguration configuration)
+        {
+            _connectionString = configuration.GetConnectionString("DefaultConnection");
+        }
         public int PlaceOrder(Order order)
         {
             int orderId = 0;
@@ -323,6 +327,97 @@ namespace WebApplication1.Models.Repositories
             }
 
             return stats;
+        }
+        public (List<RecentOrder> orders, decimal last24hSales, int last24hCount,
+        decimal last7dSales, int last7dCount, decimal last30dSales, int last30dCount)
+        GetAllOrdersOfShopkeeper(string shopkeeperId, string timeFilter = "all")
+        {
+            var orders = new List<RecentOrder>();
+            decimal last24hSales = 0;
+            int last24hCount = 0;
+            decimal last7dSales = 0;
+            int last7dCount = 0;
+            decimal last30dSales = 0;
+            int last30dCount = 0;
+
+            using (SqlConnection connection = new SqlConnection(_connectionString))
+            {
+                connection.Open();
+                string baseQuery = @"SELECT DISTINCT o.OrderId, o.OrderDate, o.Total, o.Status, 
+                u.Name AS CustomerName FROM Orders o JOIN OrderProducts op ON o.OrderId = op.OrderId
+                JOIN Product p ON op.productId = p.productId JOIN Brand b ON p.BrandId = b.BrandId
+                JOIN AspNetUsers u ON b.brandOwnerId = u.Id WHERE b.brandOwnerId = @ShopkeeperId";
+                string timeCondition = "";
+                switch (timeFilter.ToLower())
+                {
+                    case "24h":
+                        timeCondition = " AND o.OrderDate >= DATEADD(HOUR, -24, GETDATE())";
+                        break;
+                    case "7d":
+                        timeCondition = " AND o.OrderDate >= DATEADD(DAY, -7, GETDATE())";
+                        break;
+                    case "30d":
+                        timeCondition = " AND o.OrderDate >= DATEADD(DAY, -30, GETDATE())";
+                        break;
+                }
+
+                string orderQuery = baseQuery + timeCondition + " ORDER BY o.OrderDate DESC";
+
+                using (SqlCommand cmd = new SqlCommand(orderQuery, connection))
+                {
+                    cmd.Parameters.AddWithValue("@ShopkeeperId", shopkeeperId);
+
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            orders.Add(new RecentOrder
+                            {
+                                OrderId = reader.GetInt32(0),
+                                OrderDate = reader.GetDateTime(1),
+                                TotalAmount = reader.GetDecimal(2),
+                                Status = reader.GetString(3),
+                                CustomerName = reader.GetString(4)
+                            });
+                        }
+                    }
+                }
+
+                // Get sales statistics
+                string statsQuery = @"
+SELECT 
+    SUM(CASE WHEN o.OrderDate >= DATEADD(HOUR, -24, GETDATE()) THEN o.Total ELSE 0 END) AS Last24hSales,
+    COUNT(CASE WHEN o.OrderDate >= DATEADD(HOUR, -24, GETDATE()) THEN 1 ELSE NULL END) AS Last24hCount,
+    SUM(CASE WHEN o.OrderDate >= DATEADD(DAY, -7, GETDATE()) THEN o.Total ELSE 0 END) AS Last7dSales,
+    COUNT(CASE WHEN o.OrderDate >= DATEADD(DAY, -7, GETDATE()) THEN 1 ELSE NULL END) AS Last7dCount,
+    SUM(CASE WHEN o.OrderDate >= DATEADD(DAY, -30, GETDATE()) THEN o.Total ELSE 0 END) AS Last30dSales,
+    COUNT(CASE WHEN o.OrderDate >= DATEADD(DAY, -30, GETDATE()) THEN 1 ELSE NULL END) AS Last30dCount
+FROM Orders o
+JOIN OrderProducts op ON o.OrderId = op.OrderId
+JOIN Product p ON op.productId = p.productId
+JOIN Brand b ON p.BrandId = b.BrandId
+WHERE b.brandOwnerId = @ShopkeeperId";
+
+                using (SqlCommand cmd = new SqlCommand(statsQuery, connection))
+                {
+                    cmd.Parameters.AddWithValue("@ShopkeeperId", shopkeeperId);
+
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            last24hSales = reader.IsDBNull(0) ? 0 : reader.GetDecimal(0);
+                            last24hCount = reader.IsDBNull(1) ? 0 : reader.GetInt32(1);
+                            last7dSales = reader.IsDBNull(2) ? 0 : reader.GetDecimal(2);
+                            last7dCount = reader.IsDBNull(3) ? 0 : reader.GetInt32(3);
+                            last30dSales = reader.IsDBNull(4) ? 0 : reader.GetDecimal(4);
+                            last30dCount = reader.IsDBNull(5) ? 0 : reader.GetInt32(5);
+                        }
+                    }
+                }
+            }
+
+            return (orders, last24hSales, last24hCount, last7dSales, last7dCount, last30dSales, last30dCount);
         }
         public List<RecentOrder> GetAllOrdersOfShopkeeper(string shopkeeperId)
         {
